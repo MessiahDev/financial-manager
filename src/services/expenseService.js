@@ -1,3 +1,5 @@
+import api from './api';
+
 const expenseService = {
     getExpenses: async () => {
         try {

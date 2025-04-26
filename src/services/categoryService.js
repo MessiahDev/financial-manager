@@ -1,40 +1,42 @@
+import api from './api';
+
 const categoryService = {
-    getCategories: async () => {
+    async getCategories() {
         try {
-            const response = await api.get('/Category');
+            const response = await api.get("/Category");
             return response.data;
         } catch (error) {
-            console.error('Erro ao buscar categorias:', error);
+            console.error("Erro ao buscar categorias:", error);
             throw error;
         }
     },
 
-    createCategory: async (categoryData) => {
+    async createCategory(category) {
         try {
-            const response = await api.post('/Category', categoryData);
+            const response = await api.post("/Category", category);
             return response.data;
         } catch (error) {
-            console.error('Erro ao criar categoria:', error);
+            console.error("Erro ao criar categoria:", error);
             throw error;
         }
     },
-
-    updateCategory: async (categoryId, categoryData) => {
+    
+    async updateCategory(id, category) {
         try {
-            const response = await api.put(`/Category/${categoryId}`, categoryData);
+            const response = await api.put(`/Category/${id}`, category);
             return response.data;
         } catch (error) {
-            console.error('Erro ao atualizar categoria:', error);
+            console.error("Erro ao atualizar categoria:", error);
             throw error;
         }
     },
-
-    deleteCategory: async (categoryId) => {
+    
+    async deleteCategory(id) {
         try {
-            const response = await api.delete(`/Category/${categoryId}`);
+            const response = await api.delete(`/Category/${id}`);
             return response.data;
         } catch (error) {
-            console.error('Erro ao deletar categoria:', error);
+            console.error("Erro ao excluir categoria:", error);
             throw error;
         }
     },

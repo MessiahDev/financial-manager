@@ -1,3 +1,5 @@
+import api from './api';
+
 const userService = {
     getUserProfile: async (userId) => {
         try {

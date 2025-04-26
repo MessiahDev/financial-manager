@@ -2,23 +2,30 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
 import LoginView from '../views/LoginView.vue';
 import RegisterView from '../views/RegisterView.vue';
+import CategoryView from '../views/CategoryView.vue';
 
 const routes = [
     {
         path: '/',
-        name: 'loginView',
+        name: 'LoginView',
         component: LoginView,
     },
     {
         path: '/home',
-        name: 'homeView',
+        name: 'HomeView',
         component: HomeView,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true }
     },
     {
         path: '/cadastro',
-        name: 'registerView',
+        name: 'RegisterView',
         component: RegisterView,
+    },
+    {
+        path: '/categorias',
+        name: 'CategoryView',
+        component: CategoryView,
+        meta: { requiresAuth: true }
     },
 ];
 
