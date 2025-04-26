@@ -1,16 +1,16 @@
 <template>
     <div>
-        <HomePage />
+        <RegisterPage />
     </div>
 </template>
 
 <script>
-import HomePage from "../components/HomePage.vue";
+import RegisterPage from "../components/RegisterPage.vue";
 
 export default {
-    name: "HomeView",
+    name: "RegisterView",
     components: {
-        HomePage,
+        RegisterPage,
     },
 };
 </script>
