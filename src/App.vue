@@ -1,11 +1,11 @@
 <template>
+  <NavbarView />
   <div id="app">
     <router-view />
   </div>
 </template>
 
 <script setup>
-</script>
+import NavbarView from './views/NavbarView.vue';
 
-<style>
-</style>
+</script>

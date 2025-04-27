@@ -7,7 +7,7 @@ import CategoryView from '../views/CategoryView.vue';
 const routes = [
     {
         path: '/',
-        name: 'LoginView',
+        name: 'LoginView', // Nome da rota correto
         component: LoginView,
     },
     {
@@ -36,9 +36,9 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     if (to.meta.requiresAuth && !localStorage.getItem('token')) {
-        next({ name: 'loginView' });
+        next({ name: 'LoginView' });
     } else {
-        next();
+        next(); // Permite a navegação
     }
 });
 

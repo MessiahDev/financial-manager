@@ -16,7 +16,7 @@
                         required
                     />
                     <span class="toggle-visibility" @click="togglePasswordVisibility">
-                        {{ showPassword ? '🙈' : '👁️' }}
+                        <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
                     </span>
                 </div>
             </div>
@@ -59,16 +59,8 @@ export default {
                     password: password.value,
                 };
 
-                const response = await authService.login(credentials);
+                await authService.login(credentials, router);
 
-                if (stayConnected.value) {
-                    localStorage.setItem('token', response.token);
-                } else {
-                    sessionStorage.setItem('token', response.token);
-                }
-
-                alert('Login realizado com sucesso!');
-                router.push('/home');
             } catch (error) {
                 console.error('Erro ao fazer login:', error);
                 alert('Falha no login. Verifique seu email e senha.');

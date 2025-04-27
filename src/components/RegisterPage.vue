@@ -22,9 +22,9 @@
                         v-model="password" 
                         required 
                     />
-                    <span class="toggle-visibility" @click="togglePasswordVisibility">
-                        {{ showPassword ? '🙈' : '👁️' }}
-                    </span>
+                <span class="toggle-visibility" @click="togglePasswordVisibility">
+                    <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
+                </span>
                 </div>
             </div>
 
@@ -39,7 +39,7 @@
                         required 
                     />
                     <span class="toggle-visibility" @click="toggleConfirmPasswordVisibility">
-                        {{ showConfirmPassword ? '🙈' : '👁️' }}
+                        <i :class="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
                     </span>
                 </div>
                 <p v-if="passwordsMismatch" class="error-message">As senhas não coincidem</p>

@@ -1,4 +1,5 @@
 <template>
+    <NavbarView />
     <div class="category-page">
         <h1>Category Management</h1>
         <form @submit.prevent="addCategory" class="form-add-category">
@@ -29,26 +30,59 @@
 
 <script>
 import categoryService from "../services/categoryService";
+import authService from "../services/authService";
+import NavbarView from "../views/NavbarView.vue";
 
 export default {
     name: "CategoryPage",
+
+    components: {
+        NavbarView
+    },
+
     data() {
         return {
             categories: [],
-            newCategory: { name: "" },
+            newCategory: { name: "", userId: null },
             editingCategory: null,
+            userId: null,
         };
     },
+
     methods: {
+        async fetcUserProfile() {
+            try {
+                const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+                if (!token) {
+                    console.log("No token found, user not authenticated.");
+                    return;
+                }
+                const user = await authService.getProfile();
+                this.userId = user.id;
+            } catch (error) {
+                console.error("Error fetching user profile:", error);
+            }
+        },
+
         async fetchCategories() {
             try {
-                this.categories = await categoryService.getCategories();
+                if (!this.userId) {
+                    console.error("User ID is not set.");
+                    return;
+                }
+                this.categories = await categoryService.getCategoryByUserId(this.userId);
             } catch (error) {
                 console.error("Error fetching categories:", error);
             }
         },
+
         async addCategory() {
             try {
+                if (!this.userId) {
+                    console.error("User ID is not set.");
+                    return;
+                }
+                this.newCategory.userId = this.userId;
                 const addedCategory = await categoryService.createCategory(this.newCategory);
                 this.categories.push(addedCategory);
                 this.newCategory.name = "";
@@ -56,9 +90,11 @@ export default {
                 console.error("Error adding category:", error);
             }
         },
+
         editCategory(category) {
             this.editingCategory = { ...category };
         },
+
         async updateCategory() {
             try {
                 const updatedCategory = await categoryService.updateCategory(
@@ -74,6 +110,7 @@ export default {
                 console.error("Error updating category:", error);
             }
         },
+
         cancelEdit() {
             this.editingCategory = null;
         },
@@ -87,6 +124,7 @@ export default {
         },
     },
     async mounted() {
+        await this.fetcUserProfile();
         await this.fetchCategories();
     },
 };

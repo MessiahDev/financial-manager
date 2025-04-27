@@ -10,7 +10,12 @@
 </template>
 
 <script>
+import NavbarView from '../views/NavbarView.vue';
+
 export default {
+  components: {
+    NavbarView,
+  },
   data() {
     return {
       charts: [
@@ -22,7 +27,7 @@ export default {
     };
   },
   mounted() {
-    this.fetchChartData();
+    //this.fetchChartData();
   },
   methods: {
     async fetchChartData() {

@@ -11,6 +11,26 @@ const categoryService = {
         }
     },
 
+    async getCategoryById(id) {
+        try {
+            const response = await api.get(`/Category/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error("Erro ao buscar categoria:", error);
+            throw error;
+        }
+    },
+
+    async getCategoryByUserId(userId) {
+        try {
+            const response = await api.get(`/Category/user/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error("Erro ao buscar categoria pelo id do usuário:", error);
+            throw error;
+        }
+    },
+
     async createCategory(category) {
         try {
             const response = await api.post("/Category", category);
