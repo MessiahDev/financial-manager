@@ -26,7 +26,10 @@ const categoryService = {
             const response = await api.get(`/Category/user/${userId}`);
             return response.data;
         } catch (error) {
-            console.error("Erro ao buscar categoria pelo id do usuário:", error);
+            if (error.response && error.response.status === 404) {
+                return [];
+            }
+            console.error("Error fetching categories by user:", error);
             throw error;
         }
     },

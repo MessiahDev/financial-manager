@@ -1,5 +1,4 @@
 <template>
-    <NavbarView />
     <div class="category-page">
         <h1>Category Management</h1>
         <form @submit.prevent="addCategory" class="form-add-category">
@@ -31,14 +30,9 @@
 <script>
 import categoryService from "../services/categoryService";
 import authService from "../services/authService";
-import NavbarView from "../views/NavbarView.vue";
 
 export default {
     name: "CategoryPage",
-
-    components: {
-        NavbarView
-    },
 
     data() {
         return {
@@ -50,7 +44,7 @@ export default {
     },
 
     methods: {
-        async fetcUserProfile() {
+        async fetchUserProfile() {
             try {
                 const token = localStorage.getItem("token") || sessionStorage.getItem("token");
                 if (!token) {
@@ -70,9 +64,21 @@ export default {
                     console.error("User ID is not set.");
                     return;
                 }
-                this.categories = await categoryService.getCategoryByUserId(this.userId);
+                
+                const response = await categoryService.getCategoryByUserId(this.userId);
+                
+                if (response && response.length === 0) {
+                    this.categories = [];
+                } else {
+                    this.categories = response;
+                }
             } catch (error) {
-                console.error("Error fetching categories:", error);
+                if (error.response && error.response.status === 404) {
+                    console.warn("No categories found for this user. Returning empty list.");
+                    this.categories = [];
+                } else {
+                    console.error("Error fetching categories:", error);
+                }
             }
         },
 
@@ -82,9 +88,19 @@ export default {
                     console.error("User ID is not set.");
                     return;
                 }
+
+                if (!this.newCategory.name.trim()) {
+                    console.error("Category name is required.");
+                    return;
+                }
+
                 this.newCategory.userId = this.userId;
+                console.log("Sending category data:", this.newCategory);
+
                 const addedCategory = await categoryService.createCategory(this.newCategory);
-                this.categories.push(addedCategory);
+                
+                this.categories.push({ ...addedCategory });
+
                 this.newCategory.name = "";
             } catch (error) {
                 console.error("Error adding category:", error);
@@ -97,14 +113,18 @@ export default {
 
         async updateCategory() {
             try {
+                if (!this.editingCategory.name.trim()) {
+                    console.error("Category name is required.");
+                    return;
+                }
+
                 const updatedCategory = await categoryService.updateCategory(
                     this.editingCategory.id,
                     this.editingCategory
                 );
-                const index = this.categories.findIndex(
-                    (cat) => cat.id === updatedCategory.id
-                );
-                this.categories.splice(index, 1, updatedCategory);
+
+                await this.fetchCategories();
+
                 this.editingCategory = null;
             } catch (error) {
                 console.error("Error updating category:", error);
@@ -114,6 +134,7 @@ export default {
         cancelEdit() {
             this.editingCategory = null;
         },
+
         async deleteCategory(id) {
             try {
                 await categoryService.deleteCategory(id);
@@ -123,8 +144,9 @@ export default {
             }
         },
     },
+
     async mounted() {
-        await this.fetcUserProfile();
+        await this.fetchUserProfile();
         await this.fetchCategories();
     },
 };
