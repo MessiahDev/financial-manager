@@ -80,9 +80,6 @@ export default {
         const revenues = await revenueService.getRevenuesByUserId(userId);
         const expenses = await expenseService.getExpensesByUserId(userId);
 
-        console.log('Receitas:', revenues);
-        console.log('Despesas:', expenses);
-
         this.totalRevenues = revenues.reduce((acc, r) => acc + r.amount, 0);
         this.totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
         this.totalSavings = this.totalRevenues - this.totalExpenses;
