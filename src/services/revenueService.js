@@ -11,6 +11,17 @@ const revenueService = {
         }
     },
 
+    getRevenuesByUserId: async (userId) => {
+        try {
+            const response = await api.get(`/Revenue/user/${userId}`);
+            return response.data;
+        }
+        catch (error) {
+            console.error('Erro ao buscar receitas por ID de usuário:', error);
+            throw error;
+        }
+    },
+
     createRevenue: async (revenueData) => {
         try {
             const response = await api.post('/Revenue', revenueData);

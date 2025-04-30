@@ -10,6 +10,19 @@ const expenseService = {
             throw error;
         }
     },
+    
+    getExpensesByUserId: async (userId) => {
+        try {
+            const response = await api.get(`/Expense/user/${userId}`);
+            return response.data;
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+                return [];
+            }
+            console.error("Error fetching categories by user:", error);
+            throw error;
+        }
+    },
 
     createExpense: async (expenseData) => {
         try {

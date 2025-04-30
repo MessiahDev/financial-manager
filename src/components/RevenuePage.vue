@@ -1,19 +1,22 @@
 <template>
-    <div class="category-page">
-        <h1>Gerenciador de Categorias</h1>
-        <form @submit.prevent="saveCategory" class="category-form">
+    <div class="revenue-page">
+        <h1>Gerenciador de Receitas</h1>
+        <form @submit.prevent="saveRevenue" class="revenue-form">
             <div>
-                <input type="text" v-model="newCategory.name" placeholder="Nome da categoria" required />
+                <input type="text" v-model="newRevenue.description" placeholder="Nome da receita" required />
+            </div>
+            <div>
+                <input type="number" v-model.number="newRevenue.amount" placeholder="Valor da receita" required />
             </div>
             <button type="submit">Salvar</button>
         </form>
 
-        <ul class="category-list">
-            <li v-for="(category, index) in categories" :key="category.id" class="category-item">
-                <span>{{ category.name }}</span>
+        <ul class="revenue-list">
+            <li v-for="(revenue, index) in revenues" :key="revenue.id" class="revenue-item">
+                <span>{{ revenue.description }} - R$ {{ revenue.amount.toFixed(2) }}</span>
                 <div>
                     <button @click="startEdit(index)">Editar</button>
-                    <button @click="deleteCategory(index)">Deletar</button>
+                    <button @click="deleteRevenue(index)">Deletar</button>
                 </div>
             </li>
         </ul>
@@ -21,9 +24,10 @@
 
     <div v-if="showEditModal" class="modal-backdrop">
         <div class="modal">
-            <h2>Editar Categoria</h2>
+            <h2>Editar Receita</h2>
             <form @submit.prevent="submitEdit">
-                <input v-model="editingCategory.name" placeholder="Nome" required />
+                <input v-model="editingRevenue.description" placeholder="Nome" required />
+                <input v-model.number="editingRevenue.amount" type="number" placeholder="Valor" required />
                 <div class="modal-actions">
                     <button type="submit">Salvar</button>
                     <button @click.prevent="closeModal">Cancelar</button>
@@ -35,27 +39,29 @@
 
 <script>
 import authService from "../services/authService";
-import categoryService from "../services/categoryService";
+import revenueService from "../services/revenueService";
 
 export default {
-    name: "CategoryPage",
+    name: "RevenuePage",
     data() {
         return {
-            newCategory: {
-                name: "",
+            newRevenue: {
+                description: "",
+                amount: null,
+                date: new Date().toISOString().split("T")[0],
                 userId: null,
             },
-            categories: [],
-            editingCategory: null,
+            revenues: [],
+            editingRevenue: null,
             editingIndex: null,
             isEditing: false,
             showEditModal: false,
         };
     },
-
+    
     async mounted() {
         try {
-            await this.fetchCategories();
+            await this.fetchRevenues();
         } catch (error) {
             console.error("Erro ao montar o componente:", error);
         }
@@ -72,90 +78,83 @@ export default {
                 const user = await authService.getProfile();
                 return user.id;
             } catch (error) {
-                console.error("Erro ao obter perfil do usuário:", error);
+                console.error("Erro ao buscar perfil do usuário:", error);
                 return null;
             }
         },
 
-        async fetchCategories() {
+        async fetchRevenues() {
             try {
                 const userId = await this.fetchUserId();
                 if (!userId) {
-                    console.warn("ID do usuário não encontrado. Abortando busca de categorias.");
+                    console.warn("ID do usuário não encontrado. Abortando busca de receitas.");
                     return;
                 }
-                const response = await categoryService.getCategoryByUserId(userId);
-                this.categories = response || [];
+                const response = await revenueService.getRevenuesByUserId(userId);
+                this.revenues = response || [];
             } catch (error) {
-                console.error("Erro ao buscar categorias:", error);
+                console.error("Erro ao buscar receitas:", error);
             }
         },
 
-        async saveCategory() {
+        async saveRevenue() {
             try {
                 const userId = await this.fetchUserId();
                 if (!userId) {
-                    console.warn("ID do usuário não encontrado. Abortando salvamento de categoria.");
+                    console.warn("ID do usuário não encontrado. Abortando salvamento de receita.");
                     return;
                 }
 
-                const categoryData = { ...this.newCategory, userId: userId };
-                await categoryService.createCategory(categoryData);
-                await this.fetchCategories();
+                const revenueData = { ...this.newRevenue, userId };
+                await revenueService.createRevenue(revenueData);
+                await this.fetchRevenues();
                 this.resetForm();
             } catch (error) {
-                console.error("Erro ao salvar categoria:", error);
+                console.error("Erro ao salvar receita:", error);
             }
         },
 
-        async updateCategory() {
+        async updateRevenue() {
             try {
-                const { id, ...data } = this.editingCategory;
-                if (!id) {
-                    console.warn("ID da categoria não encontrado. Abortando atualização.");
-                    return;
-                }
-                await categoryService.updateCategory(id, data);
-                await this.fetchCategories();
+                const { id, ...data } = this.editingRevenue;
+                await revenueService.updateRevenue(id, data);
+                await this.fetchRevenues();
                 this.closeModal();
             } catch (error) {
-                console.error("Erro ao atualizar categoria:", error);
+                console.error("Erro ao atualizar receita:", error);
             }
         },
 
-        async deleteCategory(index) {
+        async deleteRevenue(index) {
             try {
-                const id = this.categories[index]?.id;
+                const id = this.revenues[index]?.id;
                 if (!id) {
-                    console.warn("ID da categoria não encontrado. Abortando exclusão.");
+                    console.warn("ID da receita não encontrado. Abortando exclusão.");
                     return;
                 }
-                await categoryService.deleteCategory(id);
-                await this.fetchCategories();
+                await revenueService.deleteRevenue(id);
+                await this.fetchRevenues();
             } catch (error) {
-                console.error("Erro ao deletar categoria:", error);
+                console.error("Erro ao deletar receita:", error);
             }
         },
 
         startEdit(index) {
-            const category = this.categories[index];
-            if (!category) {
-                console.warn("Categoria não encontrada no índice:", index);
-                return;
-            }
             this.editingIndex = index;
-            this.editingCategory = { ...category };
+            this.editingRevenue = { ...this.revenues[index] };
             this.isEditing = true;
             this.showEditModal = true;
         },
 
         submitEdit() {
-            this.updateCategory();
+            this.updateRevenue();
         },
 
         resetForm() {
-            this.newCategory = {
-                name: "",
+            this.newRevenue = {
+                description: "",
+                amount: 0,
+                date: new Date().toISOString().split("T")[0],
             };
         },
 
@@ -163,14 +162,14 @@ export default {
             this.showEditModal = false;
             this.isEditing = false;
             this.editingIndex = null;
-            this.editingCategory = null;
+            this.editingRevenue = null;
         },
     },
 };
 </script>
 
 <style scoped>
-.category-page {
+.revenue-page {
     max-width: 800px;
     margin: 0 auto;
     padding: 6em 0em 0em 0em;
@@ -180,13 +179,13 @@ export default {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.category-page h1 {
+.revenue-page h1 {
     text-align: center;
     color: #333;
     margin-bottom: 1.5em;
 }
 
-.category-form {
+.revenue-form {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
@@ -194,33 +193,33 @@ export default {
     margin-bottom: 2em;
 }
 
-.category-form div {
+.revenue-form div {
     display: flex;
     flex-direction: column;
     flex: 1;
     min-width: 150px;
 }
 
-.category-form label {
+.revenue-form label {
     font-weight: 500;
     margin-bottom: 8px;
     color: #555;
 }
 
-.category-form input,
-.category-form button {
+.revenue-form input,
+.revenue-form button {
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
-.category-form input:focus {
+.revenue-form input:focus {
     border-color: #007bff;
     outline: none;
 }
 
-.category-form button {
+.revenue-form button {
     background-color: #007bff;
     color: #fff;
     border: none;
@@ -230,16 +229,16 @@ export default {
     padding: 0 20px;
 }
 
-.category-form button:hover {
+.revenue-form button:hover {
     background-color: #0056b3;
 }
 
-.category-list {
+.revenue-list {
     list-style: none;
     padding: 0;
 }
 
-.category-item {
+.revenue-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -251,12 +250,12 @@ export default {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.category-item span {
+.revenue-item span {
     font-size: 16px;
     color: #333;
 }
 
-.category-item button {
+.revenue-item button {
     padding: 8px 12px;
     font-size: 14px;
     color: #fff;
@@ -268,15 +267,15 @@ export default {
     margin-left: 5px;
 }
 
-.category-item button:hover {
+.revenue-item button:hover {
     background-color: #218838;
 }
 
-.category-item button:nth-child(2) {
+.revenue-item button:nth-child(2) {
     background-color: #dc3545;
 }
 
-.category-item button:nth-child(2):hover {
+.revenue-item button:nth-child(2):hover {
     background-color: #c82333;
 }
 
@@ -361,19 +360,19 @@ export default {
 }
 
 @media (max-width: 800px) {
-    .category-page {
+    .revenue-page {
         padding: 7em 1em;
     }
 
-    .category-form {
+    .revenue-form {
         flex-direction: column;
         gap: 10px;
     }
 
-    .category-form button,
-    .category-item input,
-    .category-item button,
-    .category-form div {
+    .revenue-form button,
+    .revenue-item input,
+    .revenue-item button,
+    .revenue-form div {
         width: 100%;
         margin: 3px 0;
     }

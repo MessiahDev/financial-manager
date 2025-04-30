@@ -2,7 +2,7 @@
     <nav class="navbar">
         <div class="navbar-container">
             <div v-if="!isMobile" class="navbar-logo-container">
-                <a href="/" class="navbar-logo">Financial Manager</a>
+                <a href="/home" class="navbar-logo">Financial Manager</a>
             </div>
             <div v-if="isMobile" class="hamburger" @click="toggleMobileMenu" ref="mobileMenuButton">
                 <span :class="{ open: showMobileMenu }"><i class="fa-solid fa-bars"></i></span>
@@ -16,7 +16,10 @@
                     <a href="/categorias" class="navbar-link">Categorias</a>
                 </li>
                 <li class="navbar-item">
-                    <a href="/settings" class="navbar-link">Settings</a>
+                    <a href="/receita" class="navbar-link">Receita</a>
+                </li>
+                <li class="navbar-item">
+                    <a href="/despesa" class="navbar-link">Despesa</a>
                 </li>
             </ul>
 
@@ -40,71 +43,69 @@
         <ul v-if="isMobile && showMobileMenu" class="mobile-menu">
             <li><a href="/home" class="navbar-link">Home</a></li>
             <li><a href="/categorias" class="navbar-link">Categorias</a></li>
-            <li><a href="/settings" class="navbar-link">Settings</a></li>
+            <li><a href="/receita" class="navbar-link">Receita</a></li>
+            <li><a href="/despesa" class="navbar-link">Despesa</a></li>
         </ul>
     </nav>
 </template>
 
 <script>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useAuthStore } from '../stores/authStore';
 
 export default {
     name: "NavbarView",
 
-    setup() {
-        const authStore = useAuthStore();
-        const showDropdown = ref(false);
-        const isMobile = ref(false);
-        const showMobileMenu = ref(false);
-
-        const userDropdown = ref(null);
-        const mobileMenuButton = ref(null);
-
-        const detectMobile = () => {
-            isMobile.value = window.innerWidth <= 768;
-        };
-
-        const toggleDropdown = () => {
-            showDropdown.value = !showDropdown.value;
-        };
-
-        const handleClickOutside = (event) => {
-            if (userDropdown.value && !userDropdown.value.contains(event.target)) {
-                showDropdown.value = false;
-            }
-            if (mobileMenuButton.value && !mobileMenuButton.value.contains(event.target)) {
-                showMobileMenu.value = false;
-            }
-        };
-
-        const toggleMobileMenu = () => {
-            showMobileMenu.value = !showMobileMenu.value;
-        };
-
-        onMounted(() => {
-            authStore.fetchUserProfile();
-            detectMobile();
-            document.addEventListener('click', handleClickOutside);
-            window.addEventListener('resize', detectMobile);
-        });
-
-        onBeforeUnmount(() => {
-            document.removeEventListener('click', handleClickOutside);
-            window.removeEventListener('resize', detectMobile);
-        });
-
+    data() {
         return {
-            authStore,
-            showDropdown,
-            mobileMenuButton,
-            isMobile,
-            showMobileMenu,
-            toggleDropdown,
-            toggleMobileMenu,
-            userDropdown,
+            showDropdown: false,
+            isMobile: false,
+            showMobileMenu: false,
         };
     },
+
+    computed: {
+        authStore() {
+            return useAuthStore();
+        }
+    },
+
+    mounted() {
+        this.authStore.fetchUserProfile();
+        this.detectMobile();
+        document.addEventListener('click', this.handleClickOutside);
+        window.addEventListener('resize', this.detectMobile);
+    },
+
+    beforeUnmount() {
+        document.removeEventListener('click', this.handleClickOutside);
+        window.removeEventListener('resize', this.detectMobile);
+    },
+
+    methods: {
+        detectMobile() {
+            this.isMobile = window.innerWidth <= 768;
+        },
+
+        toggleDropdown() {
+            this.showDropdown = !this.showDropdown;
+        },
+
+        toggleMobileMenu() {
+            this.showMobileMenu = !this.showMobileMenu;
+        },
+
+        handleClickOutside(event) {
+            const userDropdown = this.$refs.userDropdown;
+            const mobileMenuButton = this.$refs.mobileMenuButton;
+
+            if (userDropdown && !userDropdown.contains(event.target)) {
+                this.showDropdown = false;
+            }
+            if (mobileMenuButton && !mobileMenuButton.contains(event.target)) {
+                this.showMobileMenu = false;
+            }
+        }
+    }
 };
 </script>
 

@@ -1,19 +1,28 @@
 <template>
-    <div class="category-page">
-        <h1>Gerenciador de Categorias</h1>
-        <form @submit.prevent="saveCategory" class="category-form">
+    <div class="expense-page">
+        <h1>Gerenciador de Despesas</h1>
+        <form @submit.prevent="saveExpense" class="expense-form">
             <div>
-                <input type="text" v-model="newCategory.name" placeholder="Nome da categoria" required />
+                <input type="text" v-model="form.description" placeholder="Descrição da despesa" required />
             </div>
+            <div>
+                <input type="number" v-model.number="form.amount" placeholder="Valor da despesa" required />
+            </div>
+            <select v-model="form.categoryId" required>
+                <option value="" disabled>Selecione uma categoria</option>
+                <option v-for="category in categories" :key="category.id" :value="category.id">
+                    {{ category.name }}
+                </option>
+            </select>
             <button type="submit">Salvar</button>
         </form>
 
-        <ul class="category-list">
-            <li v-for="(category, index) in categories" :key="category.id" class="category-item">
-                <span>{{ category.name }}</span>
+        <ul class="expense-list">
+            <li v-for="(expense, index) in expenses" :key="expense.id" class="expense-item">
+                <span>{{ expense.description }} - R$ {{ expense.amount.toFixed(2) }} ({{ expense.categoryName }})</span>
                 <div>
                     <button @click="startEdit(index)">Editar</button>
-                    <button @click="deleteCategory(index)">Deletar</button>
+                    <button @click="deleteExpense(index)">Deletar</button>
                 </div>
             </li>
         </ul>
@@ -21,9 +30,16 @@
 
     <div v-if="showEditModal" class="modal-backdrop">
         <div class="modal">
-            <h2>Editar Categoria</h2>
+            <h2>Editar Receita</h2>
             <form @submit.prevent="submitEdit">
-                <input v-model="editingCategory.name" placeholder="Nome" required />
+                <input v-model="form.description" placeholder="Nome" required />
+                <input v-model.number="form.amount" type="number" placeholder="Valor" required />
+                <select v-model="form.categoryId" required>
+                    <option value="" disabled>Selecione uma categoria</option>
+                    <option v-for="category in categories" :key="category.id" :value="category.id">
+                        {{ category.name }}
+                    </option>
+                </select>
                 <div class="modal-actions">
                     <button type="submit">Salvar</button>
                     <button @click.prevent="closeModal">Cancelar</button>
@@ -35,29 +51,36 @@
 
 <script>
 import authService from "../services/authService";
+import expenseService from "../services/expenseService";
 import categoryService from "../services/categoryService";
 
 export default {
-    name: "CategoryPage",
+    name: "ExpensePage",
     data() {
         return {
-            newCategory: {
-                name: "",
+            categories: [],
+            expenses: [],
+            form: {
+                id: null,
+                description: "",
+                amount: null,
+                date: new Date(),
+                categoryId: "",
+                categoryName: "",
                 userId: null,
             },
-            categories: [],
-            editingCategory: null,
-            editingIndex: null,
             isEditing: false,
+            editingIndex: null,
             showEditModal: false,
         };
     },
-
+    
     async mounted() {
         try {
             await this.fetchCategories();
+            await this.fetchExpenses();
         } catch (error) {
-            console.error("Erro ao montar o componente:", error);
+            console.error("Erro ao montar o componente de despesas:", error);
         }
     },
 
@@ -91,86 +114,117 @@ export default {
             }
         },
 
-        async saveCategory() {
+        async fetchExpenses() {
             try {
                 const userId = await this.fetchUserId();
                 if (!userId) {
-                    console.warn("ID do usuário não encontrado. Abortando salvamento de categoria.");
+                    console.warn("ID do usuário não encontrado. Abortando busca de despesas.");
+                    return;
+                }
+                const response = await expenseService.getExpensesByUserId(userId);
+                this.expenses = response || [];
+            } catch (error) {
+                console.error("Erro ao buscar despesas:", error);
+            }
+        },
+
+        async saveExpense() {
+            try {
+                const userId = await this.fetchUserId();
+                if (!userId) {
+                    console.warn("ID do usuário não encontrado. Abortando salvamento de despesa.");
                     return;
                 }
 
-                const categoryData = { ...this.newCategory, userId: userId };
-                await categoryService.createCategory(categoryData);
-                await this.fetchCategories();
+                const selectedCategory = this.categories.find(c => c.id === this.form.categoryId);
+                this.form.categoryName = selectedCategory ? selectedCategory.name : "";
+
+                await expenseService.createExpense({
+                    description: this.form.description,
+                    amount: this.form.amount,
+                    date: new Date().toISOString(),
+                    categoryId: Number(this.form.categoryId),
+                    categoryName: this.form.categoryName,
+                    userId: Number(userId),
+                });
+
                 this.resetForm();
+                await this.fetchExpenses();
             } catch (error) {
-                console.error("Erro ao salvar categoria:", error);
-            }
-        },
-
-        async updateCategory() {
-            try {
-                const { id, ...data } = this.editingCategory;
-                if (!id) {
-                    console.warn("ID da categoria não encontrado. Abortando atualização.");
-                    return;
-                }
-                await categoryService.updateCategory(id, data);
-                await this.fetchCategories();
-                this.closeModal();
-            } catch (error) {
-                console.error("Erro ao atualizar categoria:", error);
-            }
-        },
-
-        async deleteCategory(index) {
-            try {
-                const id = this.categories[index]?.id;
-                if (!id) {
-                    console.warn("ID da categoria não encontrado. Abortando exclusão.");
-                    return;
-                }
-                await categoryService.deleteCategory(id);
-                await this.fetchCategories();
-            } catch (error) {
-                console.error("Erro ao deletar categoria:", error);
+                console.error("Erro ao salvar despesa:", error);
             }
         },
 
         startEdit(index) {
-            const category = this.categories[index];
-            if (!category) {
-                console.warn("Categoria não encontrada no índice:", index);
+            const expense = this.expenses[index];
+            if (!expense) {
+                console.warn("Despesa não encontrada no índice:", index);
                 return;
             }
-            this.editingIndex = index;
-            this.editingCategory = { ...category };
+            this.form = {
+                ...expense,
+                date: new Date(expense.date),
+            };
             this.isEditing = true;
+            this.editingIndex = index;
             this.showEditModal = true;
         },
 
-        submitEdit() {
-            this.updateCategory();
+        async submitEdit() {
+            try {
+                const selectedCategory = this.categories.find(c => c.id === this.form.categoryId);
+                this.form.categoryName = selectedCategory ? selectedCategory.name : "";
+
+                await expenseService.updateExpense(this.form.id, {
+                    ...this.form,
+                    date: new Date(this.form.date).toISOString(),
+                });
+
+                await this.fetchExpenses();
+                this.closeModal();
+            } catch (error) {
+                console.error("Erro ao atualizar despesa:", error);
+            }
+        },
+
+        async deleteExpense(index) {
+            try {
+                const id = this.expenses[index]?.id;
+                if (!id) {
+                    console.warn("ID da despesa não encontrado. Abortando exclusão.");
+                    return;
+                }
+                await expenseService.deleteExpense(id);
+                await this.fetchExpenses();
+            } catch (error) {
+                console.error("Erro ao deletar despesa:", error);
+            }
         },
 
         resetForm() {
-            this.newCategory = {
-                name: "",
+            this.form = {
+                id: null,
+                description: "",
+                amount: null,
+                date: new Date(),
+                categoryId: "",
+                categoryName: "",
+                userId: null,
             };
         },
 
         closeModal() {
             this.showEditModal = false;
+            this.resetForm();
             this.isEditing = false;
             this.editingIndex = null;
-            this.editingCategory = null;
         },
     },
 };
 </script>
 
 <style scoped>
-.category-page {
+.expense-page {
     max-width: 800px;
     margin: 0 auto;
     padding: 6em 0em 0em 0em;
@@ -180,13 +234,13 @@ export default {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.category-page h1 {
+.expense-page h1 {
     text-align: center;
     color: #333;
     margin-bottom: 1.5em;
 }
 
-.category-form {
+.expense-form {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
@@ -194,33 +248,34 @@ export default {
     margin-bottom: 2em;
 }
 
-.category-form div {
+.expense-form div {
     display: flex;
     flex-direction: column;
     flex: 1;
     min-width: 150px;
 }
 
-.category-form label {
+.expense-form label {
     font-weight: 500;
     margin-bottom: 8px;
     color: #555;
 }
 
-.category-form input,
-.category-form button {
+.expense-form input,
+.expense-form button,
+.expense-form select {
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
-.category-form input:focus {
+.expense-form input:focus {
     border-color: #007bff;
     outline: none;
 }
 
-.category-form button {
+.expense-form button {
     background-color: #007bff;
     color: #fff;
     border: none;
@@ -230,16 +285,16 @@ export default {
     padding: 0 20px;
 }
 
-.category-form button:hover {
+.expense-form button:hover {
     background-color: #0056b3;
 }
 
-.category-list {
+.expense-list {
     list-style: none;
     padding: 0;
 }
 
-.category-item {
+.expense-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -251,12 +306,12 @@ export default {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.category-item span {
+.expense-item span {
     font-size: 16px;
     color: #333;
 }
 
-.category-item button {
+.expense-item button {
     padding: 8px 12px;
     font-size: 14px;
     color: #fff;
@@ -268,15 +323,15 @@ export default {
     margin-left: 5px;
 }
 
-.category-item button:hover {
+.expense-item button:hover {
     background-color: #218838;
 }
 
-.category-item button:nth-child(2) {
+.expense-item button:nth-child(2) {
     background-color: #dc3545;
 }
 
-.category-item button:nth-child(2):hover {
+.expense-item button:nth-child(2):hover {
     background-color: #c82333;
 }
 
@@ -361,19 +416,20 @@ export default {
 }
 
 @media (max-width: 800px) {
-    .category-page {
+    .expense-page {
         padding: 7em 1em;
     }
 
-    .category-form {
+    .expense-form {
         flex-direction: column;
         gap: 10px;
     }
 
-    .category-form button,
-    .category-item input,
-    .category-item button,
-    .category-form div {
+    .expense-form select,
+    .expense-form button,
+    .expense-form div,
+    .expense-item input,
+    .expense-item button {
         width: 100%;
         margin: 3px 0;
     }
