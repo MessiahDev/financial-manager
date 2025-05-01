@@ -229,9 +229,7 @@ export default {
     margin: 0 auto;
     padding: 6em 0em 0em 0em;
     font-family: 'Roboto', sans-serif;
-    background-color: #f9f9f9;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .expense-page h1 {
@@ -268,6 +266,7 @@ export default {
     font-size: 16px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    color: #555;
 }
 
 .expense-form input:focus {
@@ -308,7 +307,7 @@ export default {
 
 .expense-item span {
     font-size: 16px;
-    color: #333;
+    color: #555;
 }
 
 .expense-item button {
@@ -349,7 +348,7 @@ export default {
 }
 
 .modal {
-    background-color: #fff;
+    background-color: #f5f5f5;
     padding: 2em;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -374,6 +373,7 @@ export default {
     font-size: 16px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    color: #555;
 }
 
 .modal input:focus,

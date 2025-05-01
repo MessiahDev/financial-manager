@@ -25,12 +25,12 @@
 
             <div v-if="authStore.isAuthenticated" class="navbar-user" @click="toggleDropdown" ref="userDropdown">
                 <a href="javascript:void(0)" class="navbar-link">
-                    <span>{{ authStore.firstName }}</span>
+                    <span>Olá, <b>{{ authStore.firstName }}</b>!</span>
                     <span class="arrow" :class="{ open: showDropdown }"><i class="fa-solid fa-arrow-down"></i></span>
                 </a>
                 <ul v-if="showDropdown" class="dropdown-menu">
-                    <li><a href="/profile" class="dropdown-link"><i class="fa-solid fa-user"></i>Perfil</a></li>
-                    <li><a href="/settings" class="dropdown-link"><i class="fa-solid fa-gear"></i>Configurações</a></li>
+                    <li><a href="/perfil" class="dropdown-link"><i class="fa-solid fa-user"></i>Perfil</a></li>
+                    <!-- <li><a href="/settings" class="dropdown-link"><i class="fa-solid fa-gear"></i>Configurações</a></li> -->
                     <li><a href="/" class="dropdown-link" @click.prevent="authStore.logout()"><i class="fa-solid fa-right-from-bracket"></i>Sair</a></li>
                 </ul>
             </div>

@@ -20,11 +20,12 @@
                         id="password" 
                         :type="showPassword ? 'text' : 'password'" 
                         v-model="password" 
+                        :class="{ 'error': passwordsMismatch, 'success': passwordsMatch }" 
                         required 
                     />
-                <span class="toggle-visibility" @click="togglePasswordVisibility">
-                    <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
-                </span>
+                    <span class="toggle-visibility" @click="togglePasswordVisibility">
+                        <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
+                    </span>
                 </div>
             </div>
 
@@ -118,18 +119,14 @@ export default {
 
 <style scoped>
 .register-page {
+    padding: 6em 0em 0em 0em;
     display: flex;
     justify-content: center;
-    align-items: center;
     height: 100vh;
-    background-color: #f5f5f5;
 }
 
 .register-form {
-    background: white;
-    padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 300px;
     text-align: center;
@@ -164,6 +161,11 @@ input {
     font-size: 14px;
 }
 
+input:focus {
+    outline: none;
+    box-shadow: none;
+}
+
 input.error {
     border-color: red;
 }
@@ -179,6 +181,7 @@ input.success {
     transform: translateY(-50%);
     cursor: pointer;
     font-size: 17px;
+    color: #888;
 }
 
 .error-message {

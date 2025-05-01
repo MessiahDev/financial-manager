@@ -5,6 +5,7 @@ import RegisterView from '../views/RegisterView.vue';
 import CategoryView from '../views/CategoryView.vue';
 import RevenueView from '../views/RevenueView.vue';
 import ExpenseView from '../views/ExpenseView.vue';
+import ProfileView from '../views/ProfileView.vue';
 
 const routes = [
     {
@@ -41,6 +42,12 @@ const routes = [
         component: ExpenseView,
         meta: { requiresAuth: true }
     },
+    {
+        path: '/perfil',
+        name: 'ProfileView',
+        component: ProfileView,
+        meta: { requiresAuth: true }
+    }
 ];
 
 const router = createRouter({

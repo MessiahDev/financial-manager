@@ -150,12 +150,19 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 7em;
+  padding: 6em 0em 0em 0em;
 }
 
 .dashboard-header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 1.5em;
+  padding: 20px;
+}
+
+.dashboard-header h1 {
+    text-align: center;
+    color: #333;
+    font-size: 2em;
 }
 
 .kpi-container {
@@ -163,6 +170,7 @@ export default {
   justify-content: space-around;
   width: 100%;
   margin-bottom: 20px;
+  margin-top: 2em;
 }
 
 .kpi-card {
@@ -170,7 +178,7 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: #f1f1f1;
+  background-color: #f5f5f5;
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 20px;
@@ -178,6 +186,7 @@ export default {
   height: 10em;
   width: 20%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: #333;
 }
 
 .chart-container {
@@ -188,12 +197,13 @@ export default {
 }
 
 .card {
-  background-color: #f9f9f9;
+  background-color: #f5f5f5;
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   width: 45%;
+  color: #333;
 }
 
 @media screen and (max-width: 1280px) {

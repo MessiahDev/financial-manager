@@ -90,14 +90,11 @@ export default {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #f5f5f5;
 }
 
 .login-form {
-    background: #ffffff;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     max-width: 400px;
     width: 100%;
     box-sizing: border-box;
@@ -127,6 +124,12 @@ input[type="text"] {
     border: 1px solid #cccccc;
     border-radius: 4px;
     box-sizing: border-box;
+    color: #555;
+}
+
+input:focus {
+    outline: none;
+    box-shadow: none;
 }
 
 .password-group {
@@ -151,6 +154,7 @@ input[type="text"] {
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #555;
 }
 
 .login-button {
