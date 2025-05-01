@@ -48,7 +48,7 @@ export default {
             newRevenue: {
                 description: "",
                 amount: null,
-                date: new Date().toISOString().split("T")[0],
+                date: new Date(),
                 userId: null,
             },
             revenues: [],
