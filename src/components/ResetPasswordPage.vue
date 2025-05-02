@@ -1,28 +1,13 @@
 <template>
-    <div class="register-page">
-        <form @submit.prevent="register" class="register-form">
-            <h2>Cadastro</h2>
-            
-            <div class="form-group">
-                <label for="name">Nome</label>
-                <input id="name" type="text" v-model="name" required />
-            </div>
-
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input id="email" type="email" v-model="email" required />
-            </div>
+    <div class="resetpassword-page">
+        <form @submit.prevent="reset" class="resetpassword-form">
+            <h2>Redefinir senha</h2>
 
             <div class="form-group">
                 <label for="password">Senha</label>
                 <div class="input-wrapper">
-                    <input 
-                        id="password" 
-                        :type="showPassword ? 'text' : 'password'" 
-                        v-model="password" 
-                        :class="{ 'error': passwordsMismatch, 'success': passwordsMatch }" 
-                        required 
-                    />
+                    <input id="password" :type="showPassword ? 'text' : 'password'" v-model="newPassword"
+                        :class="{ 'error': passwordsMismatch, 'success': passwordsMatch }" required />
                     <span class="toggle-visibility" @click="togglePasswordVisibility">
                         <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
                     </span>
@@ -32,18 +17,15 @@
             <div class="form-group">
                 <label for="confirmPassword">Confirmação de Senha</label>
                 <div class="input-wrapper">
-                    <input 
-                        id="confirmPassword" 
-                        :type="showConfirmPassword ? 'text' : 'password'" 
-                        v-model="confirmPassword" 
-                        :class="{ 'error': passwordsMismatch, 'success': passwordsMatch }" 
-                        required 
-                    />
+                    <input id="confirmPassword" :type="showConfirmPassword ? 'text' : 'password'"
+                        v-model="confirmNewPassword" :class="{ 'error': passwordsMismatch, 'success': passwordsMatch }"
+                        required />
                     <span class="toggle-visibility" @click="toggleConfirmPasswordVisibility">
                         <i :class="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
                     </span>
                 </div>
                 <p v-if="passwordsMismatch" class="error-message">As senhas não coincidem!</p>
+                <p v-if="passwordResetSuccess" class="success-message">Senha redefinida com sucesso!</p>
             </div>
 
             <button type="submit" :disabled="passwordsMismatch" class="submit-button">Cadastrar</button>
@@ -57,56 +39,72 @@ import router from '../router';
 import authService from '../services/authService';
 
 export default {
-    name: 'RegisterPage',
+    name: 'ResetPasswordPage',
     data() {
         return {
-            name: '',
-            email: '',
-            password: '',
-            confirmPassword: '',
+            passwordResetSuccess: false,
+            newPassword: '',
+            confirmNewPassword: '',
             showPassword: false,
             showConfirmPassword: false,
         };
     },
-    
+
+    computed: {
+        passwordsMismatch() {
+            return this.newPassword && this.confirmNewPassword && this.newPassword !== this.confirmNewPassword;
+        },
+        passwordsMatch() {
+            return this.newPassword && this.confirmNewPassword && this.newPassword === this.confirmNewPassword;
+        }
+    },
+
     methods: {
         togglePasswordVisibility() {
             this.showPassword = !this.showPassword;
         },
+
         toggleConfirmPasswordVisibility() {
             this.showConfirmPassword = !this.showConfirmPassword;
         },
+
         goToLogin() {
             router.push('/');
         },
-        async register() {
-            try {
-                const userData = {
-                    name: this.name,
-                    email: this.email,
-                    password: this.password,
-                };
 
-                await authService.register(userData);
-                router.push('/');
+        async reset() {
+            try {
+                const token = this.$route.query.token;
+
+                if (!token) {
+                    alert('Token inválido ou ausente na URL.');
+                    return;
+                }
+
+                const newPassword = this.newPassword;
+
+                await authService.resetPassword(token, newPassword);
+                this.passwordResetSuccess = true;
+                this.newPassword = '';
+                this.confirmNewPassword = '';
             } catch (error) {
-                console.error('Erro ao cadastrar:', error);
-                alert('Erro ao cadastrar. Tente novamente.');
+                console.error('Erro ao redefinir a senha:', error);
+                alert('Erro ao redefinir a senha. Tente novamente.');
             }
-        },
+        }
     },
 };
 </script>
 
 <style scoped>
-.register-page {
+.resetpassword-page {
     padding: 6em 0em 0em 0em;
     display: flex;
     justify-content: center;
     height: 100vh;
 }
 
-.register-form {
+.resetpassword-form {
     border-radius: 8px;
     width: 100%;
     max-width: 300px;
@@ -163,6 +161,12 @@ input.success {
     cursor: pointer;
     font-size: 17px;
     color: #888;
+}
+
+.success-message {
+    color: green;
+    font-size: 12px;
+    margin-top: 5px;
 }
 
 .error-message {

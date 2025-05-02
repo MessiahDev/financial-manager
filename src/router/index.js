@@ -6,6 +6,8 @@ import CategoryView from '../views/CategoryView.vue';
 import RevenueView from '../views/RevenueView.vue';
 import ExpenseView from '../views/ExpenseView.vue';
 import ProfileView from '../views/ProfileView.vue';
+import ForgotPasswordView from '../views/ForgotPasswordView.vue';
+import ResetPasswordView from '../views/ResetPasswordView.vue';
 
 const routes = [
     {
@@ -47,6 +49,16 @@ const routes = [
         name: 'ProfileView',
         component: ProfileView,
         meta: { requiresAuth: true }
+    },
+    {
+        path: '/recuperar-senha',
+        name: 'ForgotPasswordView',
+        component: ForgotPasswordView
+    },
+    {
+        path: '/redefinir-senha',
+        name: 'ResetPasswordView',
+        component: ResetPasswordView
     }
 ];
 

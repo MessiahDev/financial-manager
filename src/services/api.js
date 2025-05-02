@@ -9,9 +9,12 @@ const api = axios.create({
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
-        if (token && config.headers) {
+        
+        // Verifica se o token existe e a URL não é a de recuperação de senha
+        if (token && config.headers && !config.url.includes('/Auth/forgot-password')) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+
         return config;
     },
     (error) => {

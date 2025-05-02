@@ -28,7 +28,7 @@
             </div>
             <button type="submit" class="login-button">Entrar</button>
             <div class="links">
-                <a href="#" @click.prevent="handleForgotPassword">Esqueci a senha</a>
+                <a href="/recuperar-senha">Esqueci a senha</a>
                 <a href="/cadastro">Cadastrar-se</a>
             </div>
         </form>
@@ -67,10 +67,6 @@ export default {
             }
         };
 
-        const handleForgotPassword = () => {
-            alert('Função de recuperação de senha ainda não implementada.');
-        };
-
         return {
             email,
             password,
@@ -78,7 +74,6 @@ export default {
             stayConnected,
             togglePasswordVisibility,
             handleLogin,
-            handleForgotPassword,
         };
     },
 };
