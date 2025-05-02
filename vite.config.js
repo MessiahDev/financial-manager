@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     port: 5173,
     open: true,
-    https: {
+    https: process.env.NODE_ENV === 'production' ? false : {
       key: fs.readFileSync('localhost-key.pem'),
       cert: fs.readFileSync('localhost.pem'),
     },
