@@ -60,11 +60,7 @@ const authService = {
 
     forgotPassword: async (email) => {
         try {
-            const response = await api.post('/Auth/forgot-password', { email }, {
-                headers: {
-                    Authorization: null
-                }
-            });
+            const response = await api.post('/Auth/forgot-password', { email });
             return response.data;
         } catch (error) {
             console.error('Erro ao enviar email de recuperação de senha:', error);
@@ -77,10 +73,6 @@ const authService = {
             const response = await api.post('/Auth/reset-password', {
                 Token: token,
                 NewPassword: newPassword
-            }, {
-                headers: {
-                    Authorization: null
-                }
             });
             return response.data;
         } catch (error) {
