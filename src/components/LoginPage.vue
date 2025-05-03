@@ -2,79 +2,83 @@
     <div class="login-page">
         <form class="login-form" @submit.prevent="handleLogin">
             <h2>Login</h2>
+
             <div class="form-group">
                 <label for="email">Email</label>
                 <input id="email" type="email" v-model="email" required />
             </div>
+
             <div class="form-group password-group">
                 <label for="password">Senha</label>
                 <div class="input-wrapper">
-                    <input
-                        id="password"
-                        :type="showPassword ? 'text' : 'password'"
-                        v-model="password"
-                        required
-                    />
+                    <input id="password" :type="showPassword ? 'text' : 'password'" v-model="password" required />
                     <span class="toggle-visibility" @click="togglePasswordVisibility">
                         <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
                     </span>
                 </div>
             </div>
+
             <div class="form-group">
                 <label>
                     <input type="checkbox" v-model="stayConnected" />
                     Manter conectado
                 </label>
             </div>
-            <button type="submit" class="login-button">Entrar</button>
+
+            <button type="submit" class="login-button" :disabled="isLoading">
+                Entrar
+            </button>
+
             <div class="links">
                 <a href="/recuperar-senha">Esqueci a senha</a>
                 <a href="/cadastro">Cadastrar-se</a>
+            </div>
+            <div class="loader-container">
+                <Loader v-if="isLoading" />
             </div>
         </form>
     </div>
 </template>
 
 <script>
-import { ref } from 'vue';
 import router from '../router';
 import authService from '../services/authService';
+import Loader from '../components/Loader.vue';
 
 export default {
     name: 'LoginPage',
-    setup() {
-        const email = ref('');
-        const password = ref('');
-        const showPassword = ref(false);
-        const stayConnected = ref(false);
-
-        const togglePasswordVisibility = () => {
-            showPassword.value = !showPassword.value;
+    components: {
+        Loader,
+    },
+    data() {
+        return {
+            email: '',
+            password: '',
+            showPassword: false,
+            stayConnected: false,
+            isLoading: false,
         };
-
-        const handleLogin = async () => {
+    },
+    methods: {
+        togglePasswordVisibility() {
+            this.showPassword = !this.showPassword;
+        },
+        async handleLogin() {
+            this.isLoading = true;
             try {
                 const credentials = {
-                    email: email.value,
-                    password: password.value,
+                    email: this.email,
+                    password: this.password,
                 };
 
                 await authService.login(credentials, router);
-
             } catch (error) {
                 console.error('Erro ao fazer login:', error);
                 alert('Falha no login. Verifique seu email e senha.');
+            } finally {
+                this.isLoading = false;
             }
-        };
-
-        return {
-            email,
-            password,
-            showPassword,
-            stayConnected,
-            togglePasswordVisibility,
-            handleLogin,
-        };
+        },
     },
 };
 </script>
@@ -103,6 +107,14 @@ h2 {
 
 .form-group {
     margin-bottom: 15px;
+}
+
+.loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+    height: 40px;
 }
 
 label {
