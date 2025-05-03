@@ -6,7 +6,7 @@
                 <input type="text" v-model="newRevenue.description" placeholder="Nome da receita" required />
             </div>
             <div>
-                <input type="number" v-money v-model.number="newRevenue.amount" placeholder="Valor da receita" required />
+                <input type="number" v-model.number="newRevenue.amount" placeholder="Valor da receita" required />
             </div>
             <button type="submit" :disabled="isLoading">Salvar</button>
         </form>
@@ -45,6 +45,7 @@
 import authService from "../services/authService";
 import revenueService from "../services/revenueService";
 import Loader from "../components/Loader.vue";
+import Swal from "sweetalert2";
 
 export default {
     name: "RevenuePage",
@@ -69,7 +70,7 @@ export default {
             isLoading: false,
         };
     },
-    
+
     async mounted() {
         try {
             await this.fetchRevenues();
@@ -130,26 +131,57 @@ export default {
 
         async updateRevenue() {
             try {
-                const { id, ...data } = this.editingRevenue;
-                await revenueService.updateRevenue(id, data);
+                const userId = await this.fetchUserId();
+                if (!userId) {
+                    console.warn("ID do usuário não encontrado. Abortando atualização de receita.");
+                    return;
+                }
+
+                const { id, ...rest } = this.editingRevenue;
+
+                if (!id) {
+                    console.warn("ID da receita não encontrado.");
+                    return;
+                }
+
+                const updatedData = { ...rest, userId };
+                await revenueService.updateRevenue(id, updatedData);
                 await this.fetchRevenues();
                 this.closeModal();
+                await Swal.fire("Sucesso!", "A receita foi atualizada.", "success");
             } catch (error) {
                 console.error("Erro ao atualizar receita:", error);
+                await Swal.fire("Erro", "Ocorreu um erro ao tentar atualizar a receita.", "error");
             }
         },
 
         async deleteRevenue(index) {
-            try {
-                const id = this.revenues[index]?.id;
-                if (!id) {
-                    console.warn("ID da receita não encontrado. Abortando exclusão.");
-                    return;
+            const id = this.revenues[index]?.id;
+            if (!id) {
+                console.warn("ID da receita não encontrado. Abortando exclusão.");
+                return;
+            }
+
+            const result = await Swal.fire({
+                title: "Tem certeza?",
+                text: "Essa receita será deletada e não poderá ser recuperada!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#007bff",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sim, deletar!",
+                cancelButtonText: "Cancelar"
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    await revenueService.deleteRevenue(id);
+                    await this.fetchRevenues();
+                    await Swal.fire("Deletado!", "A receita foi removida com sucesso.", "success");
+                } catch (error) {
+                    console.error("Erro ao deletar receita:", error);
+                    await Swal.fire("Erro", "Ocorreu um erro ao tentar deletar a receita.", "error");
                 }
-                await revenueService.deleteRevenue(id);
-                await this.fetchRevenues();
-            } catch (error) {
-                console.error("Erro ao deletar receita:", error);
             }
         },
 

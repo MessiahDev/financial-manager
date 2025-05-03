@@ -6,7 +6,7 @@
                 <input type="text" v-model="form.description" placeholder="Descrição da despesa" required />
             </div>
             <div>
-                <input v-money v-model.number="form.amount" placeholder="Valor da despesa" required />
+                <input type="number" v-model.number="form.amount" placeholder="Valor da despesa" required />
             </div>
             <select v-model="form.categoryId" required>
                 <option value="" disabled>Selecione uma categoria</option>
@@ -19,7 +19,8 @@
 
         <ul class="expense-list">
             <li v-for="(expense, index) in expenses" :key="expense.id" class="expense-item">
-                <span>{{ expense.description }} - R$ {{ expense.amount.toFixed(2) }} ({{ expense.categoryName }})</span>
+                <span>{{ expense.description }} - {{ Number(expense.amount).toMoeda(true) }} ({{ expense.categoryName
+                    }})</span>
                 <div>
                     <button @click="startEdit(index)">Editar</button>
                     <button @click="deleteExpense(index)">Deletar</button>
@@ -58,6 +59,7 @@ import authService from "../services/authService";
 import expenseService from "../services/expenseService";
 import categoryService from "../services/categoryService";
 import Loader from "./Loader.vue";
+import Swal from "sweetalert2";
 
 export default {
     name: "ExpensePage",
@@ -200,22 +202,41 @@ export default {
 
                 await this.fetchExpenses();
                 this.closeModal();
+                await Swal.fire("Sucesso!", "A despesa foi atualizada.", "success");
             } catch (error) {
                 console.error("Erro ao atualizar despesa:", error);
+                await Swal.fire("Erro", "Ocorreu um erro ao tentar atualizar a despesa.", "error");
             }
         },
 
         async deleteExpense(index) {
-            try {
-                const id = this.expenses[index]?.id;
-                if (!id) {
-                    console.warn("ID da despesa não encontrado. Abortando exclusão.");
-                    return;
+            const id = this.expenses[index]?.id;
+
+            if (!id) {
+                console.warn("ID da despesa não encontrado. Abortando exclusão.");
+                return;
+            }
+
+            const result = await Swal.fire({
+                title: "Tem certeza?",
+                text: "Essa despesa será deletada e não poderá ser recuperada!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#007bff",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sim, deletar!",
+                cancelButtonText: "Cancelar"
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    await expenseService.deleteExpense(id);
+                    await this.fetchExpenses();
+                    await Swal.fire("Deletado!", "A despesa foi removida com sucesso.", "success");
+                } catch (error) {
+                    console.error("Erro ao deletar despesa:", error);
+                    await Swal.fire("Erro", "Ocorreu um erro ao tentar deletar a despesa.", "error");
                 }
-                await expenseService.deleteExpense(id);
-                await this.fetchExpenses();
-            } catch (error) {
-                console.error("Erro ao deletar despesa:", error);
             }
         },
 

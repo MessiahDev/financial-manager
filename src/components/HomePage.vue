@@ -8,19 +8,19 @@
     <div class="kpi-container">
       <div class="kpi-card">
         <h3>Receitas Totais</h3>
-        <p>{{ formatCurrency(totalRevenues) }}</p>
+        <p>{{ Number(totalRevenues).toMoeda(true) }}</p>
       </div>
       <div class="kpi-card">
         <h3>Despesas Totais</h3>
-        <p>{{ formatCurrency(totalExpenses) }}</p>
+        <p>{{ Number(totalExpenses).toMoeda(true) }}</p>
       </div>
       <div class="kpi-card">
-        <h3>Investimentos</h3>
-        <p>{{ formatCurrency(totalInvestments) }}</p>
+        <h3>Dívidas</h3>
+        <p>{{ Number(totalDebts).toMoeda(true) }}</p>
       </div>
       <div class="kpi-card">
         <h3>Economias</h3>
-        <p>{{ formatCurrency(totalSavings) }}</p>
+        <p>{{ Number(totalSavings).toMoeda(true) }}</p>
       </div>
     </div>
 
@@ -52,7 +52,7 @@ export default {
     return {
       totalRevenues: 0,
       totalExpenses: 0,
-      totalInvestments: 0,
+      totalDebts: 0,
       totalSavings: 0,
       revenuesVsExpensesData: [['Mês', 'Receitas', 'Despesas']],
       expensesDistributionData: [['Categoria', 'Valor']],
@@ -70,7 +70,11 @@ export default {
       },
     };
   },
-  
+
+  mounted() {
+    this.fetchChartData();
+  },
+
   methods: {
     async fetchChartData() {
       try {
@@ -130,18 +134,7 @@ export default {
         console.error('Erro ao buscar dados para gráficos:', error);
       }
     },
-
-    formatCurrency(value) {
-      return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-      }).format(value);
-    },
-  },
-
-  mounted() {
-    this.fetchChartData();
-  },
+  }
 };
 </script>
 
@@ -160,9 +153,9 @@ export default {
 }
 
 .dashboard-header h1 {
-    text-align: center;
-    color: #333;
-    font-size: 2em;
+  text-align: center;
+  color: #333;
+  font-size: 2em;
 }
 
 .kpi-container {
@@ -194,6 +187,7 @@ export default {
   justify-content: space-around;
   width: 100%;
   margin-bottom: 20px;
+  padding: 0 20px;
 }
 
 .card {

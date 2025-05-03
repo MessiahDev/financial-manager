@@ -41,6 +41,7 @@
 import authService from "../services/authService";
 import categoryService from "../services/categoryService";
 import Loader from "../components/Loader.vue";
+import Swal from 'sweetalert2';
 
 export default {
     name: "CategoryPage",
@@ -132,22 +133,47 @@ export default {
                 await categoryService.updateCategory(id, data);
                 await this.fetchCategories();
                 this.closeModal();
+
+                Swal.fire({
+                    title: "Sucesso!",
+                    text: "A categoria foi atualizada.",
+                    icon: "success",
+                    draggable: false
+                });
             } catch (error) {
                 console.error("Erro ao atualizar categoria:", error);
+                await Swal.fire("Erro", "Ocorreu um erro ao tentar atualizar a categoria.", "error");
             }
         },
 
         async deleteCategory(index) {
-            try {
-                const id = this.categories[index]?.id;
-                if (!id) {
-                    console.warn("ID da categoria não encontrado. Abortando exclusão.");
-                    return;
+            const id = this.categories[index]?.id;
+
+            if (!id) {
+                console.warn("ID da categoria não encontrado. Abortando exclusão.");
+                return;
+            }
+
+            const result = await Swal.fire({
+                title: "Tem certeza?",
+                text: "Essa categoria será deletada e não poderá ser recuperada!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#007bff",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sim, deletar!",
+                cancelButtonText: "Cancelar"
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    await categoryService.deleteCategory(id);
+                    await this.fetchCategories();
+                    await Swal.fire("Deletado!", "A categoria foi removida com sucesso.", "success");
+                } catch (error) {
+                    console.error("Erro ao deletar categoria:", error);
+                    await Swal.fire("Erro", "Ocorreu um erro ao tentar deletar a categoria.", "error");
                 }
-                await categoryService.deleteCategory(id);
-                await this.fetchCategories();
-            } catch (error) {
-                console.error("Erro ao deletar categoria:", error);
             }
         },
 

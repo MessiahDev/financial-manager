@@ -58,6 +58,7 @@ import authService from '../services/authService';
 import userService from '../services/userService';
 import { useAuthStore } from '../stores/authStore';
 import Loader from './Loader.vue';
+import Swal from 'sweetalert2';
 
 export default {
     name: 'ProfilePage',
@@ -155,9 +156,11 @@ export default {
                 this.updateSuccess = true;
                 this.form.password = '';
                 this.confirmPassword = '';
+                await Swal.fire("Sucesso!", "O perfil foi atualizado.", "success");
             } catch (err) {
                 alert('Erro ao atualizar perfil.');
                 console.error(err);
+                await Swal.fire("Erro", "Ocorreu um erro ao tentar atualizar o perfil.", "error");
             }
         }
     }

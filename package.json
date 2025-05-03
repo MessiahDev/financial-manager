@@ -12,9 +12,12 @@
     "@fortawesome/fontawesome-free": "^6.7.2",
     "axios": "^1.9.0",
     "pinia": "^3.0.2",
+    "sweetalert2": "^11.20.0",
     "vue": "^3.5.13",
+    "vue-currency-input": "^3.2.1",
     "vue-google-charts": "^1.1.0",
-    "vue-router": "^4.5.1"
+    "vue-router": "^4.5.1",
+    "vue-the-mask": "^0.11.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.2",
