@@ -6,7 +6,7 @@
                 <input type="text" v-model="form.description" placeholder="Descrição da despesa" required />
             </div>
             <div>
-                <input type="number" v-model.number="form.amount" placeholder="Valor da despesa" required />
+                <input v-money v-model.number="form.amount" placeholder="Valor da despesa" required />
             </div>
             <select v-model="form.categoryId" required>
                 <option value="" disabled>Selecione uma categoria</option>
@@ -14,7 +14,7 @@
                     {{ category.name }}
                 </option>
             </select>
-            <button type="submit">Salvar</button>
+            <button type="submit" :disabled="isLoading">Salvar</button>
         </form>
 
         <ul class="expense-list">
@@ -26,6 +26,10 @@
                 </div>
             </li>
         </ul>
+    </div>
+
+    <div class="loader-container">
+        <Loader v-if="isLoading" />
     </div>
 
     <div v-if="showEditModal" class="modal-backdrop">
@@ -53,9 +57,15 @@
 import authService from "../services/authService";
 import expenseService from "../services/expenseService";
 import categoryService from "../services/categoryService";
+import Loader from "./Loader.vue";
 
 export default {
     name: "ExpensePage",
+
+    components: {
+        Loader,
+    },
+
     data() {
         return {
             categories: [],
@@ -72,9 +82,10 @@ export default {
             isEditing: false,
             editingIndex: null,
             showEditModal: false,
+            isLoading: false,
         };
     },
-    
+
     async mounted() {
         try {
             await this.fetchCategories();
@@ -121,7 +132,9 @@ export default {
                     console.warn("ID do usuário não encontrado. Abortando busca de despesas.");
                     return;
                 }
+                this.isLoading = true;
                 const response = await expenseService.getExpensesByUserId(userId);
+                this.isLoading = false;
                 this.expenses = response || [];
             } catch (error) {
                 console.error("Erro ao buscar despesas:", error);
@@ -139,14 +152,18 @@ export default {
                 const selectedCategory = this.categories.find(c => c.id === this.form.categoryId);
                 this.form.categoryName = selectedCategory ? selectedCategory.name : "";
 
-                await expenseService.createExpense({
+                const newExpense = {
                     description: this.form.description,
-                    amount: this.form.amount,
+                    amount: Number(this.form.amount),
                     date: new Date().toISOString(),
-                    categoryId: Number(this.form.categoryId),
+                    categoryId: this.form.categoryId,
                     categoryName: this.form.categoryName,
-                    userId: Number(userId),
-                });
+                    userId: userId,
+                };
+
+                this.isLoading = true;
+
+                await expenseService.createExpense(newExpense);
 
                 this.resetForm();
                 await this.fetchExpenses();
@@ -175,6 +192,7 @@ export default {
                 const selectedCategory = this.categories.find(c => c.id === this.form.categoryId);
                 this.form.categoryName = selectedCategory ? selectedCategory.name : "";
 
+                this.isLoading = true;
                 await expenseService.updateExpense(this.form.id, {
                     ...this.form,
                     date: new Date(this.form.date).toISOString(),
@@ -218,6 +236,7 @@ export default {
             this.resetForm();
             this.isEditing = false;
             this.editingIndex = null;
+            this.isLoading = false;
         },
     },
 };
@@ -332,6 +351,14 @@ export default {
 
 .expense-item button:nth-child(2):hover {
     background-color: #c82333;
+}
+
+.loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+    height: 40px;
 }
 
 .modal-backdrop {

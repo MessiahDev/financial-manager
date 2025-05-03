@@ -6,9 +6,9 @@
                 <input type="text" v-model="newRevenue.description" placeholder="Nome da receita" required />
             </div>
             <div>
-                <input type="number" v-model.number="newRevenue.amount" placeholder="Valor da receita" required />
+                <input type="number" v-money v-model.number="newRevenue.amount" placeholder="Valor da receita" required />
             </div>
-            <button type="submit">Salvar</button>
+            <button type="submit" :disabled="isLoading">Salvar</button>
         </form>
 
         <ul class="revenue-list">
@@ -20,6 +20,10 @@
                 </div>
             </li>
         </ul>
+    </div>
+
+    <div class="loader-container">
+        <Loader v-if="isLoading" />
     </div>
 
     <div v-if="showEditModal" class="modal-backdrop">
@@ -40,9 +44,15 @@
 <script>
 import authService from "../services/authService";
 import revenueService from "../services/revenueService";
+import Loader from "../components/Loader.vue";
 
 export default {
     name: "RevenuePage",
+
+    components: {
+        Loader,
+    },
+
     data() {
         return {
             newRevenue: {
@@ -56,6 +66,7 @@ export default {
             editingIndex: null,
             isEditing: false,
             showEditModal: false,
+            isLoading: false,
         };
     },
     
@@ -90,7 +101,9 @@ export default {
                     console.warn("ID do usuário não encontrado. Abortando busca de receitas.");
                     return;
                 }
+                this.isLoading = true;
                 const response = await revenueService.getRevenuesByUserId(userId);
+                this.isLoading = false;
                 this.revenues = response || [];
             } catch (error) {
                 console.error("Erro ao buscar receitas:", error);
@@ -106,6 +119,7 @@ export default {
                 }
 
                 const revenueData = { ...this.newRevenue, userId };
+                this.isLoading = true;
                 await revenueService.createRevenue(revenueData);
                 await this.fetchRevenues();
                 this.resetForm();
@@ -154,7 +168,7 @@ export default {
             this.newRevenue = {
                 description: "",
                 amount: 0,
-                date: new Date().toISOString().split("T")[0],
+                date: new Date(),
             };
         },
 
@@ -275,6 +289,14 @@ export default {
 
 .revenue-item button:nth-child(2):hover {
     background-color: #c82333;
+}
+
+.loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+    height: 40px;
 }
 
 .modal-backdrop {

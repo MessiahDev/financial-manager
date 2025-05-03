@@ -5,7 +5,7 @@
             <div>
                 <input type="text" v-model="newCategory.name" placeholder="Nome da categoria" required />
             </div>
-            <button type="submit">Salvar</button>
+            <button type="submit" :disabled="isLoading">Salvar</button>
         </form>
 
         <ul class="category-list">
@@ -17,6 +17,10 @@
                 </div>
             </li>
         </ul>
+    </div>
+
+    <div class="loader-container">
+        <Loader v-if="isLoading" />
     </div>
 
     <div v-if="showEditModal" class="modal-backdrop">
@@ -36,9 +40,15 @@
 <script>
 import authService from "../services/authService";
 import categoryService from "../services/categoryService";
+import Loader from "../components/Loader.vue";
 
 export default {
     name: "CategoryPage",
+
+    components: {
+        Loader,
+    },
+
     data() {
         return {
             newCategory: {
@@ -50,6 +60,7 @@ export default {
             editingIndex: null,
             isEditing: false,
             showEditModal: false,
+            isLoading: false,
         };
     },
 
@@ -84,7 +95,9 @@ export default {
                     console.warn("ID do usuário não encontrado. Abortando busca de categorias.");
                     return;
                 }
+                this.isLoading = true;
                 const response = await categoryService.getCategoryByUserId(userId);
+                this.isLoading = false;
                 this.categories = response || [];
             } catch (error) {
                 console.error("Erro ao buscar categorias:", error);
@@ -99,6 +112,7 @@ export default {
                     return;
                 }
 
+                this.isLoading = true;
                 const categoryData = { ...this.newCategory, userId: userId };
                 await categoryService.createCategory(categoryData);
                 await this.fetchCategories();
@@ -276,6 +290,14 @@ export default {
 
 .category-item button:nth-child(2):hover {
     background-color: #c82333;
+}
+
+.loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+    height: 40px;
 }
 
 .modal-backdrop {

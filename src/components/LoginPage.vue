@@ -47,9 +47,11 @@ import Loader from '../components/Loader.vue';
 
 export default {
     name: 'LoginPage',
+
     components: {
         Loader,
     },
+
     data() {
         return {
             email: '',
@@ -63,6 +65,7 @@ export default {
         togglePasswordVisibility() {
             this.showPassword = !this.showPassword;
         },
+        
         async handleLogin() {
             this.isLoading = true;
             try {

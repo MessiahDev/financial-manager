@@ -30,6 +30,10 @@
 
             <button type="submit" :disabled="passwordsMismatch" class="submit-button">Cadastrar</button>
             <button type="button" @click="goToLogin" class="back-button">Voltar ao Login</button>
+
+            <div class="loader-container">
+                <Loader v-if="isLoading" />
+            </div>
         </form>
     </div>
 </template>
@@ -37,9 +41,15 @@
 <script>
 import router from '../router';
 import authService from '../services/authService';
+import Loader from '../components/Loader.vue';
 
 export default {
     name: 'ResetPasswordPage',
+
+    components: {
+        Loader,
+    },
+
     data() {
         return {
             passwordResetSuccess: false,
@@ -47,6 +57,7 @@ export default {
             confirmNewPassword: '',
             showPassword: false,
             showConfirmPassword: false,
+            isLoading: true,
         };
     },
 
@@ -83,7 +94,9 @@ export default {
 
                 const newPassword = this.newPassword;
 
+                this.isLoading = true;
                 await authService.resetPassword(token, newPassword);
+                this.isLoading = false;
                 this.passwordResetSuccess = true;
                 this.newPassword = '';
                 this.confirmNewPassword = '';
@@ -161,6 +174,14 @@ input.success {
     cursor: pointer;
     font-size: 17px;
     color: #888;
+}
+
+.loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+    height: 40px;
 }
 
 .success-message {

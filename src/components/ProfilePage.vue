@@ -16,15 +16,11 @@
             <div class="form-group">
                 <label class="label">Nova Senha</label>
                 <div class="input-wrapper">
-                    <input
-                        :type="showPassword ? 'text' : 'password'"
-                        v-model="form.password"
-                        :class="[
-                            'input',
-                            confirmPassword && form.password !== confirmPassword ? 'input-error' : '',
-                            confirmPassword && form.password === confirmPassword ? 'input-success' : ''
-                        ]"
-                    />
+                    <input :type="showPassword ? 'text' : 'password'" v-model="form.password" :class="[
+                        'input',
+                        confirmPassword && form.password !== confirmPassword ? 'input-error' : '',
+                        confirmPassword && form.password === confirmPassword ? 'input-success' : ''
+                    ]" />
                     <span class="toggle-visibility" @click="togglePasswordVisibility">
                         <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
                     </span>
@@ -35,30 +31,24 @@
             <div class="form-group">
                 <label class="label">Confirme a Nova Senha</label>
                 <div class="input-wrapper">
-                    <input
-                        :type="showConfirmPassword ? 'text' : 'password'"
-                        v-model="confirmPassword"
-                        :class="[
-                            'input',
-                            confirmPassword && form.password !== confirmPassword ? 'input-error' : '',
-                            confirmPassword && form.password === confirmPassword ? 'input-success' : ''
-                        ]"
-                    />
+                    <input :type="showConfirmPassword ? 'text' : 'password'" v-model="confirmPassword" :class="[
+                        'input',
+                        confirmPassword && form.password !== confirmPassword ? 'input-error' : '',
+                        confirmPassword && form.password === confirmPassword ? 'input-success' : ''
+                    ]" />
                     <span class="toggle-visibility" @click="toggleConfirmPasswordVisibility">
                         <i :class="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
                     </span>
                 </div>
-                <p v-if="confirmPassword && form.password !== confirmPassword" class="error-message">
-                    As senhas não coincidem
-                </p>
+                <p v-if="confirmPassword && form.password !== confirmPassword" class="error-message">As senhas não coincidem!</p>
+                <p v-if="updateSuccess" class="update-success">Dados alterados com sucesso!</p>
             </div>
 
-            <button
-                @click="updateProfile"
-                class="button"
-            >
-                Salvar Alterações
-            </button>
+            <button @click="updateProfile" class="button" :disabled="isLoading">Salvar Alterações</button>
+
+            <div class="loader-container">
+                <Loader v-if="isLoading" />
+            </div>
         </div>
     </div>
 </template>
@@ -67,9 +57,15 @@
 import authService from '../services/authService';
 import userService from '../services/userService';
 import { useAuthStore } from '../stores/authStore';
+import Loader from './Loader.vue';
 
 export default {
     name: 'ProfilePage',
+
+    components: {
+        Loader
+    },
+
     data() {
         return {
             form: {
@@ -79,7 +75,9 @@ export default {
             },
             confirmPassword: '',
             showPassword: false,
-            showConfirmPassword: false
+            showConfirmPassword: false,
+            updateSuccess: false,
+            isLoading: false,
         }
     },
 
@@ -148,11 +146,13 @@ export default {
                     payload.password = this.form.password;
                 }
 
-                await userService.updateUserProfile(userId, payload);
+                this.isLoading = true;
 
+                await userService.updateUserProfile(userId, payload);
                 await this.authStore.fetchUserProfile();
-                
-                alert('Perfil atualizado com sucesso!');
+
+                this.isLoading = false;
+                this.updateSuccess = true;
                 this.form.password = '';
                 this.confirmPassword = '';
             } catch (err) {
@@ -217,6 +217,20 @@ export default {
 
 .input-success {
     border-color: green;
+}
+
+.update-success {
+    color: green;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+    height: 40px;
 }
 
 .toggle-visibility {
