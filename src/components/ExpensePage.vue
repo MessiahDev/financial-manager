@@ -120,6 +120,7 @@ export default {
                     console.warn("ID do usuário não encontrado. Abortando busca de categorias.");
                     return;
                 }
+                this.isLoading = true;
                 const response = await categoryService.getCategoryByUserId(userId);
                 this.categories = response || [];
             } catch (error) {
