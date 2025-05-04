@@ -6,6 +6,9 @@
             <div class="form-group">
                 <label for="email">Email</label>
                 <input id="email" type="email" v-model="email" required />
+                <small v-if="emailNotConfirmed" class="email-warning">
+                    Email não confirmado!<router-link to="/reenviar-confirmacao-email" class="resend-link">Reenviar confirmação?</router-link>
+                </small>
             </div>
 
             <div class="form-group password-group">
@@ -59,15 +62,18 @@ export default {
             showPassword: false,
             stayConnected: false,
             isLoading: false,
+            emailNotConfirmed: false,
         };
     },
     methods: {
         togglePasswordVisibility() {
             this.showPassword = !this.showPassword;
         },
-        
+
         async handleLogin() {
             this.isLoading = true;
+            this.emailNotConfirmed = false;
+
             try {
                 const credentials = {
                     email: this.email,
@@ -77,11 +83,22 @@ export default {
                 await authService.login(credentials, router);
             } catch (error) {
                 console.error('Erro ao fazer login:', error);
-                alert('Falha no login. Verifique seu email e senha.');
+
+                if (
+                    error.response &&
+                    error.response.status === 422 &&
+                    typeof error.response.data === 'string' &&
+                    error.response.data.toLowerCase().includes('e-mail não confirmado')
+                ) {
+                    this.emailNotConfirmed = true;
+                    this.password = '';
+                } else {
+                    console.error('Erro ao fazer login:', error);
+                }
             } finally {
                 this.isLoading = false;
             }
-        },
+        }
     },
 };
 </script>
@@ -195,5 +212,17 @@ input:focus {
 
 .links a:hover {
     text-decoration: underline;
+}
+
+.email-warning {
+    color: #dc3545;
+    margin-top: 5px;
+}
+
+.resend-link {
+    color: #555;
+    margin-left: 5px;
+    text-decoration: none;
+    cursor: pointer;
 }
 </style>

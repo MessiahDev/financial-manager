@@ -8,6 +8,8 @@ import ExpenseView from '../views/ExpenseView.vue';
 import ProfileView from '../views/ProfileView.vue';
 import ForgotPasswordView from '../views/ForgotPasswordView.vue';
 import ResetPasswordView from '../views/ResetPasswordView.vue';
+import ConfirmEmailView from '../views/ConfirmEmailView.vue';
+import ResendConfirmationEmailView from '../views/ResendConfirmationEmailView.vue';
 
 const routes = [
     {
@@ -59,6 +61,16 @@ const routes = [
         path: '/redefinir-senha',
         name: 'ResetPasswordView',
         component: ResetPasswordView
+    },
+    {
+        path: '/confirmar-email',
+        name: 'ConfirmEmailView',
+        component: ConfirmEmailView
+    },
+    {
+        path: '/reenviar-confirmacao-email',
+        name: 'ResendConfirmationEmailView',
+        component: ResendConfirmationEmailView
     }
 ];
 

@@ -40,10 +40,34 @@ const authService = {
 
     register: async (userData) => {
         try {
-            const response = await api.post('/User/register', userData);
+            const response = await api.post('/Auth/register', userData);
             return response.data;
         } catch (error) {
             console.error('Erro ao registrar usuário:', error);
+            throw error;
+        }
+    },
+
+    confirmEmail: async (token) => {
+        try {
+            const response = await api.get(`/Auth/confirm-email?token=${token}`);
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao confirmar email:', error);
+            throw error;
+        }
+    },
+
+    resendConfirmationEmail: async (email) => {
+        try {
+            return await api.post('/Auth/resend-confirmation-email', email, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+        }
+        catch (error) {
+            console.error('Erro ao reenviar email de confirmação:', error);
             throw error;
         }
     },

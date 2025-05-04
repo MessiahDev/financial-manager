@@ -112,6 +112,7 @@ export default {
                 this.confirmPassword = '';
                 this.resgisterSuccess = true;
             } catch (error) {
+                this.isLoading = false;
                 console.error('Erro ao cadastrar:', error);
                 alert('Erro ao cadastrar. Tente novamente.');
             }

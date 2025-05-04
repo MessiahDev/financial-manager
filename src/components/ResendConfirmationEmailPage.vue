@@ -1,17 +1,19 @@
 <template>
-    <div class="forgotPassword-page">
-        <form @submit.prevent="register" class="forgotPassword-form">
-            <h2>Esqueci a senha</h2>
+    <div class="resend-confirmation-page">
+        <form @submit.prevent="resendConfimation" class="resend-form">
+            <h2>Cadastro</h2>
 
             <div class="form-group">
                 <label for="email">Email</label>
                 <input id="email" type="email" v-model="email" required />
-                <small v-if="emailNotExist" class="emailNotExist">Email não encontrado, verifique se está correto!</small>
-                <small v-if="emailValid" class="emailValid">Uma mensagem foi enviada ao seu endereço de email!<br>Se não conseguir visualizar, verifique sua caixa de spam!</small>
             </div>
 
-            <button type="submit" class="submit-button" @click.prevent="updatePassword()">Enviar</button>
+            <button type="submit" :disabled="isLoading" class="submit-button">Enviar</button>
             <button type="button" @click="goToLogin" class="back-button">Voltar ao Login</button>
+
+            <div class="loader-container">
+                <Loader v-if="isLoading" />
+            </div>
         </form>
     </div>
 </template>
@@ -19,28 +21,57 @@
 <script>
 import router from '../router';
 import authService from '../services/authService';
+import Loader from '../components/Loader.vue';
+import Swal from 'sweetalert2';
 
 export default {
-    name: 'ForgotPasswordPage',
+    name: 'ResendConfirmationEmailPage',
+
+    components: {
+        Loader,
+    },
+
     data() {
         return {
             email: '',
-            emailNotExist: false,
-            emailValid: false,
+            isLoading: false,
         };
     },
+
     methods: {
         goToLogin() {
             router.push('/');
         },
 
-        async updatePassword() {
+        async resendConfimation() {
+            this.isLoading = true;
             try {
-                await authService.forgotPassword(this.email);
-                this.emailValid = true;
+                const response = await authService.resendConfirmationEmail(this.email);
+                console.log('Resposta:', response.data);
+
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Email reenviado!',
+                    text: 'Caso não visualize na caixa de entrada, verifique sua caixa de spam.',
+                    confirmButtonText: 'Ok',
+                });
+
+                this.goToLogin();
+
             } catch (error) {
-                console.error('Erro ao cadastrar. Tente novamente.', error);
-                this.emailNotExist = true;
+                console.error('Erro ao reenviar e-mail de confirmação:', error);
+                const mensagem = typeof error.response?.data === 'string'
+                    ? error.response.data
+                    : 'Erro desconhecido. Verifique o console.';
+
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Erro!',
+                    text: mensagem,
+                    confirmButtonText: 'Fechar',
+                });
+            } finally {
+                this.isLoading = false;
             }
         },
     },
@@ -48,14 +79,14 @@ export default {
 </script>
 
 <style scoped>
-.forgotPassword-page {
+.resend-confirmation-page {
     padding: 6em 0em 0em 0em;
     display: flex;
     justify-content: center;
     height: 100vh;
 }
 
-.forgotPassword-form {
+.resend-form {
     border-radius: 8px;
     width: 100%;
     max-width: 300px;
@@ -114,10 +145,12 @@ input.success {
     color: #888;
 }
 
-.error-message {
-    color: red;
-    font-size: 12px;
-    margin-top: 5px;
+.loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+    height: 40px;
 }
 
 .submit-button {
@@ -145,17 +178,5 @@ input.success {
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
-}
-
-.emailNotExist {
-    color: red;
-    font-size: 12px;
-    margin-top: 5px;
-}
-
-.emailValid {
-    color: green;
-    font-size: 12px;
-    margin-top: 5px;
 }
 </style>
