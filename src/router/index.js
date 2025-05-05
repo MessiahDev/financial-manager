@@ -80,8 +80,12 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-    if (to.meta.requiresAuth && !localStorage.getItem('token')) {
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+    if (to.meta.requiresAuth && !token) {
         next({ name: 'LoginView' });
+    } else if ((to.name === 'LoginView' || to.name === 'RegisterView') && token) {
+        next({ name: 'HomeView' });
     } else {
         next();
     }

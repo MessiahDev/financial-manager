@@ -1,9 +1,11 @@
 import api from './api';
 
 const userService = {
-    getUserProfile: async (userId) => {
+    getUserProfile: async (token) => {
         try {
-            const response = await api.get(`/User/${userId}`);
+            const response = await api.get('/Auth/profile', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
             return response.data;
         } catch (error) {
             console.error('Erro ao buscar perfil do usuário:', error);
@@ -14,7 +16,7 @@ const userService = {
     updateUserProfile: async (userId, userData) => {
         try {
             const response = await api.put(`/User/${userId}`, userData);
-            return response.data;
+            return response;
         } catch (error) {
             console.error('Erro ao atualizar perfil do usuário:', error);
             throw error;

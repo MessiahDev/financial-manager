@@ -2,12 +2,17 @@ import api from './api';
 import { useAuthStore } from '../stores/authStore';
 
 const authService = {
-    login: async (credentials, router) => {
+    login: async (credentials, router, stayConnected = false) => {
         try {
             const response = await api.post('/Auth/login', credentials);
             const token = response.data.token;
+
             if (token) {
-                localStorage.setItem('token', token);
+                if (stayConnected) {
+                    localStorage.setItem('token', token);
+                } else {
+                    sessionStorage.setItem('token', token);
+                }
 
                 const authStore = useAuthStore();
                 await authStore.fetchUserProfile();
@@ -16,6 +21,7 @@ const authService = {
                     router.push('/home');
                 }
             }
+
             return response.data;
         } catch (error) {
             console.error('Erro ao fazer login:', error);
@@ -23,19 +29,13 @@ const authService = {
         }
     },
 
-    logout: async () => {
-        try {
-            await api.post('/Auth/logout');
-        } catch (error) {
-            console.error('Erro ao fazer logout no servidor:', error);
-        } finally {
-            localStorage.removeItem('token');
-            sessionStorage.removeItem('token');
+    logout: () => {
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
 
-            const authStore = useAuthStore();
-            authStore.isAuthenticated = false;
-            authStore.firstName = '';
-        }
+        const authStore = useAuthStore();
+        authStore.isAuthenticated = false;
+        authStore.firstName = '';
     },
 
     register: async (userData) => {

@@ -4,12 +4,12 @@
 
         <div class="card">
             <div class="form-group">
-                <label class="label">Nome</label>
+                <label type="text" class="label">Nome</label>
                 <input v-model="form.name" type="text" class="input" />
             </div>
 
             <div class="form-group">
-                <label class="label">E-mail</label>
+                <label type="email" class="label">E-mail</label>
                 <input v-model="form.email" type="email" class="input" />
             </div>
 
@@ -40,7 +40,8 @@
                         <i :class="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
                     </span>
                 </div>
-                <p v-if="confirmPassword && form.password !== confirmPassword" class="error-message">As senhas não coincidem!</p>
+                <p v-if="confirmPassword && form.password !== confirmPassword" class="error-message">As senhas não
+                    coincidem!</p>
                 <p v-if="updateSuccess" class="update-success">Dados alterados com sucesso!</p>
             </div>
 
@@ -59,6 +60,7 @@ import userService from '../services/userService';
 import { useAuthStore } from '../stores/authStore';
 import Loader from './Loader.vue';
 import Swal from 'sweetalert2';
+import router from '../router';
 
 export default {
     name: 'ProfilePage',
@@ -133,6 +135,7 @@ export default {
         async updateProfile() {
             try {
                 const userId = await this.fetchUserId();
+                const user = await authService.getProfile(userId);
 
                 const payload = {
                     name: this.form.name,
@@ -141,26 +144,53 @@ export default {
 
                 if (this.form.password.trim() !== '') {
                     if (this.form.password !== this.confirmPassword) {
-                        alert('As senhas não coincidem!');
+                        Swal.fire("Erro!", "As senhas não coincidem!", "error");
                         return;
                     }
                     payload.password = this.form.password;
                 }
 
+                const oldEmail = user.email;
+
                 this.isLoading = true;
 
-                await userService.updateUserProfile(userId, payload);
+                const response = await userService.updateUserProfile(user.id, payload);
                 await this.authStore.fetchUserProfile();
 
                 this.isLoading = false;
                 this.updateSuccess = true;
                 this.form.password = '';
                 this.confirmPassword = '';
-                await Swal.fire("Sucesso!", "O perfil foi atualizado.", "success");
-            } catch (err) {
-                alert('Erro ao atualizar perfil.');
-                console.error(err);
-                await Swal.fire("Erro", "Ocorreu um erro ao tentar atualizar o perfil.", "error");
+
+                const message = typeof response.data === 'string'
+                    ? response.data
+                    : (response.data.message || 'Perfil atualizado com sucesso.');
+
+                await Swal.fire("Sucesso!", message, "success");
+
+                if (this.form.email.trim().toLowerCase() !== oldEmail.trim().toLowerCase()) {
+                    await authService.logout();
+                    router.push('/');
+                }
+
+            } catch (error) {
+                this.isLoading = false;
+                console.error('Erro ao atualizar perfil:', error);
+
+                let message = 'Não foi possível concluir a atualização. Tente novamente mais tarde.';
+
+                if (error.response && error.response.data) {
+                    message = typeof error.response.data === 'string'
+                        ? error.response.data
+                        : (error.response.data.message || message);
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro ao atualizar!',
+                    text: message,
+                    confirmButtonColor: '#d33',
+                });
             }
         }
     }

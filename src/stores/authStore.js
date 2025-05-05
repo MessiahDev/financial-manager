@@ -13,11 +13,10 @@ export const useAuthStore = defineStore('auth', {
         if (!token) {
           this.isAuthenticated = false;
           return;
-        } else {
-          this.isAuthenticated = true;
         }
+        this.isAuthenticated = true;
 
-        const user = await authService.getProfile();
+        const user = await authService.getProfile(token);
         if (user && user.name) {
           this.firstName = user.name.split(' ')[0];
         }

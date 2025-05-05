@@ -12,7 +12,7 @@ export default defineConfig({
       cert: fs.readFileSync('localhost.pem'),
     },
     hmr: {
-      protocol: 'ws',
+      protocol: 'wss',
       host: 'localhost',
     }
   },

@@ -52,6 +52,7 @@
 import router from '../router';
 import authService from '../services/authService';
 import Loader from '../components/Loader.vue';
+import Swal from 'sweetalert2';
 
 export default {
     name: 'RegisterPage',
@@ -106,6 +107,14 @@ export default {
                 this.isLoading = true;
                 await authService.register(userData);
                 this.isLoading = false;
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Cadastro realizado!',
+                    text: `Um email de verificação foi enviado para ${this.email}. Caso não visualize, verifique sua caixa de spam.`,
+                    confirmButtonColor: '#3085d6',
+                });
+
                 this.name = '';
                 this.email = '';
                 this.password = '';
@@ -114,7 +123,22 @@ export default {
             } catch (error) {
                 this.isLoading = false;
                 console.error('Erro ao cadastrar:', error);
-                alert('Erro ao cadastrar. Tente novamente.');
+
+                let message = 'Não foi possível concluir o cadastro. Tente novamente mais tarde.';
+
+                if (error.response && error.response.data) {
+
+                    message = typeof error.response.data === 'string'
+                        ? error.response.data
+                        : (error.response.data.message || message);
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro ao cadastrar!',
+                    text: message,
+                    confirmButtonColor: '#d33',
+                });
             }
         },
     },

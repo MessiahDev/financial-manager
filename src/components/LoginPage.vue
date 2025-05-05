@@ -7,7 +7,8 @@
                 <label for="email">Email</label>
                 <input id="email" type="email" v-model="email" required />
                 <small v-if="emailNotConfirmed" class="email-warning">
-                    Email não confirmado!<router-link to="/reenviar-confirmacao-email" class="resend-link">Reenviar confirmação?</router-link>
+                    Email não confirmado!<router-link to="/reenviar-confirmacao-email" class="resend-link">Reenviar
+                        confirmação?</router-link>
                 </small>
             </div>
 
@@ -47,6 +48,7 @@
 import router from '../router';
 import authService from '../services/authService';
 import Loader from '../components/Loader.vue';
+import Swal from 'sweetalert2';
 
 export default {
     name: 'LoginPage',
@@ -80,9 +82,11 @@ export default {
                     password: this.password,
                 };
 
-                await authService.login(credentials, router);
+                await authService.login(credentials, router, this.stayConnected);
             } catch (error) {
                 console.error('Erro ao fazer login:', error);
+
+                let message = 'Ocorreu um erro ao tentar fazer login. Tente novamente mais tarde.';
 
                 if (
                     error.response &&
@@ -92,9 +96,23 @@ export default {
                 ) {
                     this.emailNotConfirmed = true;
                     this.password = '';
-                } else {
-                    console.error('Erro ao fazer login:', error);
+
+                    message = 'Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada ou spam.';
+                } else if (
+                    error.response &&
+                    (typeof error.response.data === 'string' || error.response.data.message)
+                ) {
+                    message = typeof error.response.data === 'string'
+                        ? error.response.data
+                        : error.response.data.message;
                 }
+
+                await Swal.fire({
+                    icon: 'info',
+                    title: 'Erro ao fazer login!',
+                    text: message,
+                    confirmButtonColor: '#3085d6',
+                });
             } finally {
                 this.isLoading = false;
             }
