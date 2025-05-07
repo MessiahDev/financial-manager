@@ -21,6 +21,20 @@ const debtService = {
         }
     },
 
+    getDebtsByUserId: async (userId) => {
+        try {
+            const response = await api.get(`/Debt/user/${userId}`);
+            return response.data;
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+                return [];
+            }
+            console.error("Erro ao buscar dívidas por usuário!:", error);
+            throw error;
+        }
+    },
+
+
     updateDebt: async (debtId, debtData) => {
         try {
             const response = await api.put(`/Debt/${debtId}`, debtData);

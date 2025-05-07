@@ -1,4 +1,5 @@
 import api from './api';
+import router from '../router';
 import { useAuthStore } from '../stores/authStore';
 
 const authService = {
@@ -32,10 +33,12 @@ const authService = {
     logout: () => {
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');
-
+    
         const authStore = useAuthStore();
         authStore.isAuthenticated = false;
         authStore.firstName = '';
+
+        router.push('/');
     },
 
     register: async (userData) => {

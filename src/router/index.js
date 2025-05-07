@@ -1,76 +1,71 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import HomeView from '../views/HomeView.vue';
-import LoginView from '../views/LoginView.vue';
-import RegisterView from '../views/RegisterView.vue';
-import CategoryView from '../views/CategoryView.vue';
-import RevenueView from '../views/RevenueView.vue';
-import ExpenseView from '../views/ExpenseView.vue';
-import ProfileView from '../views/ProfileView.vue';
-import ForgotPasswordView from '../views/ForgotPasswordView.vue';
-import ResetPasswordView from '../views/ResetPasswordView.vue';
-import ConfirmEmailView from '../views/ConfirmEmailView.vue';
-import ResendConfirmationEmailView from '../views/ResendConfirmationEmailView.vue';
 
 const routes = [
     {
         path: '/',
         name: 'LoginView',
-        component: LoginView,
+        component: () => import('../views/LoginView.vue')
     },
     {
         path: '/home',
         name: 'HomeView',
-        component: HomeView,
+        component: () => import('../views/HomeView.vue'),
         meta: { requiresAuth: true }
     },
     {
         path: '/cadastro',
         name: 'RegisterView',
-        component: RegisterView,
+        component: () => import('../views/RegisterView.vue')
     },
     {
         path: '/categorias',
         name: 'CategoryView',
-        component: CategoryView,
+        component: () => import('../views/CategoryView.vue'),
         meta: { requiresAuth: true }
     },
     {
         path: '/receita',
         name: 'RevenueView',
-        component: RevenueView,
+        component: () => import('../views/RevenueView.vue'),
         meta: { requiresAuth: true }
     },
     {
         path: '/despesa',
         name: 'ExpenseView',
-        component: ExpenseView,
+        component: () => import('../views/ExpenseView.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/divida',
+        name: 'DebtView',
+        component: () => import('../views/DebtView.vue'),
         meta: { requiresAuth: true }
     },
     {
         path: '/perfil',
         name: 'ProfileView',
-        component: ProfileView,
+        component: () => import('../views/ProfileView.vue'),
         meta: { requiresAuth: true }
     },
     {
         path: '/recuperar-senha',
         name: 'ForgotPasswordView',
-        component: ForgotPasswordView
+        component: () => import('../views/ForgotPasswordView.vue')
     },
     {
         path: '/redefinir-senha',
         name: 'ResetPasswordView',
-        component: ResetPasswordView
+        component: () => import('../views/ResetPasswordView.vue')
     },
     {
         path: '/confirmar-email',
         name: 'ConfirmEmailView',
-        component: ConfirmEmailView
+        component: () => import('../views/ConfirmEmailView.vue')
     },
     {
         path: '/reenviar-confirmacao-email',
         name: 'ResendConfirmationEmailView',
-        component: ResendConfirmationEmailView
+        component: () => import('../views/ResendConfirmationEmailView.vue')
     }
 ];
 

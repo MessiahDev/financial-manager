@@ -1,36 +1,44 @@
 <template>
-  <section class="home-page">
-    <div class="dashboard-header">
-      <h1>Resumo Financeiro</h1>
-      <p>Bem-vindo ao seu painel financeiro. Aqui está um resumo das suas finanças.</p>
+  <section class="flex flex-col items-center font-sans pt-24 px-4 max-w-7xl mx-auto">
+    <div class="text-center mb-6 px-4">
+      <h1 class="text-3xl font-bold text-gray-800">Resumo Financeiro</h1>
+      <p class="text-gray-600 mt-2">Acompanhe seus dados financeiros de forma visual e intuitiva.</p>
     </div>
 
-    <div class="kpi-container">
-      <div class="kpi-card">
-        <h3>Receitas Totais</h3>
-        <p>{{ Number(totalRevenues).toMoeda(true) }}</p>
+    <div class="grid grid-cols-1 flex items-center justify-center sm:grid-cols-2 xl:grid-cols-4 gap-6 w-full mb-8 px-3">
+      <div class="min-w-[1400px]">
+        <FinanceCard title="Receitas Totais" :value="totalRevenues.toMoeda(true)" />
       </div>
-      <div class="kpi-card">
-        <h3>Despesas Totais</h3>
-        <p>{{ Number(totalExpenses).toMoeda(true) }}</p>
+      <div class="min-w-[1400px]">
+        <FinanceCard title="Despesas Totais" :value="totalExpenses.toMoeda(true)" />
       </div>
-      <div class="kpi-card">
-        <h3>Dívidas</h3>
-        <p>{{ Number(totalDebts).toMoeda(true) }}</p>
+      <div class="min-w-[1400px]">
+        <FinanceCard title="Economias" :value="Number(totalSavings).toMoeda(true)" />
       </div>
-      <div class="kpi-card">
-        <h3>Economias</h3>
-        <p>{{ Number(totalSavings).toMoeda(true) }}</p>
+      <div class="min-w-[1400px]">
+        <FinanceCard title="Dívidas Totais">
+          <div class="flex flex-col items-center break-words px-5">
+            <p class="font-medium text-sm text-gray-700">
+              Pagas: {{ paidDebtsCount }} <span class="text-green-600 font-semibold">{{ paidDebtsTotal.toMoeda(true)
+                }}</span>
+            </p>
+            <p class="font-medium text-sm text-gray-700">
+              Em aberto: {{ openDebtsCount }} <span class="text-red-600 font-semibold">{{ openDebtsTotal.toMoeda(true)
+                }}</span>
+            </p>
+          </div>
+        </FinanceCard>
       </div>
     </div>
 
-    <div class="chart-container">
-      <div class="card">
-        <h3>Receitas vs Despesas</h3>
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 w-full px-2">
+      <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm text-gray-800">
+        <h3 class="font-semibold text-lg mb-3">Receitas vs Despesas</h3>
         <GChart type="ColumnChart" :data="revenuesVsExpensesData" :options="chartOptionsColumn" />
       </div>
-      <div class="card">
-        <h3>Distribuição de Despesas</h3>
+
+      <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm text-gray-800">
+        <h3 class="font-semibold text-lg mb-3">Distribuição de Despesas</h3>
         <GChart type="PieChart" :data="expensesDistributionData" :options="chartOptionsPie" />
       </div>
     </div>
@@ -39,14 +47,17 @@
 
 <script>
 import { GChart } from 'vue-google-charts';
+import FinanceCard from '../components/FinanceCard.vue';
 import revenueService from '../services/revenueService';
 import expenseService from '../services/expenseService';
+import debtService from '../services/debtService';
 import authService from '../services/authService';
 
 export default {
   name: 'HomePage',
   components: {
     GChart,
+    FinanceCard,
   },
   data() {
     return {
@@ -54,6 +65,10 @@ export default {
       totalExpenses: 0,
       totalDebts: 0,
       totalSavings: 0,
+      paidDebtsCount: 0,
+      paidDebtsTotal: 0,
+      openDebtsCount: 0,
+      openDebtsTotal: 0,
       revenuesVsExpensesData: [['Mês', 'Receitas', 'Despesas']],
       expensesDistributionData: [['Categoria', 'Valor']],
       chartOptionsColumn: {
@@ -83,9 +98,11 @@ export default {
 
         const revenues = await revenueService.getRevenuesByUserId(userId);
         const expenses = await expenseService.getExpensesByUserId(userId);
+        const debts = await debtService.getDebtsByUserId(userId);
 
         this.totalRevenues = revenues.reduce((acc, r) => acc + r.amount, 0);
         this.totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
+        this.totalDebts = debts.reduce((acc, d) => acc + d.amount, 0);
         this.totalSavings = this.totalRevenues - this.totalExpenses;
 
         const months = [
@@ -126,10 +143,20 @@ export default {
           categoryMap[category] += e.amount;
         });
 
+        const paidDebts = debts.filter((d) => d.isPaid === true);
+        const openDebts = debts.filter((d) => d.isPaid === false);
+
+        this.paidDebtsCount = paidDebts.length;
+        this.paidDebtsTotal = paidDebts.reduce((acc, debt) => acc + debt.amount, 0);
+        this.openDebtsCount = openDebts.length;
+        this.openDebtsTotal = openDebts.reduce((acc, debt) => acc + debt.amount, 0);
+
         this.expensesDistributionData = [
           ['Categoria', 'Valor'],
           ...Object.entries(categoryMap),
+          ['Dívidas em aberto', this.openDebtsTotal],
         ];
+
       } catch (error) {
         console.error('Erro ao buscar dados para gráficos:', error);
       }
@@ -137,109 +164,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.home-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 6em 0em 0em 0em;
-}
-
-.dashboard-header {
-  text-align: center;
-  margin-bottom: 1.5em;
-  padding: 20px;
-}
-
-.dashboard-header h1 {
-  text-align: center;
-  color: #333;
-  font-size: 2em;
-}
-
-.kpi-container {
-  display: flex;
-  justify-content: space-around;
-  width: 100%;
-  margin-bottom: 20px;
-  margin-top: 2em;
-}
-
-.kpi-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
-  text-align: center;
-  height: 10em;
-  width: 20%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  color: #333;
-}
-
-.chart-container {
-  display: flex;
-  justify-content: space-around;
-  width: 100%;
-  margin-bottom: 20px;
-  padding: 0 20px;
-}
-
-.card {
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  width: 45%;
-  color: #333;
-}
-
-@media screen and (max-width: 1280px) {
-  .kpi-container {
-    flex-wrap: wrap;
-  }
-
-  .kpi-card {
-    width: 45%;
-    margin-bottom: 10px;
-  }
-
-  .chart-container {
-    flex-wrap: wrap;
-  }
-
-  .card {
-    width: 100%;
-    margin-bottom: 10px;
-  }
-}
-
-@media screen and (max-width: 800px) {
-  .kpi-container {
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-  }
-
-  .kpi-card {
-    width: 90%;
-    margin-bottom: 20px;
-  }
-
-  .chart-container {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .card {
-    width: 90%;
-    margin-bottom: 20px;
-  }
-}
-</style>

@@ -1,5 +1,5 @@
 <template>
-    <span class="loader"></span>
+    <span class="inline-block w-12 h-12 border-[5px] border-gray-300 border-b-blue-500 rounded-full animate-spin box-border"></span>
 </template>
 
 <script>
@@ -7,26 +7,3 @@ export default {
     name: "Loader",
 };
 </script>
-
-<style scoped>
-.loader {
-    width: 48px;
-    height: 48px;
-    border: 5px solid #ccc;
-    border-bottom-color: #007bff;
-    border-radius: 50%;
-    display: inline-block;
-    box-sizing: border-box;
-    animation: rotation 1s linear infinite;
-}
-
-@keyframes rotation {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
-</style>

@@ -1,17 +1,25 @@
 <template>
-    <div class="resend-confirmation-page">
-        <form @submit.prevent="resendConfimation" class="resend-form">
-            <h2>Cadastro</h2>
+    <div class="flex justify-center items-start font-sans pt-24 min-h-screen">
+        <form @submit.prevent="resendConfimation" class="w-full max-w-sm text-center space-y-5">
+            <h2 class="text-2xl font-semibold text-gray-800">Cadastro</h2>
 
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input id="email" type="email" v-model="email" required />
+            <div class="space-y-2 text-left">
+                <label for="email" class="block text-gray-600 text-sm font-medium">Email</label>
+                <input id="email" type="email" v-model="email" required
+                    class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300" />
             </div>
 
-            <button type="submit" :disabled="isLoading" class="submit-button">Enviar</button>
-            <button type="button" @click="goToLogin" class="back-button">Voltar ao Login</button>
+            <button type="submit" :disabled="isLoading"
+                class="w-full px-3 py-2 bg-blue-400 hover:bg-blue-500 text-white rounded-md text-base disabled:bg-blue-200 disabled:cursor-not-allowed transition-colors">
+                Enviar
+            </button>
 
-            <div class="loader-container">
+            <button type="button" @click="goToLogin"
+                class="w-full px-3 py-2 bg-gray-200 text-gray-800 rounded-md text-sm hover:bg-gray-300 transition-colors">
+                Voltar ao Login
+            </button>
+
+            <div class="flex justify-center items-center mt-10 h-10">
                 <Loader v-if="isLoading" />
             </div>
         </form>
@@ -47,28 +55,33 @@ export default {
             this.isLoading = true;
             try {
                 const response = await authService.resendConfirmationEmail(this.email);
-                console.log('Resposta:', response.data);
-
                 await Swal.fire({
                     icon: 'success',
                     title: 'Email reenviado!',
                     text: 'Caso não visualize na caixa de entrada, verifique sua caixa de spam.',
-                    confirmButtonText: 'Ok',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded'
+                    },
+                    buttonsStyling: false
                 });
 
                 this.goToLogin();
-
             } catch (error) {
                 console.error('Erro ao reenviar e-mail de confirmação:', error);
                 const mensagem = typeof error.response?.data === 'string'
                     ? error.response.data
-                    : 'Erro desconhecido. Verifique o console.';
+                    : 'Erro desconhecido.';
 
                 await Swal.fire({
                     icon: 'error',
                     title: 'Erro!',
                     text: mensagem,
-                    confirmButtonText: 'Fechar',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded'
+                    },
+                    buttonsStyling: false
                 });
             } finally {
                 this.isLoading = false;
@@ -77,106 +90,3 @@ export default {
     },
 };
 </script>
-
-<style scoped>
-.resend-confirmation-page {
-    padding: 6em 0em 0em 0em;
-    display: flex;
-    justify-content: center;
-    height: 100vh;
-}
-
-.resend-form {
-    border-radius: 8px;
-    width: 100%;
-    max-width: 300px;
-    text-align: center;
-}
-
-h2 {
-    margin-bottom: 20px;
-    color: #333;
-}
-
-.form-group {
-    margin-bottom: 15px;
-    text-align: left;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-    color: #555;
-}
-
-.input-wrapper {
-    position: relative;
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    padding-right: 30px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-input:focus {
-    outline: none;
-    box-shadow: none;
-}
-
-input.error {
-    border-color: red;
-}
-
-input.success {
-    border-color: green;
-}
-
-.toggle-visibility {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    cursor: pointer;
-    font-size: 17px;
-    color: #888;
-}
-
-.loader-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 40px;
-    height: 40px;
-}
-
-.submit-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #4cafef;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.submit-button:disabled {
-    background-color: #b3d9ff;
-    cursor: not-allowed;
-}
-
-.back-button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    background-color: #e0e0e0;
-    color: #333;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-}
-</style>

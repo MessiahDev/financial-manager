@@ -1,40 +1,58 @@
 <template>
-    <div class="revenue-page">
-        <h1>Gerenciador de Receitas</h1>
-        <form @submit.prevent="saveRevenue" class="revenue-form">
-            <div>
-                <input type="text" v-model="newRevenue.description" placeholder="Nome da receita" required />
+    <div class="max-w-5xl mx-auto py-24 font-sans px-4">
+        <h1 class="text-center text-3xl font-bold text-gray-800 mb-8">Gerenciador de Receitas</h1>
+        <form @submit.prevent="saveRevenue"
+            class="flex flex-wrap sm:flex-nowrap items-center justify-center items-end gap-4 mb-8">
+            <div class="flex flex-col flex-1 min-w-[150px]">
+                <input type="text" v-model="newRevenue.description" placeholder="Nome da receita" required
+                    class="px-4 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
-            <div>
-                <input type="number" v-model.number="newRevenue.amount" placeholder="Valor da receita" required />
+            <div class="flex flex-col flex-1 min-w-[150px]">
+                <input type="number" v-model.number="newRevenue.amount" placeholder="Valor da receita" required
+                    class="px-4 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
-            <button type="submit" :disabled="isLoading">Salvar</button>
+            <button type="submit" :disabled="isLoading"
+                class="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400">
+                Salvar
+            </button>
         </form>
 
-        <ul class="revenue-list">
-            <li v-for="(revenue, index) in revenues" :key="revenue.id" class="revenue-item">
-                <span>{{ revenue.description }} - R$ {{ revenue.amount.toFixed(2) }}</span>
-                <div>
-                    <button @click="startEdit(index)">Editar</button>
-                    <button @click="deleteRevenue(index)">Deletar</button>
+        <ul class="list-none p-0">
+            <li v-for="(revenue, index) in revenues" :key="revenue.id"
+                class="flex justify-between items-center mb-2 p-1 bg-white hover:bg-zinc-200 transition-colors border border-gray-300 rounded-lg shadow-md">
+                <span class="px-3 text-gray-600 text-sm">{{ revenue.description }} - {{
+                    Number(revenue.amount.toFixed(2)).toMoeda(true) }}</span>
+                <div class="flex items-center">
+                    <button @click="startEdit(index)"
+                        class="px-3 py-2 text-white bg-green-500 rounded-md hover:bg-green-600 transition-colors text-sm">
+                        Editar
+                    </button>
+                    <button @click="deleteRevenue(index)"
+                        class="px-3 py-2 ml-2 text-white bg-red-500 rounded-md hover:bg-red-600 transition-colors text-sm">
+                        Deletar
+                    </button>
                 </div>
             </li>
         </ul>
     </div>
 
-    <div class="loader-container">
+    <div class="flex justify-center items-center mt-10 h-10">
         <Loader v-if="isLoading" />
     </div>
 
-    <div v-if="showEditModal" class="modal-backdrop">
-        <div class="modal">
-            <h2>Editar Receita</h2>
+    <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-gray-100 p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
+            <h2 class="text-center text-xl font-semibold text-gray-800 mb-4">Editar Dívida</h2>
             <form @submit.prevent="submitEdit">
-                <input v-model="editingRevenue.description" placeholder="Nome" required />
-                <input v-model.number="editingRevenue.amount" type="number" placeholder="Valor" required />
-                <div class="modal-actions">
-                    <button type="submit">Salvar</button>
-                    <button @click.prevent="closeModal">Cancelar</button>
+                <input v-model="editingRevenue.description" placeholder="Título" required
+                    class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md" />
+                <input type="number" v-model="editingRevenue.amount" placeholder="Valor" required
+                    class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md" />
+                <div class="flex flex-col sm:flex-row justify-end gap-2">
+                    <button type="submit"
+                        class="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md">Salvar</button>
+                    <button @click.prevent="closeModal"
+                        class="px-4 py-2 text-white bg-gray-600 hover:bg-gray-700 rounded-md">Cancelar</button>
                 </div>
             </form>
         </div>
@@ -167,27 +185,62 @@ export default {
                 text: "Essa receita será deletada e não poderá ser recuperada!",
                 icon: "warning",
                 showCancelButton: true,
-                confirmButtonColor: "#007bff",
-                cancelButtonColor: "#d33",
                 confirmButtonText: "Sim, deletar!",
-                cancelButtonText: "Cancelar"
+                cancelButtonText: "Cancelar",
+                customClass: {
+                    confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded',
+                    cancelButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded ml-2'
+                },
+                buttonsStyling: false,
             });
 
             if (result.isConfirmed) {
                 try {
                     await revenueService.deleteRevenue(id);
                     await this.fetchRevenues();
-                    await Swal.fire("Deletado!", "A receita foi removida com sucesso.", "success");
+
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Deletado!',
+                        text: 'A receita foi removida com sucesso.',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded'
+                        },
+                        buttonsStyling: false
+                    });
                 } catch (error) {
-                    console.error("Erro ao deletar receita:", error);
-                    await Swal.fire("Erro", "Ocorreu um erro ao tentar deletar a receita.", "error");
+                    console.error('Erro ao deletar receita:', error);
+
+                    let message = 'Ocorreu um erro ao tentar deletar a receita. Tente novamente mais tarde.';
+
+                    if (error.response && error.response.data) {
+                        message =
+                            typeof error.response.data === 'string'
+                                ? error.response.data
+                                : error.response.data.message || message;
+                    }
+
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Erro ao deletar receita!',
+                        text: message,
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded'
+                        },
+                        buttonsStyling: false
+                    });
                 }
             }
         },
 
         startEdit(index) {
             this.editingIndex = index;
-            this.editingRevenue = { ...this.revenues[index] };
+            this.editingRevenue = {
+                ...this.revenues[index],
+                amount: Number(this.revenues[index].amount).toFixed(2)
+            };
             this.isEditing = true;
             this.showEditModal = true;
         },
@@ -214,225 +267,4 @@ export default {
 };
 </script>
 
-<style scoped>
-.revenue-page {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 6em 0em 0em 0em;
-    font-family: 'Roboto', sans-serif;
-    border-radius: 8px;
-}
-
-.revenue-page h1 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 1.5em;
-}
-
-.revenue-form {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    gap: 15px;
-    margin-bottom: 2em;
-}
-
-.revenue-form div {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-width: 150px;
-}
-
-.revenue-form label {
-    font-weight: 500;
-    margin-bottom: 8px;
-    color: #555;
-}
-
-.revenue-form input,
-.revenue-form button {
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.revenue-form input:focus {
-    border-color: #007bff;
-    outline: none;
-}
-
-.revenue-form button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    height: 48px;
-    padding: 0 20px;
-}
-
-.revenue-form button:hover {
-    background-color: #0056b3;
-}
-
-.revenue-list {
-    list-style: none;
-    padding: 0;
-}
-
-.revenue-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    padding: 15px;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.revenue-item span {
-    font-size: 16px;
-    color: #555;
-}
-
-.revenue-item button {
-    padding: 8px 12px;
-    font-size: 14px;
-    color: #fff;
-    background-color: #28a745;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-left: 5px;
-}
-
-.revenue-item button:hover {
-    background-color: #218838;
-}
-
-.revenue-item button:nth-child(2) {
-    background-color: #dc3545;
-}
-
-.revenue-item button:nth-child(2):hover {
-    background-color: #c82333;
-}
-
-.loader-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 40px;
-    height: 40px;
-}
-
-.modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.modal {
-    background-color: #f5f5f5;
-    padding: 2em;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    max-width: 400px;
-    width: 100%;
-    font-family: 'Roboto', sans-serif;
-}
-
-.modal h2 {
-    margin-top: 0;
-    margin-bottom: 1em;
-    color: #333;
-    font-size: 1.5em;
-    text-align: center;
-}
-
-.modal input,
-.modal select {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 1em;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    color: #555;
-}
-
-.modal input:focus,
-.modal select:focus {
-    border-color: #007bff;
-    outline: none;
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-.modal-actions button {
-    padding: 10px 16px;
-    font-size: 14px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.modal-actions button[type="submit"] {
-    background-color: #007bff;
-    color: #fff;
-}
-
-.modal-actions button[type="submit"]:hover {
-    background-color: #0056b3;
-}
-
-.modal-actions button:not([type="submit"]) {
-    background-color: #6c757d;
-    color: #fff;
-}
-
-.modal-actions button:not([type="submit"]):hover {
-    background-color: #5a6268;
-}
-
-@media (max-width: 800px) {
-    .revenue-page {
-        padding: 7em 1em;
-    }
-
-    .revenue-form {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .revenue-form button,
-    .revenue-item input,
-    .revenue-item button,
-    .revenue-form div {
-        width: 100%;
-        margin: 3px 0;
-    }
-
-    .modal {
-        width: 90%;
-        padding: 1.5em;
-    }
-}
-</style>
+<style scoped></style>

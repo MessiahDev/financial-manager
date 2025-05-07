@@ -1,46 +1,59 @@
 <template>
-    <div class="login-page">
-        <form class="login-form" @submit.prevent="handleLogin">
-            <h2>Login</h2>
+    <div class="flex justify-center items-center font-sans min-h-screen bg-gray-50">
+        <div class="relative w-full max-w-sm">
+            <form class="bg-white p-6 rounded-lg w-full shadow-lg" @submit.prevent="handleLogin">
+                <h2 class="text-center text-xl font-semibold text-gray-800 mb-6">
+                    Login
+                </h2>
 
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input id="email" type="email" v-model="email" required />
-                <small v-if="emailNotConfirmed" class="email-warning">
-                    Email não confirmado!<router-link to="/reenviar-confirmacao-email" class="resend-link">Reenviar
-                        confirmação?</router-link>
-                </small>
-            </div>
-
-            <div class="form-group password-group">
-                <label for="password">Senha</label>
-                <div class="input-wrapper">
-                    <input id="password" :type="showPassword ? 'text' : 'password'" v-model="password" required />
-                    <span class="toggle-visibility" @click="togglePasswordVisibility">
-                        <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
-                    </span>
+                <div class="mb-4">
+                    <label for="email" class="block text-gray-600 mb-2">Email</label>
+                    <input id="email" type="email" v-model="email" required
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <small v-if="emailNotConfirmed" class="text-red-500 mt-2 block">
+                        Email não confirmado!
+                        <router-link to="/reenviar-confirmacao-email" class="text-blue-600">
+                            Reenviar confirmação?
+                        </router-link>
+                    </small>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" v-model="stayConnected" />
-                    Manter conectado
-                </label>
-            </div>
+                <div class="mb-4">
+                    <label for="password" class="block text-gray-600 mb-2">Senha</label>
+                    <div class="relative">
+                        <input id="password" :type="showPassword ? 'text' : 'password'" v-model="password" required
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-600"
+                            @click="togglePasswordVisibility">
+                            <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
+                        </span>
+                    </div>
+                </div>
 
-            <button type="submit" class="login-button" :disabled="isLoading">
-                Entrar
-            </button>
+                <div class="mb-6">
+                    <label class="inline-flex items-center text-gray-600">
+                        <input type="checkbox" v-model="stayConnected" class="form-checkbox text-blue-500" />
+                        <span class="ml-2">Manter conectado</span>
+                    </label>
+                </div>
 
-            <div class="links">
-                <a href="/recuperar-senha">Esqueci a senha</a>
-                <a href="/cadastro">Cadastrar-se</a>
+                <button type="submit" :disabled="isLoading"
+                    class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
+                    Entrar
+                </button>
+
+                <div class="text-center mt-4">
+                    <a href="/recuperar-senha" class="text-blue-600 hover:underline">Esqueci a senha</a><br />
+                    <a href="/cadastro" class="text-blue-600 hover:underline">Cadastrar-se</a>
+                </div>
+            </form>
+
+            <div v-if="isLoading"
+                class="absolute inset-0 bg-white bg-opacity-30 flex flex-col items-center justify-center rounded-lg z-10">
+                <Loader />
+                <p class="mt-5 font-semibold text-gray-900 text-lg">Aguarde, processando seu login...</p>
             </div>
-            <div class="loader-container">
-                <Loader v-if="isLoading" />
-            </div>
-        </form>
+        </div>
     </div>
 </template>
 
@@ -67,6 +80,7 @@ export default {
             emailNotConfirmed: false,
         };
     },
+
     methods: {
         togglePasswordVisibility() {
             this.showPassword = !this.showPassword;
@@ -96,7 +110,6 @@ export default {
                 ) {
                     this.emailNotConfirmed = true;
                     this.password = '';
-
                     message = 'Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada ou spam.';
                 } else if (
                     error.response &&
@@ -108,11 +121,15 @@ export default {
                 }
 
                 await Swal.fire({
-                    icon: 'info',
-                    title: 'Erro ao fazer login!',
-                    text: message,
-                    confirmButtonColor: '#3085d6',
-                });
+                        icon: 'error',
+                        title: 'Erro ao fazer login!',
+                        text: message,
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded'
+                        },
+                        buttonsStyling: false
+                    });
             } finally {
                 this.isLoading = false;
             }
@@ -120,127 +137,3 @@ export default {
     },
 };
 </script>
-
-<style scoped>
-.login-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
-.login-form {
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 400px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-h2 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333333;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.loader-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 40px;
-    height: 40px;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-    color: #555555;
-}
-
-input[type="email"],
-input[type="password"],
-input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #cccccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    color: #555;
-}
-
-input:focus {
-    outline: none;
-    box-shadow: none;
-}
-
-.password-group {
-    position: relative;
-}
-
-.input-wrapper {
-    position: relative;
-}
-
-.toggle-visibility {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    right: 10px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 18px;
-    padding: 0;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #555;
-}
-
-.login-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    color: #ffffff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.login-button:hover {
-    background-color: #0056b3;
-}
-
-.links {
-    margin-top: 15px;
-    text-align: center;
-}
-
-.links a {
-    color: #007bff;
-    text-decoration: none;
-    margin: 0 10px;
-}
-
-.links a:hover {
-    text-decoration: underline;
-}
-
-.email-warning {
-    color: #dc3545;
-    margin-top: 5px;
-}
-
-.resend-link {
-    color: #555;
-    margin-left: 5px;
-    text-decoration: none;
-    cursor: pointer;
-}
-</style>

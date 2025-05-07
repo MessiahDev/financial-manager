@@ -1,246 +1,139 @@
 <template>
-    <nav class="navbar">
-        <div class="navbar-container">
-            <div v-if="!isMobile" class="navbar-logo-container">
-                <a href="/home" class="navbar-logo">Financial Manager</a>
-            </div>
-            <div v-if="isMobile" class="hamburger" @click="toggleMobileMenu" ref="mobileMenuButton">
-                <span :class="{ open: showMobileMenu }"><i class="fa-solid fa-bars"></i></span>
-            </div>
-
-            <ul v-if="authStore.isAuthenticated" class="navbar-menu">
-                <li class="navbar-item">
-                    <a href="/home" class="navbar-link">Home</a>
-                </li>
-                <li class="navbar-item">
-                    <a href="/categorias" class="navbar-link">Categorias</a>
-                </li>
-                <li class="navbar-item">
-                    <a href="/receita" class="navbar-link">Receita</a>
-                </li>
-                <li class="navbar-item">
-                    <a href="/despesa" class="navbar-link">Despesa</a>
-                </li>
-            </ul>
-
-            <div v-if="authStore.isAuthenticated" class="navbar-user" @click="toggleDropdown" ref="userDropdown">
-                <a href="javascript:void(0)" class="navbar-link">
-                    <span>Olá, <b>{{ authStore.firstName }}</b>!</span>
-                    <span class="arrow" :class="{ open: showDropdown }"><i class="fa-solid fa-arrow-down"></i></span>
-                </a>
-                <ul v-if="showDropdown" class="dropdown-menu">
-                    <li><a href="/perfil" class="dropdown-link"><i class="fa-solid fa-user"></i>Perfil</a></li>
-                    <!-- <li><a href="/settings" class="dropdown-link"><i class="fa-solid fa-gear"></i>Configurações</a></li> -->
-                    <li><a href="/" class="dropdown-link" @click.prevent="authStore.logout()"><i class="fa-solid fa-right-from-bracket"></i>Sair</a></li>
-                </ul>
-            </div>
-
-            <div v-else class="navbar-user">
-                <a href="/" class="navbar-link"><i class="fa-solid fa-user"></i></a>
-            </div>
+    <nav class="bg-[#2c3e50] text-white font-sans fixed top-0 left-0 w-full z-10 shadow-md">
+      <div class="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
+        <router-link to="/home" class="text-xl font-bold text-white">Financial Manager</router-link>
+  
+        <div class="md:hidden text-2xl cursor-pointer" @click="toggleMobileMenu" ref="mobileMenuButton">
+          <i class="fa-solid fa-bars"></i>
         </div>
-
-        <ul v-if="isMobile && showMobileMenu" class="mobile-menu">
-            <li><a href="/home" class="navbar-link">Home</a></li>
-            <li><a href="/categorias" class="navbar-link">Categorias</a></li>
-            <li><a href="/receita" class="navbar-link">Receita</a></li>
-            <li><a href="/despesa" class="navbar-link">Despesa</a></li>
+  
+        <ul
+          v-if="authStore.isAuthenticated"
+          class="hidden md:flex space-x-6 text-sm font-medium items-center"
+        >
+          <li v-for="item in navItems" :key="item.path">
+            <router-link
+              :to="item.path"
+              class="px-3 py-2 rounded hover:bg-white hover:text-[#2c3e50] transition"
+              :class="{ 'bg-white text-[#2c3e50] font-semibold': $route.path === item.path }"
+            >
+              {{ item.label }}
+            </router-link>
+          </li>
         </ul>
+  
+        <div v-if="authStore.isAuthenticated" class="relative ml-4" ref="userDropdown">
+          <button
+            class="flex items-center space-x-2 focus:outline-none"
+            @click="toggleDropdown"
+          >
+            <span>Olá, <b>{{ authStore.firstName }}</b>!</span>
+            <i
+              class="fa-solid fa-chevron-down transition-transform duration-200"
+              :class="{ 'rotate-180': showDropdown }"
+            ></i>
+          </button>
+  
+          <ul
+            v-if="showDropdown"
+            class="absolute right-0 mt-2 w-40 bg-[#34495e] rounded shadow-md z-20 py-2 text-sm"
+          >
+            <li>
+              <router-link
+                to="/perfil"
+                class="block px-4 py-2 hover:bg-[#3c5d7c]"
+              >
+                <i class="fa-solid fa-user mr-2"></i>Perfil
+              </router-link>
+            </li>
+            <li>
+              <a
+                href="/"
+                @click.prevent="authStore.logout()"
+                class="block px-4 py-2 hover:bg-[#3c5d7c]"
+              >
+                <i class="fa-solid fa-right-from-bracket mr-2"></i>Sair
+              </a>
+            </li>
+          </ul>
+        </div>
+  
+        <div v-else>
+          <router-link to="/" class="text-white text-base">
+            <i class="fa-solid fa-user"></i>
+          </router-link>
+        </div>
+      </div>
+  
+      <!-- Mobile Menu -->
+      <div v-if="isMobile && showMobileMenu" class="md:hidden bg-[#34495e] px-6 py-4">
+        <ul class="flex flex-col space-y-4 text-base">
+          <li v-for="item in navItems" :key="item.path">
+            <router-link
+              :to="item.path"
+              class="block py-2 px-3 rounded hover:bg-[#3c5d7c]"
+              :class="{ 'bg-white text-[#2c3e50] font-semibold': $route.path === item.path }"
+            >
+              {{ item.label }}
+            </router-link>
+          </li>
+        </ul>
+      </div>
     </nav>
-</template>
-
-<script>
-import { useAuthStore } from '../stores/authStore';
-
-export default {
-    name: "NavbarView",
-
+  </template>
+  
+  <script>
+  import { useAuthStore } from '../stores/authStore';
+  
+  export default {
+    name: 'NavbarView',
     data() {
-        return {
-            showDropdown: false,
-            isMobile: false,
-            showMobileMenu: false,
-        };
+      return {
+        showDropdown: false,
+        isMobile: false,
+        showMobileMenu: false,
+        navItems: [
+          { path: '/home', label: 'Home' },
+          { path: '/categorias', label: 'Categorias' },
+          { path: '/receita', label: 'Receita' },
+          { path: '/despesa', label: 'Despesa' },
+          { path: '/divida', label: 'Dívida' },
+        ],
+      };
     },
-
     computed: {
-        authStore() {
-            return useAuthStore();
-        }
+      authStore() {
+        return useAuthStore();
+      },
     },
-
     mounted() {
-        this.authStore.fetchUserProfile();
-        this.detectMobile();
-        document.addEventListener('click', this.handleClickOutside);
-        window.addEventListener('resize', this.detectMobile);
+      this.authStore.fetchUserProfile();
+      this.detectMobile();
+      window.addEventListener('resize', this.detectMobile);
+      document.addEventListener('click', this.handleClickOutside);
     },
-
     beforeUnmount() {
-        document.removeEventListener('click', this.handleClickOutside);
-        window.removeEventListener('resize', this.detectMobile);
+      window.removeEventListener('resize', this.detectMobile);
+      document.removeEventListener('click', this.handleClickOutside);
     },
-
     methods: {
-        detectMobile() {
-            this.isMobile = window.innerWidth <= 768;
-        },
-
-        toggleDropdown() {
-            this.showDropdown = !this.showDropdown;
-        },
-
-        toggleMobileMenu() {
-            this.showMobileMenu = !this.showMobileMenu;
-        },
-
-        handleClickOutside(event) {
-            const userDropdown = this.$refs.userDropdown;
-            const mobileMenuButton = this.$refs.mobileMenuButton;
-
-            if (userDropdown && !userDropdown.contains(event.target)) {
-                this.showDropdown = false;
-            }
-            if (mobileMenuButton && !mobileMenuButton.contains(event.target)) {
-                this.showMobileMenu = false;
-            }
-        }
-    }
-};
-</script>
-
-<style scoped>
-.navbar {
-    background-color: #2c3e50;
-    color: white;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 10;
-}
-
-.navbar-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 2rem;
-}
-
-.navbar-logo-container {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-}
-
-.navbar-logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: white;
-    text-decoration: none;
-}
-
-.hamburger {
-    font-size: 1.8rem;
-    cursor: pointer;
-    display: none;
-}
-
-.navbar-menu {
-    list-style: none;
-    display: flex;
-    gap: 1rem;
-    margin: 0;
-    padding: 0;
-}
-
-.navbar-link {
-    color: white;
-    text-decoration: none;
-    font-size: 1rem;
-    padding: 0.5rem 1rem;
-}
-
-.navbar-link:hover {
-    text-decoration: underline;
-}
-
-.navbar-user {
-    position: relative;
-    cursor: pointer;
-}
-
-.dropdown-menu {
-    position: absolute;
-    right: 0;
-    top: 100%;
-    background-color: #34495e;
-    list-style: none;
-    margin: 0;
-    padding: 0.5rem 0;
-    border-radius: 4px;
-    min-width: 150px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-li i {
-    margin: 0 0.5rem 0 0;
-}
-
-.dropdown-link {
-    display: block;
-    padding: 0.5rem 1rem;
-    color: white;
-    text-decoration: none;
-    font-size: 0.9rem;
-}
-
-.dropdown-link:hover {
-    background-color: #3c5d7c;
-}
-
-.navbar-item:hover {
-    background-color: #3c5d7c;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-    height: 100%;
-}
-
-.arrow {
-    display: inline-block;
-    margin-left: 0.3rem;
-    transition: transform 0.1s ease;
-}
-
-.arrow.open {
-    transform: rotate(180deg);
-}
-
-.mobile-menu {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    background-color: #34495e;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
-    z-index: 1;
-}
-
-@media (max-width: 768px) {
-    .navbar-menu {
-        display: none;
-    }
-
-    .hamburger {
-        display: block;
-    }
-
-    .navbar-logo {
-        display: none;
-    }
-}
-</style>
+      detectMobile() {
+        this.isMobile = window.innerWidth <= 768;
+      },
+      toggleDropdown() {
+        this.showDropdown = !this.showDropdown;
+      },
+      toggleMobileMenu() {
+        this.showMobileMenu = !this.showMobileMenu;
+      },
+      handleClickOutside(event) {
+        const dropdown = this.$refs.userDropdown;
+        const menuBtn = this.$refs.mobileMenuButton;
+  
+        if (dropdown && !dropdown.contains(event.target)) this.showDropdown = false;
+        if (menuBtn && !menuBtn.contains(event.target)) this.showMobileMenu = false;
+      },
+    },
+  };
+  </script>
+  

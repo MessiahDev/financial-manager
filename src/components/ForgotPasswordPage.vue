@@ -1,17 +1,30 @@
 <template>
-    <div class="forgotPassword-page">
-        <form @submit.prevent="register" class="forgotPassword-form">
-            <h2>Esqueci a senha</h2>
+    <div class="flex justify-center items-start font-sans min-h-screen pt-24 px-4 sm:px-0">
+        <form @submit.prevent="register" class="w-full max-w-sm rounded-md text-center space-y-4">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-5">Esqueci a senha</h2>
 
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input id="email" type="email" v-model="email" required />
-                <small v-if="emailNotExist" class="emailNotExist">Email não encontrado, verifique se está correto!</small>
-                <small v-if="emailValid" class="emailValid">Uma mensagem foi enviada ao seu endereço de email!<br>Se não conseguir visualizar, verifique sua caixa de spam!</small>
+            <div class="text-left space-y-2">
+                <label for="email" class="block text-gray-600 text-sm font-medium">Email</label>
+                <input id="email" type="email" v-model="email" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                <small v-if="emailNotExist" class="text-red-500 text-xs block mt-1">
+                    Email não encontrado, verifique se está correto!
+                </small>
+                <small v-if="emailValid" class="text-green-600 text-xs block mt-1">
+                    Uma mensagem foi enviada ao seu endereço de email!
+                    <br />Se não conseguir visualizar, verifique sua caixa de spam!
+                </small>
             </div>
 
-            <button type="submit" class="submit-button" @click.prevent="updatePassword()">Enviar</button>
-            <button type="button" @click="goToLogin" class="back-button">Voltar ao Login</button>
+            <button type="submit"
+                class="w-full bg-blue-400 text-white py-2 rounded-md text-sm hover:bg-blue-500 transition"
+                @click.prevent="updatePassword()">
+                Enviar
+            </button>
+            <button type="button" @click="goToLogin"
+                class="w-full mt-2 bg-gray-200 text-gray-800 py-2 rounded-md text-sm hover:bg-gray-300 transition">
+                Voltar ao Login
+            </button>
         </form>
     </div>
 </template>
@@ -38,124 +51,45 @@ export default {
             try {
                 await authService.forgotPassword(this.email);
                 this.emailValid = true;
+                this.emailNotExist = false;
+
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso!',
+                    text: 'A senha foi atualizada.',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded'
+                    },
+                    buttonsStyling: false
+                });
             } catch (error) {
-                console.error('Erro ao cadastrar. Tente novamente.', error);
                 this.emailNotExist = true;
+                this.emailValid = false;
+
+                console.error('Erro ao cadastrar. Tente novamente:', error);
+
+                let message = 'Ocorreu um erro ao tentar cadastrar a despesa. Tente novamente mais tarde.';
+
+                if (error.response && error.response.data) {
+                    message =
+                        typeof error.response.data === 'string'
+                            ? error.response.data
+                            : error.response.data.message || message;
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro ao cadastrar!',
+                    text: message,
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded'
+                    },
+                    buttonsStyling: false
+                });
             }
         },
     },
 };
 </script>
-
-<style scoped>
-.forgotPassword-page {
-    padding: 6em 0em 0em 0em;
-    display: flex;
-    justify-content: center;
-    height: 100vh;
-}
-
-.forgotPassword-form {
-    border-radius: 8px;
-    width: 100%;
-    max-width: 300px;
-    text-align: center;
-}
-
-h2 {
-    margin-bottom: 20px;
-    color: #333;
-}
-
-.form-group {
-    margin-bottom: 15px;
-    text-align: left;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-    color: #555;
-}
-
-.input-wrapper {
-    position: relative;
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    padding-right: 30px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-input:focus {
-    outline: none;
-    box-shadow: none;
-}
-
-input.error {
-    border-color: red;
-}
-
-input.success {
-    border-color: green;
-}
-
-.toggle-visibility {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    cursor: pointer;
-    font-size: 17px;
-    color: #888;
-}
-
-.error-message {
-    color: red;
-    font-size: 12px;
-    margin-top: 5px;
-}
-
-.submit-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #4cafef;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.submit-button:disabled {
-    background-color: #b3d9ff;
-    cursor: not-allowed;
-}
-
-.back-button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    background-color: #e0e0e0;
-    color: #333;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.emailNotExist {
-    color: red;
-    font-size: 12px;
-    margin-top: 5px;
-}
-
-.emailValid {
-    color: green;
-    font-size: 12px;
-    margin-top: 5px;
-}
-</style>

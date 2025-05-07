@@ -1,53 +1,76 @@
 <template>
-    <div class="expense-page">
-        <h1>Gerenciador de Despesas</h1>
-        <form @submit.prevent="saveExpense" class="expense-form">
-            <div>
-                <input type="text" v-model="form.description" placeholder="Descrição da despesa" required />
+    <div class="max-w-5xl mx-auto py-24 font-sans rounded-xl px-4">
+        <h1 class="text-center text-3xl font-bold text-gray-800 mb-8">Gerenciador de Despesas</h1>
+        <form @submit.prevent="saveExpense" class="flex flex-wrap sm:flex-nowrap items-end gap-4 mb-8">
+            <div class="flex flex-col flex-1 min-w-[150px]">
+                <input type="text" v-model="form.description" placeholder="Descrição da despesa" required
+                    class="px-4 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
-            <div>
-                <input type="number" v-model.number="form.amount" placeholder="Valor da despesa" required />
+            <div class="flex flex-col flex-1 min-w-[150px]">
+                <input type="number" v-model.number="form.amount" placeholder="Valor da despesa" required
+                    class="px-4 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
-            <select v-model="form.categoryId" required>
+            <select v-model="form.categoryId" required
+                class="px-4 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-400">
                 <option value="" disabled>Selecione uma categoria</option>
                 <option v-for="category in categories" :key="category.id" :value="category.id">
                     {{ category.name }}
                 </option>
             </select>
-            <button type="submit" :disabled="isLoading">Salvar</button>
+            <button type="submit" :disabled="isLoading"
+                class="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400">
+                Salvar
+            </button>
         </form>
 
-        <ul class="expense-list">
-            <li v-for="(expense, index) in expenses" :key="expense.id" class="expense-item">
-                <span>{{ expense.description }} - {{ Number(expense.amount).toMoeda(true) }} ({{ expense.categoryName
-                    }})</span>
-                <div>
-                    <button @click="startEdit(index)">Editar</button>
-                    <button @click="deleteExpense(index)">Deletar</button>
+        <ul class="list-none p-0">
+            <li v-for="(expense, index) in expenses" :key="expense.id"
+                class="flex justify-between items-center mb-2 p-1 bg-white hover:bg-zinc-200 transition-colors border border-gray-300 rounded-lg shadow-md">
+                <span class="px-3 text-gray-600 text-sm">{{ expense.description }} - {{
+                    Number(expense.amount).toMoeda(true)
+                }} ({{ expense.categoryName }})</span>
+                <div class="flex items-center">
+                    <button @click="startEdit(index)"
+                        class="px-3 py-2 text-white bg-green-500 rounded-md hover:bg-green-600 transition-colors text-sm">
+                        Editar
+                    </button>
+                    <button @click="deleteExpense(index)"
+                        class="px-3 py-2 ml-2 text-white bg-red-500 rounded-md hover:bg-red-600 transition-colors text-sm">
+                        Deletar
+                    </button>
                 </div>
             </li>
         </ul>
     </div>
 
-    <div class="loader-container">
-        <Loader v-if="isLoading" />
+    <div class="flex justify-center items-center mt-10 h-10" v-if="isLoading">
+        <Loader />
     </div>
 
-    <div v-if="showEditModal" class="modal-backdrop">
-        <div class="modal">
-            <h2>Editar Receita</h2>
+    <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div class="bg-gray-100 p-8 rounded-xl shadow-xl max-w-md w-full">
+            <h2 class="text-center text-gray-800 mb-4 text-xl font-semibold">Editar Receita</h2>
             <form @submit.prevent="submitEdit">
-                <input v-model="form.description" placeholder="Nome" required />
-                <input v-model.number="form.amount" type="number" placeholder="Valor" required />
-                <select v-model="form.categoryId" required>
+                <input v-model="form.description" placeholder="Nome" required
+                    class="w-full p-2 mb-4 border border-gray-300 rounded-md text-gray-600 focus:outline-none focus:border-blue-500" />
+                <input v-model.number="form.amount" type="number" placeholder="Valor" required
+                    class="w-full p-2 mb-4 border border-gray-300 rounded-md text-gray-600 focus:outline-none focus:border-blue-500" />
+                <select v-model="form.categoryId" required
+                    class="w-full p-2 mb-4 border border-gray-300 rounded-md text-gray-600 focus:outline-none focus:border-blue-500">
                     <option value="" disabled>Selecione uma categoria</option>
                     <option v-for="category in categories" :key="category.id" :value="category.id">
                         {{ category.name }}
                     </option>
                 </select>
-                <div class="modal-actions">
-                    <button type="submit">Salvar</button>
-                    <button @click.prevent="closeModal">Cancelar</button>
+                <div class="flex flex-col sm:flex-row justify-end gap-2">
+                    <button type="submit"
+                        class="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors">
+                        Salvar
+                    </button>
+                    <button @click.prevent="closeModal"
+                        class="px-4 py-2 text-white bg-gray-500 rounded-md hover:bg-gray-700 transition-colors">
+                        Cancelar
+                    </button>
                 </div>
             </form>
         </div>
@@ -74,11 +97,11 @@ export default {
             expenses: [],
             form: {
                 id: null,
-                description: "",
+                description: '',
                 amount: null,
                 date: new Date(),
-                categoryId: "",
-                categoryName: "",
+                categoryId: '',
+                categoryName: '',
                 userId: null,
             },
             isEditing: false,
@@ -183,6 +206,7 @@ export default {
             }
             this.form = {
                 ...expense,
+                amount: Number(expense.amount).toFixed(2),
                 date: new Date(expense.date),
             };
             this.isEditing = true;
@@ -203,10 +227,39 @@ export default {
 
                 await this.fetchExpenses();
                 this.closeModal();
-                await Swal.fire("Sucesso!", "A despesa foi atualizada.", "success");
+
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Sucesso!',
+                    text: 'A despesa foi atualizada.',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded'
+                    },
+                    buttonsStyling: false
+                });
             } catch (error) {
-                console.error("Erro ao atualizar despesa:", error);
-                await Swal.fire("Erro", "Ocorreu um erro ao tentar atualizar a despesa.", "error");
+                console.error('Erro ao atualizar despesa:', error);
+
+                let message = 'Ocorreu um erro ao tentar atualizar a despesa. Tente novamente mais tarde.';
+
+                if (error.response && error.response.data) {
+                    message =
+                        typeof error.response.data === 'string'
+                            ? error.response.data
+                            : error.response.data.message || message;
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erro ao atualizar!',
+                    text: message,
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded'
+                    },
+                    buttonsStyling: false
+                });
             }
         },
 
@@ -223,10 +276,13 @@ export default {
                 text: "Essa despesa será deletada e não poderá ser recuperada!",
                 icon: "warning",
                 showCancelButton: true,
-                confirmButtonColor: "#007bff",
-                cancelButtonColor: "#d33",
                 confirmButtonText: "Sim, deletar!",
-                cancelButtonText: "Cancelar"
+                cancelButtonText: "Cancelar",
+                customClass: {
+                    confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded',
+                    cancelButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded ml-2'
+                },
+                buttonsStyling: false,
             });
 
             if (result.isConfirmed) {
@@ -244,11 +300,11 @@ export default {
         resetForm() {
             this.form = {
                 id: null,
-                description: "",
+                description: '',
                 amount: null,
                 date: new Date(),
-                categoryId: "",
-                categoryName: "",
+                categoryId: '',
+                categoryName: '',
                 userId: null,
             };
         },
@@ -263,229 +319,3 @@ export default {
     },
 };
 </script>
-
-<style scoped>
-.expense-page {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 6em 0em 0em 0em;
-    font-family: 'Roboto', sans-serif;
-    border-radius: 8px;
-}
-
-.expense-page h1 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 1.5em;
-}
-
-.expense-form {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    gap: 15px;
-    margin-bottom: 2em;
-}
-
-.expense-form div {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-width: 150px;
-}
-
-.expense-form label {
-    font-weight: 500;
-    margin-bottom: 8px;
-    color: #555;
-}
-
-.expense-form input,
-.expense-form button,
-.expense-form select {
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    color: #555;
-}
-
-.expense-form input:focus {
-    border-color: #007bff;
-    outline: none;
-}
-
-.expense-form button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    height: 48px;
-    padding: 0 20px;
-}
-
-.expense-form button:hover {
-    background-color: #0056b3;
-}
-
-.expense-list {
-    list-style: none;
-    padding: 0;
-}
-
-.expense-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    padding: 15px;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.expense-item span {
-    font-size: 16px;
-    color: #555;
-}
-
-.expense-item button {
-    padding: 8px 12px;
-    font-size: 14px;
-    color: #fff;
-    background-color: #28a745;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-left: 5px;
-}
-
-.expense-item button:hover {
-    background-color: #218838;
-}
-
-.expense-item button:nth-child(2) {
-    background-color: #dc3545;
-}
-
-.expense-item button:nth-child(2):hover {
-    background-color: #c82333;
-}
-
-.loader-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 40px;
-    height: 40px;
-}
-
-.modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.modal {
-    background-color: #f5f5f5;
-    padding: 2em;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    max-width: 400px;
-    width: 100%;
-    font-family: 'Roboto', sans-serif;
-}
-
-.modal h2 {
-    margin-top: 0;
-    margin-bottom: 1em;
-    color: #333;
-    font-size: 1.5em;
-    text-align: center;
-}
-
-.modal input,
-.modal select {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 1em;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    color: #555;
-}
-
-.modal input:focus,
-.modal select:focus {
-    border-color: #007bff;
-    outline: none;
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-.modal-actions button {
-    padding: 10px 16px;
-    font-size: 14px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.modal-actions button[type="submit"] {
-    background-color: #007bff;
-    color: #fff;
-}
-
-.modal-actions button[type="submit"]:hover {
-    background-color: #0056b3;
-}
-
-.modal-actions button:not([type="submit"]) {
-    background-color: #6c757d;
-    color: #fff;
-}
-
-.modal-actions button:not([type="submit"]):hover {
-    background-color: #5a6268;
-}
-
-@media (max-width: 800px) {
-    .expense-page {
-        padding: 7em 1em;
-    }
-
-    .expense-form {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .expense-form select,
-    .expense-form button,
-    .expense-form div,
-    .expense-item input,
-    .expense-item button {
-        width: 100%;
-        margin: 3px 0;
-    }
-
-    .modal {
-        width: 90%;
-        padding: 1.5em;
-    }
-}
-</style>

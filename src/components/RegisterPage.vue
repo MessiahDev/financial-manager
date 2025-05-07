@@ -1,47 +1,59 @@
 <template>
-    <div class="register-page">
-        <form @submit.prevent="register" class="register-form">
-            <h2>Cadastro</h2>
+    <div class="flex justify-center items-start font-sans min-h-screen pt-24 px-4 sm:px-0">
+        <form @submit.prevent="register" class="w-full max-w-sm text-center space-y-4">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-5">Cadastro</h2>
 
-            <div class="form-group">
-                <label for="name">Nome</label>
-                <input id="name" type="text" v-model="name" required />
+            <div class="text-left space-y-2">
+                <label for="name" class="block text-gray-600 text-sm font-medium">Nome</label>
+                <input id="name" type="text" v-model="name" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
             </div>
 
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input id="email" type="email" v-model="email" required />
+            <div class="text-left space-y-2">
+                <label for="email" class="block text-gray-600 text-sm font-medium">Email</label>
+                <input id="email" type="email" v-model="email" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
             </div>
 
-            <div class="form-group">
-                <label for="password">Senha</label>
-                <div class="input-wrapper">
-                    <input id="password" :type="showPassword ? 'text' : 'password'" v-model="password"
-                        :class="{ 'error': passwordsMismatch, 'success': passwordsMatch }" required />
-                    <span class="toggle-visibility" @click="togglePasswordVisibility">
-                        <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
-                    </span>
-                </div>
+            <div class="text-left space-y-2 relative">
+                <label for="password" class="block text-gray-600 text-sm font-medium">Senha</label>
+                <input id="password" :type="showPassword ? 'text' : 'password'" v-model="password" required :class="[
+                    'w-full px-3 py-2 pr-10 rounded-md text-sm focus:outline-none border',
+                    passwordsMismatch ? 'border-red-500' : passwordsMatch ? 'border-green-500' : 'border-gray-300'
+                ]" />
+                <span class="absolute right-3 top-[50%] transform -translate-y-1/3 text-gray-500 text-lg cursor-pointer"
+                    @click="togglePasswordVisibility">
+                    <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
+                </span>
             </div>
 
-            <div class="form-group">
-                <label for="confirmPassword">Confirmação de Senha</label>
-                <div class="input-wrapper">
-                    <input id="confirmPassword" :type="showConfirmPassword ? 'text' : 'password'"
-                        v-model="confirmPassword" :class="{ 'error': passwordsMismatch, 'success': passwordsMatch }"
-                        required />
-                    <span class="toggle-visibility" @click="toggleConfirmPasswordVisibility">
-                        <i :class="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
-                    </span>
-                </div>
-                <p v-if="passwordsMismatch" class="error-message">As senhas não coincidem!</p>
-                <p v-if="resgisterSuccess" class="success-message">Cadastro realizado com sucesso!</p>
+            <div class="text-left space-y-2 relative">
+                <label for="confirmPassword" class="block text-gray-600 text-sm font-medium">Confirmação de
+                    Senha</label>
+                <input id="confirmPassword" :type="showConfirmPassword ? 'text' : 'password'" v-model="confirmPassword"
+                    required :class="[
+                        'w-full px-3 py-2 pr-10 rounded-md text-sm focus:outline-none border',
+                        passwordsMismatch ? 'border-red-500' : passwordsMatch ? 'border-green-500' : 'border-gray-300'
+                    ]" />
+                <span class="absolute right-3 top-[50%] transform -translate-y-1/3 text-gray-500 text-lg cursor-pointer"
+                    @click="toggleConfirmPasswordVisibility">
+                    <i :class="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
+                </span>
+                <p v-if="passwordsMismatch" class="text-red-500 text-xs mt-1">As senhas não coincidem!</p>
+                <p v-if="resgisterSuccess" class="text-green-600 text-xs mt-1">Cadastro realizado com sucesso!</p>
             </div>
 
-            <button type="submit" :disabled="passwordsMismatch || isLoading" class="submit-button">Cadastrar</button>
-            <button type="button" @click="goToLogin" class="back-button">Voltar ao Login</button>
+            <button type="submit" :disabled="passwordsMismatch || isLoading"
+                class="w-full bg-blue-400 text-white py-2 rounded-md text-sm hover:bg-blue-500 transition disabled:bg-blue-200 disabled:cursor-not-allowed">
+                Cadastrar
+            </button>
 
-            <div class="loader-container">
+            <button type="button" @click="goToLogin"
+                class="w-full mt-2 bg-gray-200 text-gray-800 py-2 rounded-md text-sm hover:bg-gray-300 transition">
+                Voltar ao Login
+            </button>
+
+            <div class="flex justify-center items-center mt-10 h-10">
                 <Loader v-if="isLoading" />
             </div>
         </form>
@@ -56,11 +68,9 @@ import Swal from 'sweetalert2';
 
 export default {
     name: 'RegisterPage',
-
     components: {
         Loader,
     },
-
     data() {
         return {
             name: '',
@@ -73,29 +83,24 @@ export default {
             resgisterSuccess: false,
         };
     },
-
     computed: {
         passwordsMatch() {
-            return (this.password !== '' && this.confirmPassword !== '' && this.password === this.confirmPassword);
+            return this.password !== '' && this.confirmPassword !== '' && this.password === this.confirmPassword;
         },
         passwordsMismatch() {
-            return (this.password !== '' && this.confirmPassword !== '' && this.password !== this.confirmPassword)
+            return this.password !== '' && this.confirmPassword !== '' && this.password !== this.confirmPassword;
         },
     },
-
     methods: {
         togglePasswordVisibility() {
             this.showPassword = !this.showPassword;
         },
-
         toggleConfirmPasswordVisibility() {
             this.showConfirmPassword = !this.showConfirmPassword;
         },
-
         goToLogin() {
             router.push('/');
         },
-
         async register() {
             try {
                 const userData = {
@@ -108,11 +113,15 @@ export default {
                 await authService.register(userData);
                 this.isLoading = false;
 
-                Swal.fire({
+                await  Swal.fire({
                     icon: 'success',
                     title: 'Cadastro realizado!',
                     text: `Um email de verificação foi enviado para ${this.email}. Caso não visualize, verifique sua caixa de spam.`,
-                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded'
+                    },
+                    buttonsStyling: false
                 });
 
                 this.name = '';
@@ -124,138 +133,27 @@ export default {
                 this.isLoading = false;
                 console.error('Erro ao cadastrar:', error);
 
-                let message = 'Não foi possível concluir o cadastro. Tente novamente mais tarde.';
+                let message = 'Ocorreu um erro ao tentar cadastrar o usuário. Tente novamente mais tarde.';
 
                 if (error.response && error.response.data) {
-
-                    message = typeof error.response.data === 'string'
-                        ? error.response.data
-                        : (error.response.data.message || message);
+                    message =
+                        typeof error.response.data === 'string'
+                            ? error.response.data
+                            : error.response.data.message || message;
                 }
 
                 Swal.fire({
                     icon: 'error',
                     title: 'Erro ao cadastrar!',
                     text: message,
-                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK',
+                    customClass: {
+                        confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded'
+                    },
+                    buttonsStyling: false
                 });
             }
         },
     },
 };
 </script>
-
-<style scoped>
-.register-page {
-    padding: 6em 0em 0em 0em;
-    display: flex;
-    justify-content: center;
-    height: 100vh;
-}
-
-.register-form {
-    border-radius: 8px;
-    width: 100%;
-    max-width: 300px;
-    text-align: center;
-}
-
-h2 {
-    margin-bottom: 20px;
-    color: #333;
-}
-
-.form-group {
-    margin-bottom: 15px;
-    text-align: left;
-}
-
-label {
-    display: block;
-    margin-bottom: 5px;
-    color: #555;
-}
-
-.input-wrapper {
-    position: relative;
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    padding-right: 30px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-input:focus {
-    outline: none;
-    box-shadow: none;
-}
-
-input.error {
-    border-color: red;
-}
-
-input.success {
-    border-color: green;
-}
-
-.toggle-visibility {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    cursor: pointer;
-    font-size: 17px;
-    color: #888;
-}
-
-.loader-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 40px;
-    height: 40px;
-}
-
-.success-message {
-    color: green;
-    font-size: 12px;
-    margin-top: 5px;
-}
-
-.error-message {
-    color: red;
-    font-size: 12px;
-    margin-top: 5px;
-}
-
-.submit-button {
-    width: 100%;
-    padding: 10px;
-    background-color: #4cafef;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.submit-button:disabled {
-    background-color: #b3d9ff;
-    cursor: not-allowed;
-}
-
-.back-button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    background-color: #e0e0e0;
-    color: #333;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-}
-</style>

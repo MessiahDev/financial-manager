@@ -9,7 +9,9 @@ import { mask } from 'vue-the-mask';
 
 import '@fortawesome/fontawesome-free/css/all.css';
 import './assets/style.css';
-import './assets/scripts/custom';
+import './assets/main.css'
+import './assets/scripts/custom.js';
+import './assets/scripts/helper.js';
 
 const app = createApp(App);
 
