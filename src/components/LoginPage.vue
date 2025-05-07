@@ -59,9 +59,9 @@
 
 <script>
 import router from '../router';
-import authService from '../services/authService';
 import Loader from '../components/Loader.vue';
-import Swal from 'sweetalert2';
+import authService from '../services/authService';
+import { showError } from "../services/alertService";
 
 export default {
     name: 'LoginPage',
@@ -98,10 +98,6 @@ export default {
 
                 await authService.login(credentials, router, this.stayConnected);
             } catch (error) {
-                console.error('Erro ao fazer login:', error);
-
-                let message = 'Ocorreu um erro ao tentar fazer login. Tente novamente mais tarde.';
-
                 if (
                     error.response &&
                     error.response.status === 422 &&
@@ -110,26 +106,10 @@ export default {
                 ) {
                     this.emailNotConfirmed = true;
                     this.password = '';
-                    message = 'Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada ou spam.';
-                } else if (
-                    error.response &&
-                    (typeof error.response.data === 'string' || error.response.data.message)
-                ) {
-                    message = typeof error.response.data === 'string'
-                        ? error.response.data
-                        : error.response.data.message;
+                    await showError('Atenção!', error);
+                } else {
+                    await showError('Erro ao fazer login:', error);
                 }
-
-                await Swal.fire({
-                        icon: 'error',
-                        title: 'Erro ao fazer login!',
-                        text: message,
-                        confirmButtonText: 'OK',
-                        customClass: {
-                            confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded'
-                        },
-                        buttonsStyling: false
-                    });
             } finally {
                 this.isLoading = false;
             }

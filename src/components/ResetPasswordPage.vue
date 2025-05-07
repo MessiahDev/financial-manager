@@ -62,6 +62,7 @@
 import router from '../router';
 import authService from '../services/authService';
 import Loader from '../components/Loader.vue';
+import { showError, showSuccess } from '../services/alertService';
 
 export default {
     name: 'ResetPasswordPage',
@@ -115,34 +116,11 @@ export default {
                 await authService.resetPassword(token, this.newPassword);
                 this.isLoading = false;
                 this.passwordResetSuccess = true;
-                await  Swal.fire({
-                    icon: 'success',
-                    title: 'Sucesso!',
-                    text: 'Senha redefinida com sucesso.',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded'
-                    },
-                    buttonsStyling: false
-                });
+                await showSuccess('Sucesso!', 'Sua senha foi redefinida.');
                 this.newPassword = '';
                 this.confirmNewPassword = '';
             } catch (error) {
-                console.error('Erro ao redefinir a senha:', error);
-                const mensagem = typeof error.response?.data === 'string'
-                    ? error.response.data
-                    : 'Erro desconhecido.';
-
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Erro!',
-                    text: mensagem,
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded'
-                    },
-                    buttonsStyling: false
-                });
+                await showError('Erro ao redefinir a senha:', error);
             }
         },
     },

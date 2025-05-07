@@ -60,10 +60,10 @@
 </template>
 
 <script>
+import Loader from "../components/Loader.vue";
 import authService from "../services/authService";
 import revenueService from "../services/revenueService";
-import Loader from "../components/Loader.vue";
-import Swal from "sweetalert2";
+import { showConfirm, showError, showSuccess } from "../services/alertService";
 
 export default {
     name: "RevenuePage",
@@ -166,10 +166,9 @@ export default {
                 await revenueService.updateRevenue(id, updatedData);
                 await this.fetchRevenues();
                 this.closeModal();
-                await Swal.fire("Sucesso!", "A receita foi atualizada.", "success");
+                await showSuccess('Sucesso!', 'A receita foi atualizada.');
             } catch (error) {
-                console.error("Erro ao atualizar receita:", error);
-                await Swal.fire("Erro", "Ocorreu um erro ao tentar atualizar a receita.", "error");
+                await showError('Erro ao atualizar receita:', error);
             }
         },
 
@@ -180,57 +179,15 @@ export default {
                 return;
             }
 
-            const result = await Swal.fire({
-                title: "Tem certeza?",
-                text: "Essa receita será deletada e não poderá ser recuperada!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Sim, deletar!",
-                cancelButtonText: "Cancelar",
-                customClass: {
-                    confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded',
-                    cancelButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded ml-2'
-                },
-                buttonsStyling: false,
-            });
+            const result = await showConfirm();
 
             if (result.isConfirmed) {
                 try {
                     await revenueService.deleteRevenue(id);
                     await this.fetchRevenues();
-
-                    await Swal.fire({
-                        icon: 'success',
-                        title: 'Deletado!',
-                        text: 'A receita foi removida com sucesso.',
-                        confirmButtonText: 'OK',
-                        customClass: {
-                            confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded'
-                        },
-                        buttonsStyling: false
-                    });
+                    await showSuccess('Sucesso!', 'A receita foi removida.');
                 } catch (error) {
-                    console.error('Erro ao deletar receita:', error);
-
-                    let message = 'Ocorreu um erro ao tentar deletar a receita. Tente novamente mais tarde.';
-
-                    if (error.response && error.response.data) {
-                        message =
-                            typeof error.response.data === 'string'
-                                ? error.response.data
-                                : error.response.data.message || message;
-                    }
-
-                    await Swal.fire({
-                        icon: 'error',
-                        title: 'Erro ao deletar receita!',
-                        text: message,
-                        confirmButtonText: 'OK',
-                        customClass: {
-                            confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded'
-                        },
-                        buttonsStyling: false
-                    });
+                    await showError('Erro ao deletar receita:', error);
                 }
             }
         },

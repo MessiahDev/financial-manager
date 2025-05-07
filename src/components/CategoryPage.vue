@@ -53,10 +53,10 @@
 </template>
 
 <script>
+import Loader from "../components/Loader.vue";
 import authService from "../services/authService";
 import categoryService from "../services/categoryService";
-import Loader from "../components/Loader.vue";
-import Swal from 'sweetalert2';
+import { showSuccess, showError, showConfirm } from "../services/alertService";
 
 export default {
     name: "CategoryPage",
@@ -67,13 +67,13 @@ export default {
 
     data() {
         return {
+            userId: null,
             newCategory: {
                 name: "",
                 userId: null,
             },
             categories: [],
             editingCategory: null,
-            editingIndex: null,
             isEditing: false,
             showEditModal: false,
             isLoading: false,
@@ -82,7 +82,11 @@ export default {
 
     async mounted() {
         try {
-            await this.fetchCategories();
+            this.userId = await this.fetchUserId();
+            if (this.userId) {
+                this.newCategory.userId = this.userId;
+                await this.fetchCategories();
+            }
         } catch (error) {
             console.error("Erro ao montar o componente:", error);
         }
@@ -106,35 +110,26 @@ export default {
 
         async fetchCategories() {
             try {
-                const userId = await this.fetchUserId();
-                if (!userId) {
-                    console.warn("ID do usuário não encontrado. Abortando busca de categorias.");
-                    return;
-                }
                 this.isLoading = true;
-                const response = await categoryService.getCategoryByUserId(userId);
-                this.isLoading = false;
+                const response = await categoryService.getCategoryByUserId(this.userId);
                 this.categories = response || [];
             } catch (error) {
                 console.error("Erro ao buscar categorias:", error);
+            } finally {
+                this.isLoading = false;
             }
         },
 
         async saveCategory() {
             try {
-                const userId = await this.fetchUserId();
-                if (!userId) {
-                    console.warn("ID do usuário não encontrado. Abortando salvamento de categoria.");
-                    return;
-                }
-
                 this.isLoading = true;
-                const categoryData = { ...this.newCategory, userId: userId };
-                await categoryService.createCategory(categoryData);
+                await categoryService.createCategory(this.newCategory);
                 await this.fetchCategories();
                 this.resetForm();
             } catch (error) {
                 console.error("Erro ao salvar categoria:", error);
+            } finally {
+                this.isLoading = false;
             }
         },
 
@@ -145,80 +140,34 @@ export default {
                     console.warn("ID da categoria não encontrado. Abortando atualização.");
                     return;
                 }
+
                 await categoryService.updateCategory(id, data);
                 await this.fetchCategories();
                 this.closeModal();
 
-                Swal.fire({
-                    title: "Sucesso!",
-                    text: "A categoria foi atualizada.",
-                    icon: "success",
-                    draggable: false
-                });
+                await showSuccess('Sucesso!', 'A categoria foi atualizada.');
             } catch (error) {
-                console.error("Erro ao atualizar categoria:", error);
-                await Swal.fire("Erro", "Ocorreu um erro ao tentar atualizar a categoria.", "error");
+                console.error('Erro ao atualizar categoria:', error);
+                await showError('Erro ao atualizar', error);
             }
         },
 
         async deleteCategory(index) {
             const id = this.categories[index]?.id;
-
             if (!id) {
                 console.warn("ID da categoria não encontrado. Abortando exclusão.");
                 return;
             }
 
-            const result = await Swal.fire({
-                title: "Tem certeza?",
-                text: "Essa categoria será deletada e não poderá ser recuperada!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Sim, deletar!",
-                cancelButtonText: "Cancelar",
-                customClass: {
-                    confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded',
-                    cancelButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded ml-2'
-                },
-                buttonsStyling: false,
-            });
+            const result = await showConfirm();
 
             if (result.isConfirmed) {
                 try {
                     await categoryService.deleteCategory(id);
                     await this.fetchCategories();
-                    await Swal.fire({
-                        icon: 'success',
-                        title: 'Deletado!',
-                        text: 'A categoria foi removida com sucesso.',
-                        confirmButtonText: 'OK',
-                        customClass: {
-                            confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded'
-                        },
-                        buttonsStyling: false
-                    });
+                    await showSuccess('Deletado!', 'A categoria foi removida com sucesso.');
                 } catch (error) {
-                    console.error('Erro ao deletar categoria:', error);
-
-                    let message = 'Ocorreu um erro ao tentar deletar a categoria. Tente novamente mais tarde.';
-
-                    if (error.response && error.response.data) {
-                        message =
-                            typeof error.response.data === 'string'
-                                ? error.response.data
-                                : error.response.data.message || message;
-                    }
-
-                    await Swal.fire({
-                        icon: 'error',
-                        title: 'Erro ao deletar categoria!',
-                        text: message,
-                        confirmButtonText: 'OK',
-                        customClass: {
-                            confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded'
-                        },
-                        buttonsStyling: false
-                    });
+                    await showError('Erro ao deletar categoria!', error);
                 }
             }
         },
@@ -229,7 +178,6 @@ export default {
                 console.warn("Categoria não encontrada no índice:", index);
                 return;
             }
-            this.editingIndex = index;
             this.editingCategory = { ...category };
             this.isEditing = true;
             this.showEditModal = true;
@@ -242,13 +190,13 @@ export default {
         resetForm() {
             this.newCategory = {
                 name: "",
+                userId: this.userId,
             };
         },
 
         closeModal() {
             this.showEditModal = false;
             this.isEditing = false;
-            this.editingIndex = null;
             this.editingCategory = null;
         },
     },

@@ -25,8 +25,8 @@
 </template>
 
 <script>
-import authService from "../services/authService";
 import Loader from "../components/Loader.vue";
+import authService from "../services/authService";
 
 export default {
     name: "ConfirmEmailPage",

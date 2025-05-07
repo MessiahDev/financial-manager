@@ -90,18 +90,16 @@
 </template>
 
 <script>
+import Loader from "../components/Loader.vue";
 import authService from "../services/authService";
 import debtService from "../services/debtService";
-import Loader from "../components/Loader.vue";
-import Swal from 'sweetalert2';
+import { showSuccess, showError, showConfirm } from "../services/alertService";
 
 export default {
     name: "DebtPage",
-
     components: {
         Loader,
     },
-
     data() {
         return {
             newDebt: {
@@ -120,7 +118,6 @@ export default {
             isLoading: false,
         };
     },
-
     async mounted() {
         try {
             await this.fetchDebts();
@@ -128,7 +125,6 @@ export default {
             console.error("Erro ao montar o componente:", error);
         }
     },
-
     methods: {
         async fetchUserId() {
             const token = localStorage.getItem("token") || sessionStorage.getItem("token");
@@ -160,7 +156,7 @@ export default {
                 const userId = await this.fetchUserId();
                 if (!userId) return;
                 const [day, month, year] = this.newDebt.dueDate.split('/');
-                const isoDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+                const isoDate = new Date(year, month - 1, day);
                 const debtData = { ...this.newDebt, userId, dueDate: isoDate.toISOString() };
                 this.isLoading = true;
                 await debtService.createDebt(debtData);
@@ -177,10 +173,10 @@ export default {
                 await debtService.updateDebt(id, data);
                 await this.fetchDebts();
                 this.closeModal();
-                Swal.fire("Sucesso!", "A dívida foi atualizada.", "success");
+                await showSuccess('Sucesso!', 'A dívida foi atualizada.');
             } catch (error) {
-                console.error("Erro ao atualizar dívida:", error);
-                Swal.fire("Erro", "Ocorreu um erro ao tentar atualizar a dívida.", "error");
+                console.error('Erro ao atualizar dívida:', error);
+                await showError('Erro ao atualizar!', error);
             }
         },
 
@@ -188,35 +184,21 @@ export default {
             const id = this.debts[index]?.id;
             if (!id) return;
 
-            const result = await Swal.fire({
-                title: "Tem certeza?",
-                text: "Essa dívida será deletada!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Sim, deletar!",
-                cancelButtonText: "Cancelar",
-                customClass: {
-                    confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded',
-                    cancelButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded ml-2'
-                },
-                buttonsStyling: false,
-            });
+            const result = await showConfirm();
 
             if (result.isConfirmed) {
                 try {
                     await debtService.deleteDebt(id);
                     await this.fetchDebts();
-                    Swal.fire("Deletado!", "A dívida foi removida com sucesso.", "success");
+                    await showSuccess('Deletado!', 'A dívida foi removida com sucesso.');
                 } catch (error) {
-                    console.error("Erro ao deletar dívida:", error);
-                    Swal.fire("Erro", "Ocorreu um erro ao tentar deletar a dívida.", "error");
+                    await showError('Erro ao deletar!', error);
                 }
             }
         },
 
         startEdit(index) {
             const debt = this.debts[index];
-
             const date = new Date(debt.dueDate);
             const yyyy = date.getFullYear();
             const mm = String(date.getMonth() + 1).padStart(2, '0');
@@ -233,7 +215,7 @@ export default {
 
         submitEdit() {
             const [day, month, year] = this.editingDebt.dueDate.split('/');
-            const isoDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+            const isoDate = new Date(year, month - 1, day);
 
             const updatedDebt = {
                 ...this.editingDebt,

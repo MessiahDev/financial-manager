@@ -62,9 +62,9 @@
 
 <script>
 import router from '../router';
-import authService from '../services/authService';
 import Loader from '../components/Loader.vue';
-import Swal from 'sweetalert2';
+import authService from '../services/authService';
+import { showSuccess, showError } from '../services/alertService';
 
 export default {
     name: 'RegisterPage',
@@ -113,16 +113,7 @@ export default {
                 await authService.register(userData);
                 this.isLoading = false;
 
-                await  Swal.fire({
-                    icon: 'success',
-                    title: 'Cadastro realizado!',
-                    text: `Um email de verificação foi enviado para ${this.email}. Caso não visualize, verifique sua caixa de spam.`,
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded'
-                    },
-                    buttonsStyling: false
-                });
+                await showSuccess('Cadastro realizado!', `Um email de verificação foi enviado para ${this.email}. Caso não visualize, verifique sua caixa de spam.`);
 
                 this.name = '';
                 this.email = '';
@@ -131,27 +122,7 @@ export default {
                 this.resgisterSuccess = true;
             } catch (error) {
                 this.isLoading = false;
-                console.error('Erro ao cadastrar:', error);
-
-                let message = 'Ocorreu um erro ao tentar cadastrar o usuário. Tente novamente mais tarde.';
-
-                if (error.response && error.response.data) {
-                    message =
-                        typeof error.response.data === 'string'
-                            ? error.response.data
-                            : error.response.data.message || message;
-                }
-
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Erro ao cadastrar!',
-                    text: message,
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded'
-                    },
-                    buttonsStyling: false
-                });
+                await showError('Erro ao cadastrar:', error);
             }
         },
     },

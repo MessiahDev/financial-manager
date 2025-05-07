@@ -28,7 +28,7 @@
                 class="flex justify-between items-center mb-2 p-1 bg-white hover:bg-zinc-200 transition-colors border border-gray-300 rounded-lg shadow-md">
                 <span class="px-3 text-gray-600 text-sm">{{ expense.description }} - {{
                     Number(expense.amount).toMoeda(true)
-                }} ({{ expense.categoryName }})</span>
+                    }} ({{ expense.categoryName }})</span>
                 <div class="flex items-center">
                     <button @click="startEdit(index)"
                         class="px-3 py-2 text-white bg-green-500 rounded-md hover:bg-green-600 transition-colors text-sm">
@@ -78,11 +78,11 @@
 </template>
 
 <script>
+import Loader from "./Loader.vue";
 import authService from "../services/authService";
 import expenseService from "../services/expenseService";
 import categoryService from "../services/categoryService";
-import Loader from "./Loader.vue";
-import Swal from "sweetalert2";
+import { showSuccess, showError, showConfirm } from "../services/alertService";
 
 export default {
     name: "ExpensePage",
@@ -218,48 +218,16 @@ export default {
             try {
                 const selectedCategory = this.categories.find(c => c.id === this.form.categoryId);
                 this.form.categoryName = selectedCategory ? selectedCategory.name : "";
-
                 this.isLoading = true;
                 await expenseService.updateExpense(this.form.id, {
                     ...this.form,
                     date: new Date(this.form.date).toISOString(),
                 });
-
                 await this.fetchExpenses();
                 this.closeModal();
-
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Sucesso!',
-                    text: 'A despesa foi atualizada.',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded'
-                    },
-                    buttonsStyling: false
-                });
+                await showSuccess('Sucesso!', 'A despesa foi atualizada.');
             } catch (error) {
-                console.error('Erro ao atualizar despesa:', error);
-
-                let message = 'Ocorreu um erro ao tentar atualizar a despesa. Tente novamente mais tarde.';
-
-                if (error.response && error.response.data) {
-                    message =
-                        typeof error.response.data === 'string'
-                            ? error.response.data
-                            : error.response.data.message || message;
-                }
-
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Erro ao atualizar!',
-                    text: message,
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded'
-                    },
-                    buttonsStyling: false
-                });
+                await showError('Erro ao atualizar despesa:', error);
             }
         },
 
@@ -270,29 +238,15 @@ export default {
                 console.warn("ID da despesa não encontrado. Abortando exclusão.");
                 return;
             }
-
-            const result = await Swal.fire({
-                title: "Tem certeza?",
-                text: "Essa despesa será deletada e não poderá ser recuperada!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Sim, deletar!",
-                cancelButtonText: "Cancelar",
-                customClass: {
-                    confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded',
-                    cancelButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded ml-2'
-                },
-                buttonsStyling: false,
-            });
+            const result = await showConfirm();
 
             if (result.isConfirmed) {
                 try {
                     await expenseService.deleteExpense(id);
                     await this.fetchExpenses();
-                    await Swal.fire("Deletado!", "A despesa foi removida com sucesso.", "success");
+                    await showSuccess('Deletado!', 'A despesa foi removida com sucesso.');
                 } catch (error) {
-                    console.error("Erro ao deletar despesa:", error);
-                    await Swal.fire("Erro", "Ocorreu um erro ao tentar deletar a despesa.", "error");
+                    await showError('Erro ao deletar despesa:', error);
                 }
             }
         },

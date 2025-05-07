@@ -23,7 +23,7 @@ const authService = {
                 }
             }
 
-            return response.data;
+            return response;
         } catch (error) {
             console.error('Erro ao fazer login:', error);
             throw error;

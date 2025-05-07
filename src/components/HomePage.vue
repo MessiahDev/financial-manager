@@ -47,11 +47,11 @@
 
 <script>
 import { GChart } from 'vue-google-charts';
+import authService from '../services/authService';
+import debtService from '../services/debtService';
 import FinanceCard from '../components/FinanceCard.vue';
 import revenueService from '../services/revenueService';
 import expenseService from '../services/expenseService';
-import debtService from '../services/debtService';
-import authService from '../services/authService';
 
 export default {
   name: 'HomePage',

@@ -32,6 +32,7 @@
 <script>
 import router from '../router';
 import authService from '../services/authService';
+import { showSuccess, showError } from "../services/alertService";
 
 export default {
     name: 'ForgotPasswordPage',
@@ -52,42 +53,11 @@ export default {
                 await authService.forgotPassword(this.email);
                 this.emailValid = true;
                 this.emailNotExist = false;
-
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Sucesso!',
-                    text: 'A senha foi atualizada.',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded'
-                    },
-                    buttonsStyling: false
-                });
+                await showSuccess('Sucesso!', 'A senha foi atualizada.');
             } catch (error) {
                 this.emailNotExist = true;
                 this.emailValid = false;
-
-                console.error('Erro ao cadastrar. Tente novamente:', error);
-
-                let message = 'Ocorreu um erro ao tentar cadastrar a despesa. Tente novamente mais tarde.';
-
-                if (error.response && error.response.data) {
-                    message =
-                        typeof error.response.data === 'string'
-                            ? error.response.data
-                            : error.response.data.message || message;
-                }
-
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Erro ao cadastrar!',
-                    text: message,
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded'
-                    },
-                    buttonsStyling: false
-                });
+                await showError('Erro ao atualizar a senha:', error);
             }
         },
     },

@@ -65,12 +65,12 @@
 
 
 <script>
+import router from '../router';
+import Loader from './Loader.vue';
 import authService from '../services/authService';
 import userService from '../services/userService';
 import { useAuthStore } from '../stores/authStore';
-import Loader from './Loader.vue';
-import Swal from 'sweetalert2';
-import router from '../router';
+import { showSuccess, showError } from "../services/alertService";
 
 export default {
     name: 'ProfilePage',
@@ -154,16 +154,7 @@ export default {
 
                 if (this.form.password.trim() !== '') {
                     if (this.form.password !== this.confirmPassword) {
-                        await Swal.fire({
-                            icon: 'error',
-                            title: 'Erro!',
-                            text: 'As senhas não coincidem!',
-                            confirmButtonText: 'OK',
-                            customClass: {
-                                confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded'
-                            },
-                            buttonsStyling: false
-                        });
+                        await showError('Atenção!', 'As senhas não coincidem.');
                         return;
                     }
                     payload.password = this.form.password;
@@ -181,20 +172,7 @@ export default {
                 this.form.password = '';
                 this.confirmPassword = '';
 
-                const message = typeof response.data === 'string'
-                    ? response.data
-                    : (response.data.message || 'Perfil atualizado com sucesso.');
-
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Sucesso!',
-                    text: message,
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded'
-                    },
-                    buttonsStyling: false
-                });
+                await showSuccess('Sucesso', 'Perfil atualizado com sucesso.');
 
                 if (this.form.email.trim().toLowerCase() !== oldEmail.trim().toLowerCase()) {
                     await authService.logout();
@@ -203,26 +181,7 @@ export default {
 
             } catch (error) {
                 this.isLoading = false;
-                console.error('Erro ao atualizar perfil:', error);
-
-                let message = 'Ocorreu um erro ao tentar atualizar o perfil. Tente novamente mais tarde.';
-
-                if (error.response && error.response.data) {
-                    message = typeof error.response.data === 'string'
-                        ? error.response.data
-                        : (error.response.data.message || message);
-                }
-
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Erro ao atualizar!',
-                    text: message,
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded'
-                    },
-                    buttonsStyling: false
-                });
+                await showError('Erro ao atualizar perfil:', error)
             }
         }
     }

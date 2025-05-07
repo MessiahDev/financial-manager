@@ -30,7 +30,7 @@
 import router from '../router';
 import authService from '../services/authService';
 import Loader from '../components/Loader.vue';
-import Swal from 'sweetalert2';
+import { showError, showSuccess } from '../services/alertService';
 
 export default {
     name: 'ResendConfirmationEmailPage',
@@ -55,34 +55,10 @@ export default {
             this.isLoading = true;
             try {
                 const response = await authService.resendConfirmationEmail(this.email);
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Email reenviado!',
-                    text: 'Caso não visualize na caixa de entrada, verifique sua caixa de spam.',
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded'
-                    },
-                    buttonsStyling: false
-                });
-
+                await showSuccess('Email reenviado!', 'Caso não visualize na caixa de entrada, verifique sua caixa de spam.');
                 this.goToLogin();
             } catch (error) {
-                console.error('Erro ao reenviar e-mail de confirmação:', error);
-                const mensagem = typeof error.response?.data === 'string'
-                    ? error.response.data
-                    : 'Erro desconhecido.';
-
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Erro!',
-                    text: mensagem,
-                    confirmButtonText: 'OK',
-                    customClass: {
-                        confirmButton: 'bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded'
-                    },
-                    buttonsStyling: false
-                });
+                await showError('Erro ao reenviar e-mail de confirmação:', error);
             } finally {
                 this.isLoading = false;
             }

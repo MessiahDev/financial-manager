@@ -64,8 +64,7 @@
           </router-link>
         </div>
       </div>
-  
-      <!-- Mobile Menu -->
+
       <div v-if="isMobile && showMobileMenu" class="md:hidden bg-[#34495e] px-6 py-4">
         <ul class="flex flex-col space-y-4 text-base">
           <li v-for="item in navItems" :key="item.path">
