@@ -163,7 +163,9 @@ export default {
                 await this.fetchDebts();
                 this.resetForm();
             } catch (error) {
-                console.error("Erro ao salvar dívida:", error);
+                await showError('Erro ao salvar dívida:', error);
+            } finally {
+                this.isLoading = false;
             }
         },
 

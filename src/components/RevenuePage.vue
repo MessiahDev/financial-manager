@@ -143,7 +143,10 @@ export default {
                 await this.fetchRevenues();
                 this.resetForm();
             } catch (error) {
-                console.error("Erro ao salvar receita:", error);
+                this.isLoading = false
+                await showError('Erro ao salvar receita:', error);
+            } finally {
+                this.isLoading = false;
             }
         },
 

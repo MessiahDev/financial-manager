@@ -127,7 +127,7 @@ export default {
                 await this.fetchCategories();
                 this.resetForm();
             } catch (error) {
-                console.error("Erro ao salvar categoria:", error);
+                await showError('Erro ao salvar categoria:', error);
             } finally {
                 this.isLoading = false;
             }

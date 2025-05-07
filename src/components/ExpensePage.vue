@@ -194,7 +194,9 @@ export default {
                 this.resetForm();
                 await this.fetchExpenses();
             } catch (error) {
-                console.error("Erro ao salvar despesa:", error);
+                await showError('Erro ao salvar despesa:', error);
+            } finally {
+                this.isLoading = false;
             }
         },
 
