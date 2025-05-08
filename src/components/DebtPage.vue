@@ -51,6 +51,7 @@
             :disabled="isLoading"
             class="btn-primary"
             >
+            <i class="fa-regular fa-floppy-disk mr-1"></i>
             Salvar
             </button>
         </div>
@@ -72,8 +73,14 @@
             </span>
             </span>
             <div class="flex gap-2">
-            <button @click="startEdit(index)" class="btn-green">Editar</button>
-            <button @click="deleteDebt(index)" class="btn-red">Deletar</button>
+            <button @click="startEdit(index)" class="btn-green">
+                <i class="fa-regular fa-pen-to-square mr-1"></i>
+                Editar
+            </button>
+            <button @click="deleteDebt(index)" class="btn-red">
+                <i class="fa-regular fa-trash-can mr-1"></i>
+                Deletar
+            </button>
             </div>
         </li>
         </ul>
