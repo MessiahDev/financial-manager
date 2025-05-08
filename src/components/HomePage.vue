@@ -1,42 +1,44 @@
 <template>
-  <section class="container mx-auto py-16 px-4 font-sans">
-    <div class="text-center mb-10 mt-10">
+  <section class="container mx-auto pt-12 px-4 font-sans min-h-screen">
+    <div class="text-center my-12">
       <h1 class="text-3xl font-bold text-gray-800">Resumo Financeiro</h1>
       <p class="text-gray-600 mt-2">
         Acompanhe seus dados financeiros de forma visual e intuitiva.
       </p>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 w-full mb-10">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
       <FinanceCard title="Receitas Totais" :value="totalRevenues.toMoeda(true)" />
       <FinanceCard title="Despesas Totais" :value="totalExpenses.toMoeda(true)" />
       <FinanceCard title="Economias" :value="Number(totalSavings).toMoeda(true)" />
       <FinanceCard title="Dívidas Totais">
-        <div class="flex flex-col items-center text-center px-3 break-words">
-          <p class="font-medium text-sm text-gray-700">
-            Pagas: {{ paidDebtsCount }}
+        <div class="flex flex-col items-center text-center px-2 space-y-1">
+          <p class="text-sm text-gray-700">
+            Pagas:
             <span class="text-green-600 font-semibold">
               {{ paidDebtsTotal.toMoeda(true) }}
             </span>
+            ({{ paidDebtsCount }})
           </p>
-          <p class="font-medium text-sm text-gray-700">
-            Em aberto: {{ openDebtsCount }}
+          <p class="text-sm text-gray-700">
+            Em aberto:
             <span class="text-red-600 font-semibold">
               {{ openDebtsTotal.toMoeda(true) }}
             </span>
+            ({{ openDebtsCount }})
           </p>
         </div>
       </FinanceCard>
     </div>
 
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 w-full">
-      <div class="bg-white border border-gray-200 rounded-xl p-5 bg-gray-100 border border-gray-300 text-gray-800">
-        <h3 class="font-semibold text-lg mb-3">Receitas vs Despesas</h3>
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div class="bg-white border border-gray-300 shadow rounded-xl p-6 shadow-sm">
+        <h3 class="font-semibold text-lg mb-4 text-gray-800">Receitas vs Despesas</h3>
         <GChart type="ColumnChart" :data="revenuesVsExpensesData" :options="chartOptionsColumn" />
       </div>
 
-      <div class="bg-white border border-gray-200 rounded-xl p-5 bg-gray-100 border border-gray-300 text-gray-800">
-        <h3 class="font-semibold text-lg mb-3">Distribuição de Despesas</h3>
+      <div class="bg-white border border-gray-300 shadow rounded-xl p-6 shadow-sm">
+        <h3 class="font-semibold text-lg mb-4 text-gray-800">Distribuição de Despesas</h3>
         <GChart type="PieChart" :data="expensesDistributionData" :options="chartOptionsPie" />
       </div>
     </div>
