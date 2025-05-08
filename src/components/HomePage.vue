@@ -1,5 +1,5 @@
 <template>
-  <section class="flex flex-col items-center font-sans pt-24 px-4 max-w-7xl mx-auto">
+  <section class="max-w-7xl mx-auto py-24 font-sans px-4">
     <div class="text-center mb-6 px-4">
       <h1 class="text-3xl font-bold text-gray-800">Resumo Financeiro</h1>
       <p class="text-gray-600 mt-2">Acompanhe seus dados financeiros de forma visual e intuitiva.</p>
