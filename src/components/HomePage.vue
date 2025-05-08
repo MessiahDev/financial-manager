@@ -30,12 +30,12 @@
     </div>
 
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 w-full">
-      <div class="bg-white border border-gray-200 rounded-xl p-5 bg-gray-100 border border-gray-300 shadow-lg text-gray-800">
+      <div class="bg-white border border-gray-200 rounded-xl p-5 bg-gray-100 border border-gray-300 text-gray-800">
         <h3 class="font-semibold text-lg mb-3">Receitas vs Despesas</h3>
         <GChart type="ColumnChart" :data="revenuesVsExpensesData" :options="chartOptionsColumn" />
       </div>
 
-      <div class="bg-white border border-gray-200 rounded-xl p-5 bg-gray-100 border border-gray-300 shadow-lg text-gray-800">
+      <div class="bg-white border border-gray-200 rounded-xl p-5 bg-gray-100 border border-gray-300 text-gray-800">
         <h3 class="font-semibold text-lg mb-3">Distribuição de Despesas</h3>
         <GChart type="PieChart" :data="expensesDistributionData" :options="chartOptionsPie" />
       </div>
