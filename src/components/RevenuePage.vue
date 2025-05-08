@@ -1,60 +1,78 @@
 <template>
     <div class="max-w-5xl mx-auto py-24 font-sans px-4">
-        <h1 class="text-center text-3xl font-bold text-gray-800 mb-8">Gerenciador de Receitas</h1>
-        <form @submit.prevent="saveRevenue"
-            class="flex flex-wrap sm:flex-nowrap items-center justify-center items-end gap-4 mb-8">
-            <div class="flex flex-col flex-1 min-w-[150px]">
-                <input type="text" v-model="newRevenue.description" placeholder="Nome da receita" required
-                    class="px-4 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div class="flex flex-col flex-1 min-w-[150px]">
-                <input type="number" v-model.number="newRevenue.amount" placeholder="Valor da receita" required
-                    class="px-4 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <button type="submit" :disabled="isLoading"
-                class="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400">
-                Salvar
+        <h1 class="text-center text-3xl font-bold text-gray-800 mb-12">
+        Gerenciador de Receitas
+        </h1>
+        
+        <form
+        @submit.prevent="saveRevenue"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-12"
+        >
+        <input
+            v-model="newRevenue.description"
+            type="text"
+            placeholder="Descrição da receita"
+            required
+            class="input"
+            aria-label="Descrição da receita"
+        />
+        <input
+            v-model="newRevenue.amount"
+            type="number"
+            placeholder="Valor"
+            required
+            class="input"
+            aria-label="Valor da receita"
+        />
+        <div class="col-span-full flex justify-end">
+            <button
+            type="submit"
+            :disabled="isLoading"
+            class="btn-primary"
+            >
+            Salvar
             </button>
+        </div>
         </form>
 
-        <ul class="list-none p-0">
-            <li v-for="(revenue, index) in revenues" :key="revenue.id"
-                class="flex justify-between items-center mb-2 p-1 bg-white hover:bg-zinc-200 transition-colors border border-gray-300 rounded-lg shadow-md">
-                <span class="px-3 text-gray-600 text-sm">{{ revenue.description }} - {{
-                    Number(revenue.amount.toFixed(2)).toMoeda(true) }}</span>
-                <div class="flex items-center">
-                    <button @click="startEdit(index)"
-                        class="px-3 py-2 text-white bg-green-500 rounded-md hover:bg-green-600 transition-colors text-sm">
-                        Editar
-                    </button>
-                    <button @click="deleteRevenue(index)"
-                        class="px-3 py-2 ml-2 text-white bg-red-500 rounded-md hover:bg-red-600 transition-colors text-sm">
-                        Deletar
-                    </button>
-                </div>
-            </li>
+        <ul class="space-y-2">
+        <li
+            v-for="(revenue, index) in revenues"
+            :key="revenue.id"
+            class="flex justify-between items-center p-3 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-zinc-100"
+        >
+            <span class="text-sm text-gray-700">
+            <strong>{{ revenue.description }}</strong> - 
+            {{ Number(revenue.amount).toMoeda(true) }}
+            </span>
+            <div class="flex gap-2">
+            <button @click="startEdit(index)" class="btn-green">Editar</button>
+            <button @click="deleteRevenue(index)" class="btn-red">Deletar</button>
+            </div>
+        </li>
         </ul>
-    </div>
 
-    <div class="flex justify-center items-center mt-10 h-10">
-        <Loader v-if="isLoading" />
-    </div>
+        <div class="flex justify-center items-center mt-10 h-10">
+            <Loader v-if="isLoading" />
+        </div>
 
-    <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-gray-100 p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
-            <h2 class="text-center text-xl font-semibold text-gray-800 mb-4">Editar Dívida</h2>
+        <div
+        v-if="showEditModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        >
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
+            <h2 class="text-center text-xl font-semibold text-gray-800 mb-4">
+            Editar Receita
+            </h2>
             <form @submit.prevent="submitEdit">
-                <input v-model="editingRevenue.description" placeholder="Título" required
-                    class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md" />
-                <input type="number" v-model="editingRevenue.amount" placeholder="Valor" required
-                    class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md" />
-                <div class="flex flex-col sm:flex-row justify-end gap-2">
-                    <button type="submit"
-                        class="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md">Salvar</button>
-                    <button @click.prevent="closeModal"
-                        class="px-4 py-2 text-white bg-gray-600 hover:bg-gray-700 rounded-md">Cancelar</button>
-                </div>
+            <input v-model="editingRevenue.description" placeholder="Título" required class="input mb-4" />
+            <input v-model="editingRevenue.amount" type="number" placeholder="Valor" required class="input mb-4" />
+            <div class="flex flex-col sm:flex-row justify-end gap-2">
+                <button type="submit" class="btn-primary">Salvar</button>
+                <button @click.prevent="closeModal" class="btn-secondary">Cancelar</button>
+            </div>
             </form>
+        </div>
         </div>
     </div>
 </template>
@@ -80,6 +98,7 @@ export default {
                 date: new Date(),
                 userId: null,
             },
+            userId: null,
             revenues: [],
             editingRevenue: null,
             editingIndex: null,
@@ -91,7 +110,11 @@ export default {
 
     async mounted() {
         try {
-            await this.fetchRevenues();
+            this.userId = await this.fetchUserId();
+            if (this.userId) {
+                this.newRevenue.userId = this.userId;
+                await this.fetchRevenues();
+            }
         } catch (error) {
             console.error("Erro ao montar o componente:", error);
         }
@@ -115,13 +138,9 @@ export default {
 
         async fetchRevenues() {
             try {
-                const userId = await this.fetchUserId();
-                if (!userId) {
-                    console.warn("ID do usuário não encontrado. Abortando busca de receitas.");
-                    return;
-                }
+                if (!this.userId) return;
                 this.isLoading = true;
-                const response = await revenueService.getRevenuesByUserId(userId);
+                const response = await revenueService.getRevenuesByUserId(this.userId);
                 this.isLoading = false;
                 this.revenues = response || [];
             } catch (error) {
@@ -131,13 +150,7 @@ export default {
 
         async saveRevenue() {
             try {
-                const userId = await this.fetchUserId();
-                if (!userId) {
-                    console.warn("ID do usuário não encontrado. Abortando salvamento de receita.");
-                    return;
-                }
-
-                const revenueData = { ...this.newRevenue, userId };
+                const revenueData = { ...this.newRevenue };
                 this.isLoading = true;
                 await revenueService.createRevenue(revenueData);
                 await this.fetchRevenues();
@@ -152,21 +165,14 @@ export default {
 
         async updateRevenue() {
             try {
-                const userId = await this.fetchUserId();
-                if (!userId) {
-                    console.warn("ID do usuário não encontrado. Abortando atualização de receita.");
-                    return;
-                }
-
-                const { id, ...rest } = this.editingRevenue;
+                const { id, ...data } = this.editingRevenue;
 
                 if (!id) {
                     console.warn("ID da receita não encontrado.");
                     return;
                 }
 
-                const updatedData = { ...rest, userId };
-                await revenueService.updateRevenue(id, updatedData);
+                await revenueService.updateRevenue(id, data);
                 await this.fetchRevenues();
                 this.closeModal();
                 await showSuccess('Sucesso!', 'A receita foi atualizada.');
@@ -199,7 +205,8 @@ export default {
             this.editingIndex = index;
             this.editingRevenue = {
                 ...this.revenues[index],
-                amount: Number(this.revenues[index].amount).toFixed(2)
+                amount: Number(this.revenues[index].amount).toFixed(2),
+                userId: this.userId, 
             };
             this.isEditing = true;
             this.showEditModal = true;

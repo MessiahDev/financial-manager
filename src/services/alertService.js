@@ -14,7 +14,7 @@ export const showSuccess = (title = 'Sucesso!', text = 'Operação concluída.')
     ...baseConfig,
     confirmButtonText: 'OK',
     customClass: {
-      confirmButton: `bg-blue-600 hover:bg-blue-700 ${baseClass}`,
+      confirmButton: `btn-primary ${baseClass}`,
     },
   });
 };
@@ -46,7 +46,7 @@ export const showError = (title = 'Erro!', errorOrMessage = '') => {
     ...baseConfig,
     confirmButtonText: 'OK',
     customClass: {
-      confirmButton: `bg-red-600 hover:bg-red-700 ${baseClass}`,
+      confirmButton: `btn-red ${baseClass}`,
     },
   });
 };
@@ -66,8 +66,8 @@ export const showConfirm = ({
     cancelButtonText,
     ...baseConfig,
     customClass: {
-      confirmButton: `bg-red-600 hover:bg-red-700 ${baseClass}`,
-      cancelButton: `bg-blue-600 hover:bg-blue-700 ${baseClass} ml-2`,
+      confirmButton: `btn-red ${baseClass}`,
+      cancelButton: `btn-primary ${baseClass} ml-2`,
     },
   });
 };

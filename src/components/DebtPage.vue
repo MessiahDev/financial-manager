@@ -1,90 +1,110 @@
 <template>
     <div class="max-w-5xl mx-auto py-24 font-sans px-4">
-        <h1 class="text-center text-3xl font-bold text-gray-800 mb-8">Gerenciador de Dívidas</h1>
+        <h1 class="text-center text-3xl font-bold text-gray-800 mb-12">
+        Gerenciador de Dívidas
+        </h1>
 
-        <form @submit.prevent="saveDebt"
-            class="flex flex-wrap sm:flex-nowrap items-center justify-center items-end gap-4 mb-8">
-            <div class="flex flex-col flex-1 min-w-[150px]">
-                <input type="text" v-model="newDebt.description" placeholder="Título da dívida" required
-                    class="px-4 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div class="flex flex-col flex-1 min-w-[150px]">
-                <input type="number" v-model="newDebt.amount" placeholder="Valor" required
-                    class="px-4 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div class="flex flex-col flex-1 min-w-[150px]">
-                <input type="text" v-model="newDebt.dueDate" v-mask="'##/##/####'" placeholder="Data de vencimento"
-                    required
-                    class="px-4 py-2 text-base border border-gray-300 rounded-md text-right text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div class="flex flex-col flex-1 min-w-[150px]">
-                <input type="text" v-model="newDebt.creditor" placeholder="Credora" required
-                    class="px-4 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div class="flex items-center justify-center text-gray-600">
-                <label class="flex items-center font-medium gap-2">
-                    <input type="checkbox" v-model="newDebt.isPaid" class="scale-125 accent-blue-600" />
-                    Quitada?
-                </label>
-            </div>
-            <button type="submit" :disabled="isLoading"
-                class="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400">
-                Salvar
+        <form
+        @submit.prevent="saveDebt"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12"
+        >
+        <input
+            v-model="newDebt.description"
+            type="text"
+            placeholder="Título da dívida"
+            required
+            class="input"
+            aria-label="Título da dívida"
+        />
+        <input
+            v-model="newDebt.amount"
+            type="number"
+            placeholder="Valor"
+            required
+            class="input"
+            aria-label="Valor da dívida"
+        />
+        <input
+            v-model="newDebt.dueDate"
+            type="text"
+            v-mask="'##/##/####'"
+            placeholder="Data de vencimento"
+            required
+            class="input text-right"
+            aria-label="Data de vencimento"
+        />
+        <input
+            v-model="newDebt.creditor"
+            type="text"
+            placeholder="Credora"
+            required
+            class="input"
+            aria-label="Credora"
+        />
+        <label class="flex items-center gap-2 text-gray-700 col-span-full">
+            <input type="checkbox" v-model="newDebt.isPaid" class="scale-125 accent-blue-600" />
+            Dívida já foi quitada?
+        </label>
+        <div class="col-span-full flex justify-end">
+            <button
+            type="submit"
+            :disabled="isLoading"
+            class="btn-primary"
+            >
+            Salvar
             </button>
+        </div>
         </form>
 
-        <ul class="list-none p-0">
-            <li v-for="(debt, index) in debts" :key="debt.id"
-                class="flex justify-between items-center mb-2 p-1 bg-white hover:bg-zinc-200 transition-colors border border-gray-300 rounded-lg shadow-md">
-                <span class="px-3 text-gray-600 text-sm">
-                    {{ debt.description }} - {{ Number(debt.amount).toMoeda(true) }} - Vence em:
-                    {{ new Date(debt.dueDate).toLocaleDateString() }} - Credora: {{ debt.creditor }} - Situação:
-                    <strong :class="debt.isPaid ? 'text-green-600' : 'text-red-600'">
-                        {{ debt.isPaid ? 'Quitada' : 'Em aberto' }}
-                    </strong>
-                </span>
-                <div class="flex items-center">
-                    <button @click="startEdit(index)"
-                        class="px-3 py-2 text-white bg-green-500 rounded-md hover:bg-green-600 transition-colors text-sm">
-                        Editar
-                    </button>
-                    <button @click="deleteDebt(index)"
-                        class="px-3 py-2 ml-2 text-white bg-red-500 rounded-md hover:bg-red-600 transition-colors text-sm">
-                        Deletar
-                    </button>
-                </div>
-            </li>
+        <ul class="space-y-2">
+        <li
+            v-for="(debt, index) in debts"
+            :key="debt.id"
+            class="flex justify-between items-center p-3 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-zinc-100"
+        >
+            <span class="text-sm text-gray-700">
+            <strong>{{ debt.description }}</strong> - 
+            {{ Number(debt.amount).toMoeda(true) }} - 
+            Vence em {{ new Date(debt.dueDate).toLocaleDateString() }} - 
+            Credora: {{ debt.creditor }} - 
+            <span :class="debt.isPaid ? 'text-green-600' : 'text-red-600'">
+                <strong>{{ debt.isPaid ? 'Quitada' : 'Em aberto' }}</strong>
+            </span>
+            </span>
+            <div class="flex gap-2">
+            <button @click="startEdit(index)" class="btn-green">Editar</button>
+            <button @click="deleteDebt(index)" class="btn-red">Deletar</button>
+            </div>
+        </li>
         </ul>
 
         <div class="flex justify-center items-center mt-10 h-10">
-            <Loader v-if="isLoading" />
+        <Loader v-if="isLoading" />
         </div>
 
-        <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-gray-100 p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
-                <h2 class="text-center text-xl font-semibold text-gray-800 mb-4">Editar Dívida</h2>
-                <form @submit.prevent="submitEdit">
-                    <input v-model="editingDebt.description" placeholder="Título" required
-                        class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md" />
-                    <input type="number" v-model="editingDebt.amount" placeholder="Valor" required
-                        class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md" />
-                    <input type="text" v-model="editingDebt.dueDate" v-mask="'##/##/####'"
-                        placeholder="Data de vencimento" required
-                        class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md text-right" />
-                    <input type="text" v-model="editingDebt.creditor" placeholder="Credora" required
-                        class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md" />
-                    <label class="flex items-center gap-2 text-gray-600 mb-4 px-1">
-                        <input type="checkbox" v-model="editingDebt.isPaid" class="scale-125 accent-blue-600" />
-                        Quitada?
-                    </label>
-                    <div class="flex flex-col sm:flex-row justify-end gap-2">
-                        <button type="submit"
-                            class="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md">Salvar</button>
-                        <button @click.prevent="closeModal"
-                            class="px-4 py-2 text-white bg-gray-600 hover:bg-gray-700 rounded-md">Cancelar</button>
-                    </div>
-                </form>
+        <div
+        v-if="showEditModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        >
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
+            <h2 class="text-center text-xl font-semibold text-gray-800 mb-4">
+            Editar Dívida
+            </h2>
+            <form @submit.prevent="submitEdit">
+            <input v-model="editingDebt.description" placeholder="Título" required class="input mb-4" />
+            <input v-model="editingDebt.amount" type="number" placeholder="Valor" required class="input mb-4" />
+            <input v-model="editingDebt.dueDate" type="text" v-mask="'##/##/####'" placeholder="Data de vencimento" required class="input text-right mb-4" />
+            <input v-model="editingDebt.creditor" placeholder="Credora" required class="input mb-4" />
+            <label class="flex items-center gap-2 text-gray-600 mb-4">
+                <input type="checkbox" v-model="editingDebt.isPaid" class="scale-125 accent-blue-600" />
+                Dívida já foi quitada?
+            </label>
+            <div class="flex flex-col sm:flex-row justify-end gap-2">
+                <button type="submit" class="btn-primary">Salvar</button>
+                <button @click.prevent="closeModal" class="btn-secondary">Cancelar</button>
             </div>
+            </form>
+        </div>
         </div>
     </div>
 </template>
@@ -110,6 +130,7 @@ export default {
                 isPaid: false,
                 userId: null,
             },
+            userId: null,
             debts: [],
             editingDebt: null,
             editingIndex: null,
@@ -120,7 +141,10 @@ export default {
     },
     async mounted() {
         try {
-            await this.fetchDebts();
+            this.userId = await this.fetchUserId();
+            if (this.userId) {
+                await this.fetchDebts();
+            }
         } catch (error) {
             console.error("Erro ao montar o componente:", error);
         }
@@ -140,10 +164,9 @@ export default {
 
         async fetchDebts() {
             try {
-                const userId = await this.fetchUserId();
-                if (!userId) return;
+                if (!this.userId) return;
                 this.isLoading = true;
-                const response = await debtService.getDebtsByUserId(userId);
+                const response = await debtService.getDebtsByUserId(this.userId);
                 this.debts = response || [];
                 this.isLoading = false;
             } catch (error) {
@@ -153,11 +176,10 @@ export default {
 
         async saveDebt() {
             try {
-                const userId = await this.fetchUserId();
-                if (!userId) return;
+                if (!this.userId) return;
                 const [day, month, year] = this.newDebt.dueDate.split('/');
                 const isoDate = new Date(year, month - 1, day);
-                const debtData = { ...this.newDebt, userId, dueDate: isoDate.toISOString() };
+                const debtData = { ...this.newDebt, userId: this.userId, dueDate: isoDate.toISOString() };
                 this.isLoading = true;
                 await debtService.createDebt(debtData);
                 await this.fetchDebts();
@@ -221,6 +243,7 @@ export default {
 
             const updatedDebt = {
                 ...this.editingDebt,
+                userId: this.userId,
                 isPaid: !!this.editingDebt.isPaid,
                 dueDate: isoDate.toISOString(),
             };

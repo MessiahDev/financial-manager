@@ -1,53 +1,68 @@
 <template>
     <div class="max-w-5xl mx-auto py-24 font-sans px-4">
-        <h1 class="text-center text-3xl font-bold text-gray-800 mb-8">Gerenciador de Categorias</h1>
-        <form @submit.prevent="saveCategory"
-            class="flex flex-wrap sm:flex-nowrap items-center justify-center items-end gap-4 mb-8">
-            <div class="flex flex-col flex-1 min-w-[150px]">
-                <input type="text" v-model="newCategory.name" placeholder="Nome da receita" required
-                    class="px-4 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <button type="submit" :disabled="isLoading"
-                class="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400">
-                Salvar
+        <h1 class="text-center text-3xl font-bold text-gray-800 mb-12">
+        Gerenciador de Categorias
+        </h1>
+        
+        <form
+        @submit.prevent="saveCategory"
+        class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-1 gap-4 mb-12"
+        >
+        <input
+            v-model="newCategory.name"
+            type="text"
+            placeholder="Descrição da categoria"
+            required
+            class="input"
+            aria-label="Descrição da categoria"
+        />
+        <div class="col-span-full flex justify-end">
+            <button
+            type="submit"
+            :disabled="isLoading"
+            class="btn-primary"
+            >
+            Salvar
             </button>
+        </div>
         </form>
 
-        <ul class="list-none p-0">
-            <li v-for="(category, index) in categories" :key="category.id"
-                class="flex justify-between items-center mb-2 p-1 bg-white hover:bg-zinc-200 transition-colors border border-gray-300 rounded-lg shadow-md">
-                <span class="px-3 text-gray-600 text-sm">{{ category.name }}</span>
-                <div class="flex items-center">
-                    <button @click="startEdit(index)"
-                        class="px-3 py-2 text-white bg-green-500 rounded-md hover:bg-green-600 transition-colors text-sm">
-                        Editar
-                    </button>
-                    <button @click="deleteCategory(index)"
-                        class="px-3 py-2 ml-2 text-white bg-red-500 rounded-md hover:bg-red-600 transition-colors text-sm">
-                        Deletar
-                    </button>
-                </div>
-            </li>
+        <ul class="space-y-2">
+        <li
+            v-for="(category, index) in categories"
+            :key="category.id"
+            class="flex justify-between items-center p-3 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-zinc-100"
+        >
+            <span class="text-sm text-gray-700">
+            <strong>{{ category.name }}</strong>
+            </span>
+            <div class="flex gap-2">
+            <button @click="startEdit(index)" class="btn-green">Editar</button>
+            <button @click="deleteCategory(index)" class="btn-red">Deletar</button>
+            </div>
+        </li>
         </ul>
-    </div>
 
-    <div class="flex justify-center items-center mt-10 h-10">
-        <Loader v-if="isLoading" />
-    </div>
+        <div class="flex justify-center items-center mt-10 h-10">
+            <Loader v-if="isLoading" />
+        </div>
 
-    <div v-if="showEditModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-gray-100 p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
-            <h2 class="text-center text-xl font-semibold text-gray-800 mb-4">Editar Dívida</h2>
+        <div
+        v-if="showEditModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        >
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
+            <h2 class="text-center text-xl font-semibold text-gray-800 mb-4">
+            Editar Categoria
+            </h2>
             <form @submit.prevent="submitEdit">
-                <input v-model="editingCategory.name" placeholder="Nome" required
-                    class="w-full px-4 py-2 mb-4 border border-gray-300 rounded-md" />
-                <div class="flex flex-col sm:flex-row justify-end gap-2">
-                    <button type="submit"
-                        class="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-md">Salvar</button>
-                    <button @click.prevent="closeModal"
-                        class="px-4 py-2 text-white bg-gray-600 hover:bg-gray-700 rounded-md">Cancelar</button>
-                </div>
+            <input v-model="editingCategory.name" placeholder="Título" required class="input mb-4" />
+            <div class="flex flex-col sm:flex-row justify-end gap-2">
+                <button type="submit" class="btn-primary">Salvar</button>
+                <button @click.prevent="closeModal" class="btn-secondary">Cancelar</button>
+            </div>
             </form>
+        </div>
         </div>
     </div>
 </template>
@@ -110,6 +125,7 @@ export default {
 
         async fetchCategories() {
             try {
+                if (!this.userId) return;
                 this.isLoading = true;
                 const response = await categoryService.getCategoryByUserId(this.userId);
                 this.categories = response || [];
