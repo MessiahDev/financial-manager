@@ -37,14 +37,12 @@
                 aria-label="Senha"
                 class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <button
-                type="button"
-                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                <span
+                class="absolute right-3 top-2.5 text-gray-500 cursor-pointer text-lg"
                 @click="togglePasswordVisibility"
-                :aria-label="showPassword ? 'Ocultar senha' : 'Mostrar senha'"
                 >
                 <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
-                </button>
+                </span>
             </div>
             </div>
 

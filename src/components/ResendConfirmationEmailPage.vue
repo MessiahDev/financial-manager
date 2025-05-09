@@ -45,7 +45,7 @@ export default {
             isLoading: false,
         };
     },
-
+    
     methods: {
         goToLogin() {
             router.push('/');
@@ -54,7 +54,7 @@ export default {
         async resendConfimation() {
             this.isLoading = true;
             try {
-                const response = await authService.resendConfirmationEmail(this.email);
+                await authService.resendConfirmationEmail(this.email);
                 await showSuccess('Email reenviado!', 'Caso não visualize na caixa de entrada, verifique sua caixa de spam.');
                 this.goToLogin();
             } catch (error) {

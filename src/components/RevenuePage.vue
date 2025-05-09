@@ -17,12 +17,12 @@
             aria-label="Descrição da receita"
         />
         <input
-            v-model="newRevenue.amount"
-            type="number"
+            v-model="formattedAmount"
+            type="text"
             placeholder="Valor"
             required
-            class="input"
-            aria-label="Valor da receita"
+            class="input text-right"
+            aria-label="Valor"
         />
         <div class="col-span-full flex justify-end">
             <button
@@ -73,7 +73,7 @@
             </h2>
             <form @submit.prevent="submitEdit">
             <input v-model="editingRevenue.description" placeholder="Título" required class="input mb-4" />
-            <input v-model="editingRevenue.amount" type="number" placeholder="Valor" required class="input mb-4" />
+            <input v-model="formattedEditAmount" type="text" placeholder="Valor" class="input text-right mb-4" />
             <div class="flex flex-col sm:flex-row justify-end gap-2">
                 <button type="submit" class="btn-primary">Salvar</button>
                 <button @click.prevent="closeModal" class="btn-secondary">Cancelar</button>
@@ -112,7 +112,26 @@ export default {
             isEditing: false,
             showEditModal: false,
             isLoading: false,
+            formattedAmount: '',
+            formattedEditAmount: ''
         };
+    },
+
+    watch: {
+        formattedAmount(newVal) {
+            const cleaned = newVal.replace(/\D/g, '');
+            const number = parseFloat(cleaned) / 100;
+
+            this.newRevenue.amount = isNaN(number) ? 0 : number;
+            this.formattedAmount = this.newRevenue.amount.toMoeda(true);
+        },
+        formattedEditAmount(newVal) {
+            const cleaned = newVal.replace(/\D/g, '');
+            const number = parseFloat(cleaned) / 100;
+
+            this.editingRevenue.amount = isNaN(number) ? 0 : number;
+            this.formattedEditAmount = this.editingRevenue.amount.toMoeda(true);
+        }
     },
 
     async mounted() {
@@ -209,12 +228,13 @@ export default {
         },
 
         startEdit(index) {
-            this.editingIndex = index;
+            this.editingIndex = this.revenues[index];
             this.editingRevenue = {
-                ...this.revenues[index],
+                ...this.editingIndex,
                 amount: Number(this.revenues[index].amount).toFixed(2),
                 userId: this.userId, 
             };
+            this.formattedEditAmount = Number(this.editingIndex.amount).toMoeda(true);
             this.isEditing = true;
             this.showEditModal = true;
         },

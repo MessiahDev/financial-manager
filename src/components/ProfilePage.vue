@@ -15,38 +15,64 @@
                     class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300" />
             </div>
 
-            <div>
-                <label class="block text-gray-700 mb-1">Nova Senha</label>
+            <div class="space-y-1">
+                <label for="password" class="block text-sm font-medium text-gray-700">Senha</label>
+                
                 <div class="relative">
-                    <input :type="showPassword ? 'text' : 'password'" v-model="form.password" :class="[
-                        'w-full pr-10 px-4 py-2 rounded-md border focus:outline-none',
-                        confirmPassword && form.password !== confirmPassword ? 'border-red-500' : '',
-                        confirmPassword && form.password === confirmPassword ? 'border-green-500' : 'border-gray-300'
-                    ]" />
-                    <span class="absolute inset-y-0 right-3 flex items-center cursor-pointer text-gray-500"
-                        @click="togglePasswordVisibility">
-                        <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
+                    <input
+                    id="password"
+                    :type="showPassword ? 'text' : 'password'"
+                    v-model="password"
+                    required
+                    :class="[
+                        'w-full px-4 py-2 pr-10 rounded-lg focus:outline-none border transition',
+                        passwordsMismatch ? 'border-red-500' : passwordsMatch ? 'border-green-500' : 'border-gray-300'
+                    ]"
+                    />
+                    <span
+                    class="absolute right-3 top-2 text-gray-500 cursor-pointer text-lg"
+                    @click="togglePasswordVisibility"
+                    >
+                    <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
                     </span>
                 </div>
-                <small class="text-sm text-gray-500 mt-1 block">Deixe em branco para manter a senha atual.</small>
             </div>
 
-            <div>
-                <label class="block text-gray-700 mb-1">Confirme a Nova Senha</label>
+            <div class="text-sm mt-1 space-y-1">
+                <div
+                    v-for="(label, key) in passwordLabels"
+                    :key="key"
+                    :class="passwordChecks[key] ? 'text-green-600' : 'text-gray-500'"
+                >
+                    <i :class="passwordChecks[key] ? 'fa-solid fa-check' : 'fa-regular fa-circle'" class="mr-2"></i>
+                    {{ label }}
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmar Senha</label>
+                
                 <div class="relative">
-                    <input :type="showConfirmPassword ? 'text' : 'password'" v-model="confirmPassword" :class="[
-                        'w-full pr-10 px-4 py-2 rounded-md border focus:outline-none',
-                        confirmPassword && form.password !== confirmPassword ? 'border-red-500' : '',
-                        confirmPassword && form.password === confirmPassword ? 'border-green-500' : 'border-gray-300']" />
-                    <span class="absolute inset-y-0 right-3 flex items-center cursor-pointer text-gray-500"
-                        @click="toggleConfirmPasswordVisibility">
-                        <i :class="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
+                    <input
+                    id="confirmPassword"
+                    :type="showConfirmPassword ? 'text' : 'password'"
+                    v-model="confirmPassword"
+                    required
+                    :class="[
+                        'w-full px-4 py-2 pr-10 rounded-lg focus:outline-none border transition',
+                        passwordsMismatch ? 'border-red-500' : passwordsMatch ? 'border-green-500' : 'border-gray-300'
+                    ]"
+                    />
+                    <span
+                    class="absolute right-3 top-2 text-gray-500 cursor-pointer text-lg"
+                    @click="toggleConfirmPasswordVisibility"
+                    >
+                    <i :class="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
                     </span>
                 </div>
 
-                <p v-if="confirmPassword && form.password !== confirmPassword" class="text-sm text-red-500 mt-1">As
-                    senhas não coincidem!</p>
-                <p v-if="updateSuccess" class="text-sm text-green-600 mt-1">Dados alterados com sucesso!</p>
+                <p v-if="passwordsMismatch" class="text-red-500 text-sm">As senhas não coincidem.</p>
+                <p v-if="updateSuccess" class="text-green-600 text-sm">Cadastro realizado com sucesso!</p>
             </div>
 
             <div class="flex justify-end">
@@ -86,6 +112,7 @@ export default {
                 email: '',
                 password: ''
             },
+            password: '',
             confirmPassword: '',
             showPassword: false,
             showConfirmPassword: false,
@@ -97,6 +124,34 @@ export default {
     computed: {
         authStore() {
             return useAuthStore();
+        },
+        passwordsMatch() {
+            return this.password !== '' && this.confirmPassword !== '' && this.password === this.confirmPassword;
+        },
+        passwordsMismatch() {
+            return this.password !== '' && this.confirmPassword !== '' && this.password !== this.confirmPassword;
+        },
+        passwordChecks() {
+            return {
+            minLength: this.password.length >= 8,
+            uppercase: /[A-Z]/.test(this.password),
+            lowercase: /[a-z]/.test(this.password),
+            number: /\d/.test(this.password),
+            specialChar: /[^A-Za-z0-9]/.test(this.password)
+            };
+        },
+        isPasswordValid() {
+            const c = this.passwordChecks;
+            return c.minLength && c.uppercase && c.lowercase && c.number && c.specialChar;
+        },
+        passwordLabels() {
+            return {
+            minLength: 'Mínimo de 8 caracteres',
+            uppercase: 'Pelo menos 1 letra maiúscula',
+            lowercase: 'Pelo menos 1 letra minúscula',
+            number: 'Pelo menos 1 número',
+            specialChar: 'Pelo menos 1 caractere especial'
+            };
         }
     },
 
@@ -144,6 +199,11 @@ export default {
 
         async updateProfile() {
             try {
+                if (!this.isPasswordValid) {
+                    await showError('A senha não cumpre os critérios mínimos de segurança.');
+                    return;
+                }
+
                 const userId = await this.fetchUserId();
                 const user = await authService.getProfile(userId);
 

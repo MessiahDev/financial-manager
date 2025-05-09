@@ -17,11 +17,11 @@
             aria-label="Título da dívida"
         />
         <input
-            v-model="newDebt.amount"
-            type="number"
+            v-model="formattedAmount"
+            type="text"
             placeholder="Valor"
             required
-            class="input"
+            class="input text-right"
             aria-label="Valor da dívida"
         />
         <input
@@ -98,8 +98,8 @@
             </h2>
             <form @submit.prevent="submitEdit">
             <input v-model="editingDebt.description" placeholder="Título" required class="input mb-4" />
-            <input v-model="editingDebt.amount" type="number" placeholder="Valor" required class="input mb-4" />
-            <input v-model="editingDebt.dueDate" type="text" v-mask="'##/##/####'" placeholder="Data de vencimento" required class="input text-right mb-4" />
+            <input v-model="formattedEditAmount" type="text" placeholder="Valor" class="input text-right mb-4" />
+            <input v-model="editingDebt.dueDate" type="date" placeholder="Data de vencimento" required class="input text-right mb-4" />
             <input v-model="editingDebt.creditor" placeholder="Credora" required class="input mb-4" />
             <label class="flex items-center gap-2 text-gray-600 mb-4">
                 <input type="checkbox" v-model="editingDebt.isPaid" class="scale-125 accent-blue-600" />
@@ -143,7 +143,25 @@ export default {
             isEditing: false,
             showEditModal: false,
             isLoading: false,
+            formattedAmount: '',
+            formattedEditAmount: ''
         };
+    },
+    watch: {
+        formattedAmount(newVal) {
+            const cleaned = newVal.replace(/\D/g, '');
+            const number = parseFloat(cleaned) / 100;
+
+            this.newDebt.amount = isNaN(number) ? 0 : number;
+            this.formattedAmount = this.newDebt.amount.toMoeda(true);
+        },
+        formattedEditAmount(newVal) {
+            const cleaned = newVal.replace(/\D/g, '');
+            const number = parseFloat(cleaned) / 100;
+
+            this.editingDebt.amount = isNaN(number) ? 0 : number;
+            this.formattedEditAmount = this.editingDebt.amount.toMoeda(true);
+        }
     },
     async mounted() {
         try {
@@ -227,29 +245,25 @@ export default {
 
         startEdit(index) {
             const debt = this.debts[index];
-            const date = new Date(debt.dueDate);
-            const yyyy = date.getFullYear();
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const dd = String(date.getDate()).padStart(2, '0');
+            const date = new Date(debt.dueDate).toISOString().split('T')[0];
 
             this.editingDebt = {
                 ...debt,
                 amount: Number(debt.amount).toFixed(2),
-                dueDate: `${dd}-${mm}-${yyyy}`,
+                dueDate: date,
             };
+            this.formattedEditAmount = Number(debt.amount).toMoeda(true);
+
             this.editingIndex = index;
             this.showEditModal = true;
         },
 
         submitEdit() {
-            const [day, month, year] = this.editingDebt.dueDate.split('/');
-            const isoDate = new Date(year, month - 1, day);
-
             const updatedDebt = {
                 ...this.editingDebt,
                 userId: this.userId,
                 isPaid: !!this.editingDebt.isPaid,
-                dueDate: isoDate.toISOString(),
+                dueDate: new Date(this.editingDebt.dueDate).toISOString(),
             };
 
             this.updateDebt(updatedDebt);

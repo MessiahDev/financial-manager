@@ -29,55 +29,69 @@
           />
         </div>
 
-        <div class="space-y-1 relative">
+        <div class="space-y-1">
           <label for="password" class="block text-sm font-medium text-gray-700">Senha</label>
-          <input
-            id="password"
-            :type="showPassword ? 'text' : 'password'"
-            v-model="password"
-            required
-            :class="[
-              'w-full px-4 py-2 pr-10 rounded-lg focus:outline-none border',
-              passwordsMismatch ? 'border-red-500' : passwordsMatch ? 'border-green-500' : 'border-gray-300'
-            ]"
-          />
-          <button
-            type="button"
-            class="absolute right-3 top-[57%] transform -translate-y-1/3 text-gray-500"
-            @click="togglePasswordVisibility"
-            :aria-label="showPassword ? 'Ocultar senha' : 'Mostrar senha'"
-          >
-            <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
-          </button>
+          
+          <div class="relative">
+            <input
+              id="password"
+              :type="showPassword ? 'text' : 'password'"
+              v-model="password"
+              required
+              :class="[
+                'w-full px-4 py-2 pr-10 rounded-lg focus:outline-none border transition',
+                passwordsMismatch ? 'border-red-500' : passwordsMatch ? 'border-green-500' : 'border-gray-300'
+              ]"
+            />
+            <span
+              class="absolute right-3 top-2 text-gray-500 cursor-pointer text-lg"
+              @click="togglePasswordVisibility"
+            >
+              <i :class="showPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
+            </span>
+          </div>
         </div>
 
-        <div class="space-y-1 relative">
-          <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmar Senha</label>
-          <input
-            id="confirmPassword"
-            :type="showConfirmPassword ? 'text' : 'password'"
-            v-model="confirmPassword"
-            required
-            :class="[
-              'w-full px-4 py-2 pr-10 rounded-lg focus:outline-none border',
-              passwordsMismatch ? 'border-red-500' : passwordsMatch ? 'border-green-500' : 'border-gray-300'
-            ]"
-          />
-          <button
-            type="button"
-            class="absolute right-3 top-[57%] transform -translate-y-1/3 text-gray-500"
-            @click="toggleConfirmPasswordVisibility"
-            :aria-label="showConfirmPassword ? 'Ocultar confirmação de senha' : 'Mostrar confirmação de senha'"
+        <div class="text-sm mt-1 space-y-1">
+          <div
+            v-for="(label, key) in passwordLabels"
+            :key="key"
+            :class="passwordChecks[key] ? 'text-green-600' : 'text-gray-500'"
           >
-            <i :class="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
-          </button>
-          <p v-if="passwordsMismatch" class="text-red-500 text-sm mt-1">As senhas não coincidem.</p>
-          <p v-if="resgisterSuccess" class="text-green-600 text-sm mt-1">Cadastro realizado com sucesso!</p>
+            <i :class="passwordChecks[key] ? 'fa-solid fa-check' : 'fa-regular fa-circle'" class="mr-2"></i>
+            {{ label }}
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmar Senha</label>
+          
+          <div class="relative">
+            <input
+              id="confirmPassword"
+              :type="showConfirmPassword ? 'text' : 'password'"
+              v-model="confirmPassword"
+              required
+              :class="[
+                'w-full px-4 py-2 pr-10 rounded-lg focus:outline-none border transition',
+                passwordsMismatch ? 'border-red-500' : passwordsMatch ? 'border-green-500' : 'border-gray-300'
+              ]"
+            />
+            <span
+              class="absolute right-3 top-2 text-gray-500 cursor-pointer text-lg"
+              @click="toggleConfirmPasswordVisibility"
+            >
+              <i :class="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-regular fa-eye'"></i>
+            </span>
+          </div>
+
+          <p v-if="passwordsMismatch" class="text-red-500 text-sm">As senhas não coincidem.</p>
+          <p v-if="resgisterSuccess" class="text-green-600 text-sm">Cadastro realizado com sucesso!</p>
         </div>
 
         <button
           type="submit"
-          :disabled="passwordsMismatch || isLoading"
+          :disabled="passwordsMismatch || !isPasswordValid || isLoading"
           class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:bg-gray-400"
         >
           Cadastrar
@@ -105,64 +119,91 @@ import authService from '../services/authService';
 import { showSuccess, showError } from '../services/alertService';
 
 export default {
-    name: 'RegisterPage',
-    components: {
-        Loader,
+  name: 'RegisterPage',
+  components: {
+      Loader,
+  },
+  data() {
+      return {
+          name: '',
+          email: '',
+          password: '',
+          confirmPassword: '',
+          showPassword: false,
+          showConfirmPassword: false,
+          isLoading: false,
+          resgisterSuccess: false,
+      };
+  },
+  computed: {
+    passwordsMatch() {
+        return this.password !== '' && this.confirmPassword !== '' && this.password === this.confirmPassword;
     },
-    data() {
+    passwordsMismatch() {
+        return this.password !== '' && this.confirmPassword !== '' && this.password !== this.confirmPassword;
+    },
+    passwordChecks() {
         return {
-            name: '',
-            email: '',
-            password: '',
-            confirmPassword: '',
-            showPassword: false,
-            showConfirmPassword: false,
-            isLoading: false,
-            resgisterSuccess: false,
+        minLength: this.password.length >= 8,
+        uppercase: /[A-Z]/.test(this.password),
+        lowercase: /[a-z]/.test(this.password),
+        number: /\d/.test(this.password),
+        specialChar: /[^A-Za-z0-9]/.test(this.password)
         };
     },
-    computed: {
-        passwordsMatch() {
-            return this.password !== '' && this.confirmPassword !== '' && this.password === this.confirmPassword;
-        },
-        passwordsMismatch() {
-            return this.password !== '' && this.confirmPassword !== '' && this.password !== this.confirmPassword;
-        },
+    isPasswordValid() {
+        const c = this.passwordChecks;
+        return c.minLength && c.uppercase && c.lowercase && c.number && c.specialChar;
     },
-    methods: {
-        togglePasswordVisibility() {
-            this.showPassword = !this.showPassword;
-        },
-        toggleConfirmPasswordVisibility() {
-            this.showConfirmPassword = !this.showConfirmPassword;
-        },
-        goToLogin() {
-            router.push('/');
-        },
-        async register() {
-            try {
-                const userData = {
-                    name: this.name,
-                    email: this.email,
-                    password: this.password,
-                };
-
-                this.isLoading = true;
-                await authService.register(userData);
-                this.isLoading = false;
-
-                await showSuccess('Cadastro realizado!', `Um email de verificação foi enviado para ${this.email}. Caso não visualize, verifique sua caixa de spam.`);
-
-                this.name = '';
-                this.email = '';
-                this.password = '';
-                this.confirmPassword = '';
-                this.resgisterSuccess = true;
-            } catch (error) {
-                this.isLoading = false;
-                await showError('Erro ao cadastrar:', error);
-            }
-        },
+    passwordLabels() {
+        return {
+        minLength: 'Mínimo de 8 caracteres',
+        uppercase: 'Pelo menos 1 letra maiúscula',
+        lowercase: 'Pelo menos 1 letra minúscula',
+        number: 'Pelo menos 1 número',
+        specialChar: 'Pelo menos 1 caractere especial'
+        };
+    }
+  },
+  methods: {
+    togglePasswordVisibility() {
+        this.showPassword = !this.showPassword;
     },
+    toggleConfirmPasswordVisibility() {
+        this.showConfirmPassword = !this.showConfirmPassword;
+    },
+    goToLogin() {
+        router.push('/');
+    },
+    async register() {
+        try {
+          if (!this.isPasswordValid) {
+            await showError('A senha não cumpre os critérios mínimos de segurança.');
+            return;
+          }
+
+          const userData = {
+              name: this.name,
+              email: this.email,
+              password: this.password,
+          };
+
+          this.isLoading = true;
+          await authService.register(userData);
+          this.isLoading = false;
+
+          await showSuccess('Cadastro realizado!', `Um email de verificação foi enviado para ${this.email}. Caso não visualize, verifique sua caixa de spam.`);
+
+          this.name = '';
+          this.email = '';
+          this.password = '';
+          this.confirmPassword = '';
+          this.resgisterSuccess = true;
+      } catch (error) {
+          this.isLoading = false;
+          await showError('Erro ao cadastrar:', error);
+      }
+    },
+  },
 };
 </script>

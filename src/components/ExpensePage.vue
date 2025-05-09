@@ -17,12 +17,12 @@
             aria-label="Descrição da despesa"
         />
         <input
-            v-model="form.amount"
-            type="number"
+            v-model="formattedAmount"
+            type="text text-right"
             placeholder="Valor"
             required
-            class="input"
-            aria-label="Valor da despesa"
+            class="input text-right"
+            aria-label="Valor"
         />
         <select v-model="form.categoryId" 
             required
@@ -86,7 +86,7 @@
             </h2>
             <form @submit.prevent="submitEdit">
             <input v-model="form.description" placeholder="Título" required class="input mb-4" />
-            <input v-model="form.amount" type="number" placeholder="Valor" required class="input mb-4" />
+            <input v-model="formattedEditAmount" type="text" placeholder="Valor" class="input text-right mb-4" />
             <select v-model="form.categoryId" required
                 class="w-full p-2 mb-4 border border-gray-300 rounded-md text-gray-600 focus:outline-none focus:border-blue-500">
                 <option value="" disabled>Selecione uma categoria</option>
@@ -128,7 +128,7 @@ export default {
                 id: null,
                 description: '',
                 amount: null,
-                date: new Date(),
+                date: new Date().toISOString(),
                 categoryId: '',
                 categoryName: '',
                 userId: null,
@@ -138,7 +138,26 @@ export default {
             editingIndex: null,
             showEditModal: false,
             isLoading: false,
+            formattedAmount: '',
+            formattedEditAmount: ''
         };
+    },
+
+    watch: {
+        formattedAmount(newVal) {
+            const cleaned = newVal.replace(/\D/g, '');
+            const number = parseFloat(cleaned) / 100;
+
+            this.form.amount = isNaN(number) ? 0 : number;
+            this.formattedAmount = this.form.amount.toMoeda(true);
+        },
+        formattedEditAmount(newVal) {
+            const cleaned = newVal.replace(/\D/g, '');
+            const number = parseFloat(cleaned) / 100;
+
+            this.form.amount = isNaN(number) ? 0 : number;
+            this.formattedEditAmount = this.form.amount.toMoeda(true);
+        }
     },
 
     async mounted() {
@@ -260,6 +279,8 @@ export default {
 
         startEdit(index) {
             const expense = this.expenses[index];
+            const newDate = new Date(expense.date).toISOString().split('T')[0];
+            
             if (!expense) {
                 console.warn("Despesa não encontrada no índice:", index);
                 return;
@@ -267,8 +288,9 @@ export default {
             this.form = {
                 ...expense,
                 amount: Number(expense.amount).toFixed(2),
-                date: new Date(expense.date),
+                date: newDate,
             };
+            this.formattedEditAmount = Number(expense.amount).toMoeda(true);
             this.isEditing = true;
             this.editingIndex = index;
             this.showEditModal = true;

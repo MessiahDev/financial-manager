@@ -1,107 +1,101 @@
-function TableToExcel(table, worksheet) {
+function TableToExcel(tableId, worksheet = 'Resultado') {
+  const table = document.getElementById(tableId);
+  if (!table) {
+    console.error(`Elemento da tabela com ID "${tableId}" não encontrado.`);
+    return;
+  }
   const uri = 'data:application/vnd.ms-excel;base64,';
-  const template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><meta http-equiv="content-type" content="text/plain; charset=UTF-8"/></head><body>{table}</body></html>';
-  const base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) };
-  const format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) };
+  const template = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office"
+          xmlns:x="urn:schemas-microsoft-com:office:excel"
+          xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <!--[if gte mso 9]><xml>
+        <x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+        <x:Name>{worksheet}</x:Name>
+        <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions>
+        </x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook>
+        </xml><![endif]-->
+        <meta charset="UTF-8"/>
+      </head>
+      <body>{table}</body>
+    </html>`;
 
-  if (!table.nodeType) {
-    table = document.getElementById(table).querySelectorAll('div')[0];
-  }
+  const base64 = s => window.btoa(unescape(encodeURIComponent(s)));
+  const format = (s, c) => s.replace(/{(\w+)}/g, (m, p) => c[p]);
 
-  const ctx = { worksheet: worksheet || 'Resultado', table: table.innerHTML };
+  const tableElement = typeof table === 'string'
+    ? document.getElementById(table)?.querySelector('table, div')
+    : table;
 
-  window.location.href = uri + base64(format(template, ctx));
-}
-
-function MoedaFormatada(n, c, d, t, s, j, i, moneySign) {
-  c = isNaN((c = Math.abs(c))) ? 2 : c;
-  d = d === undefined ? "," : d;
-  t = t === undefined ? "." : t;
-  s = n < 0 ? "-" : "";
-  i = parseInt((n = Math.abs(+n || 0).toFixed(c))) + "";
-  j = (j = i.length) > 3 ? j % 3 : 0;
-
-  return " R$ " + s + (j ? i.substr(0, j) + t : "") +
-    i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) +
-    (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
-}
-
-function JSONToCSVConvertor(JSONData, ReportTitle, ShowLabel) {
-  let arrData = typeof JSONData !== 'object' ? JSON.parse(JSONData) : JSONData;
-  let CSV = '';
-
-  if (ShowLabel) {
-    let row = "";
-    for (let index in arrData[0]) {
-      row += index + ';';
-    }
-    row = row.slice(0, -1);
-    CSV += row + '\r\n';
-  }
-
-  for (let i = 0; i < arrData.length; i++) {
-    let row = "";
-    for (let index in arrData[i]) {
-      row += arrData[i][index] + ';';
-    }
-    CSV += row + '\r\n';
-  }
-
-  if (CSV === '') {
-    alert("Invalid data");
+  if (!tableElement) {
+    console.warn('Elemento da tabela não encontrado.');
     return;
   }
 
-  let fileName = "Excel_" + ReportTitle.replace(/ /g, "_");
-  let uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+  const ctx = { worksheet, table: tableElement.outerHTML };
+  window.location.href = uri + base64(format(template, ctx));
+}
 
-  let link = document.createElement("a");
-  link.href = uri;
-  link.download = fileName + ".csv";
+function JSONToCSVConvertor(JSONData, ReportTitle = 'relatorio', ShowLabel = true) {
+  const arrData = typeof JSONData !== 'object' ? JSON.parse(JSONData) : JSONData;
+  if (!Array.isArray(arrData) || arrData.length === 0) return;
+
+  let CSV = '';
+  if (ShowLabel) {
+    const headers = Object.keys(arrData[0]).join(';');
+    CSV += headers + '\r\n';
+  }
+
+  for (const row of arrData) {
+    CSV += Object.values(row).join(';') + '\r\n';
+  }
+
+  const blob = new Blob([CSV], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `Relatorio_${ReportTitle.replace(/ /g, "_")}.csv`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 }
 
+function MoedaFormatada(n, c = 2, d = ",", t = ".") {
+  const s = n < 0 ? "-" : "";
+  const i = parseInt(Math.abs(n).toFixed(c)) + "";
+  const j = i.length > 3 ? i.length % 3 : 0;
+  return " R$ " + s +
+    (j ? i.substr(0, j) + t : "") +
+    i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) +
+    (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
+}
+
 function TrataDateTime(data) {
-  return data.replace(/-/g, '/').replace('T', ' ');
+  return typeof data === 'string'
+    ? data.replace(/-/g, '/').replace('T', ' ')
+    : '';
 }
 
 function AnoMesDia(data) {
+  if (!(data instanceof Date)) return '';
   const mm = data.getMonth() + 1;
   const dd = data.getDate();
-
-  return isNaN(mm) ? '' : [
-    data.getFullYear(),
-    (mm > 9 ? '' : '0') + mm,
-    (dd > 9 ? '' : '0') + dd
-  ].join('-');
+  return `${data.getFullYear()}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
 }
 
 function DiaMesAno(data) {
+  if (!(data instanceof Date)) return '';
   const mm = data.getMonth() + 1;
   const dd = data.getDate();
-
-  return isNaN(mm) ? '' : [
-    (dd > 9 ? '' : '0') + dd,
-    (mm > 9 ? '' : '0') + mm,
-    data.getFullYear()
-  ].join('/');
+  return `${String(dd).padStart(2, '0')}/${String(mm).padStart(2, '0')}/${data.getFullYear()}`;
 }
 
 function DiaMesAnoHora(data) {
-  const mm = data.getMonth() + 1;
-  const dd = data.getDate();
-
-  const novaData = isNaN(mm) ? '' : [
-    (dd > 9 ? '' : '0') + dd,
-    (mm > 9 ? '' : '0') + mm,
-    data.getFullYear()
-  ].join('/');
-
-  const novaHora = data.toLocaleTimeString().substring(0, 5);
-
-  return `${novaData} ${novaHora}`;
+  if (!(data instanceof Date)) return '';
+  const dateStr = DiaMesAno(data);
+  const timeStr = data.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return `${dateStr} ${timeStr}`;
 }
 
 export {

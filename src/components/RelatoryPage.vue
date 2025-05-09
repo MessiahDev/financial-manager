@@ -1,97 +1,90 @@
 <template>
-  <div class="max-w-5xl mx-auto py-24 font-sans px-4">
-    <div class="max-w-6xl mx-auto space-y-6">
-      <h1 class="text-center text-3xl font-bold text-gray-800 mb-12">Relatório Financeiro</h1>
+  <div class="max-w-7xl mx-auto mt-12 py-16 px-4 sm:px-6 lg:px-8 font-sans">
+    <h1 class="text-center text-3xl sm:text-4xl font-bold text-gray-800 mb-10">Relatório Financeiro</h1>
 
-      <div class="bg-white p-4 rounded-xl shadow space-y-4">
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
-          <div>
-            <label class="text-sm text-gray-600">De:</label>
-            <input type="date" v-model="filters.from" class="input" />
-          </div>
-          <div>
-            <label class="text-sm text-gray-600">Até:</label>
-            <input type="date" v-model="filters.to" class="input" />
-          </div>
-          <div>
-            <label class="text-sm text-gray-600">Categoria:</label>
-            <select v-model="filters.category" class="input h-11">
-              <option value="all">Todas</option>
-              <option v-for="cat in categories" :key="cat.name" :value="cat.name">
-                {{ cat.name }}
-              </option>
-              <option v-if="hasDebts" value="Dívida">Dívida</option>
-              <option v-if="hasRevenues" value="Receita">Receita</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-sm text-gray-600">Status:</label>
-            <select v-model="filters.status" class="input h-11">
-              <option value="all">Todos</option>
-              <option value="paid">Pagos</option>
-              <option value="overdue">Vencidos</option>
-              <option value="open">Em aberto</option>
-              <option value="gain">Ganho</option>
-              <option value="buy">Compra</option>
-            </select>
-          </div>
-          <div>
-            <label class="text-sm text-gray-600">Buscar:</label>
-            <input v-model="filters.search" placeholder="Descrição ou categoria" class="input" />
-          </div>
+    <div class="bg-white p-4 sm:p-6 rounded-xl shadow mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">De:</label>
+          <input type="date" v-model="filters.from" class="input w-full" />
+        </div>
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Até:</label>
+          <input type="date" v-model="filters.to" class="input w-full" />
+        </div>
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Categoria:</label>
+          <select v-model="filters.category" class="input w-full h-11">
+            <option value="all">Todas</option>
+            <option v-for="cat in categories" :key="cat.name" :value="cat.name">{{ cat.name }}</option>
+            <option v-if="hasDebts" value="Dívida">Dívida</option>
+            <option v-if="hasRevenues" value="Receita">Receita</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Status:</label>
+          <select v-model="filters.status" class="input w-full h-11">
+            <option value="all">Todos</option>
+            <option value="paid">Pagos</option>
+            <option value="overdue">Vencidos</option>
+            <option value="open">Em aberto</option>
+            <option value="gain">Ganho</option>
+            <option value="buy">Compra</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Buscar:</label>
+          <input v-model="filters.search" placeholder="Descrição ou categoria" class="input w-full" />
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-4 sm:p-6 overflow-auto">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+        <h2 class="text-lg font-semibold text-gray-700">Lançamentos</h2>
+        <div class="flex flex-wrap gap-2 text-gray-700" title="Planilha">
+          <span class="flex items-center font-semibold">Baixar</span>
+          <button @click="download('excel')" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"><i class="fa-solid fa-download"></i></button>
         </div>
       </div>
 
-      <div class="bg-white rounded-xl shadow p-4">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-lg font-semibold text-gray-700">Lançamentos</h2>
-          <div class="space-x-2">
-            <button @click="download('pdf')" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">PDF</button>
-            <button @click="download('excel')" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">Excel</button>
-            <button @click="download('docx')" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">Word</button>
-          </div>
-        </div>
-
-        <table class="w-full text-sm text-left text-gray-700">
+      <div class="w-full overflow-x-auto">
+        <table class="min-w-full text-sm text-left text-gray-700">
           <thead>
-            <tr class="border-b border-gray-200">
-              <th class="px-4 py-2">Data</th>
-              <th class="px-4 py-2">Descrição</th>
-              <th class="px-4 py-2">Categoria</th>
-              <th class="px-4 py-2">Status</th>
-              <th class="px-4 py-2">Valor</th>
+            <tr class="border-b border-gray-200 bg-gray-50">
+              <th class="px-4 py-2 whitespace-nowrap">Data</th>
+              <th class="px-4 py-2 whitespace-nowrap">Descrição</th>
+              <th class="px-4 py-2 whitespace-nowrap">Categoria</th>
+              <th class="px-4 py-2 whitespace-nowrap">Status</th>
+              <th class="px-4 py-2 whitespace-nowrap">Valor</th>
             </tr>
           </thead>
           <tbody>
-            <tr
-              v-for="(item, index) in filteredTransactions"
-              :key="index"
-              class="border-b border-gray-100 hover:bg-gray-50"
-            >
+            <tr v-for="(item, index) in filteredTransactions" :key="index" class="border-b border-gray-100 hover:bg-gray-50">
               <td class="px-4 py-2">{{ new Date(item.date).toLocaleDateString('pt-BR') }}</td>
               <td class="px-4 py-2">{{ item.description }}</td>
               <td class="px-4 py-2">{{ item.category }}</td>
               <td class="px-4 py-2">
                 <span :class="{
-                    'text-green-600': item.status === 'paid',
-                    'text-red-500': item.status === 'overdue',
-                    'text-yellow-500': item.status === 'open',
-                    'text-blue-600': item.status === 'gain',
-                    'text-orange-500': item.status === 'buy',
+                  'text-green-600': item.status === 'paid',
+                  'text-red-500': item.status === 'overdue',
+                  'text-yellow-500': item.status === 'open',
+                  'text-blue-600': item.status === 'gain',
+                  'text-orange-500': item.status === 'buy'
                 }">
-                    {{ 
+                  {{ 
                     item.category === 'Dívida' ? (
-                        item.status === 'paid' ? 'Pago' : 
-                        item.status === 'overdue' ? 'Vencido' : 
-                        'Em aberto'
+                      item.status === 'paid' ? 'Pago' : 
+                      item.status === 'overdue' ? 'Vencido' : 
+                      'Em aberto'
                     ) : item.status === 'paid' ? 'Pago' : 
                     item.status === 'overdue' ? 'Vencido' : 
                     item.status === 'open' ? 'Em aberto' : 
                     item.status === 'gain' ? 'Ganho' : 
                     'Compra' 
-                    }}
+                  }}
                 </span>
-                </td>
+              </td>
               <td class="px-4 py-2 font-medium" :class="item.amount > 0 ? 'text-green-600' : 'text-red-500'">
                 {{ item.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }}
               </td>
@@ -107,11 +100,53 @@
       </div>
     </div>
   </div>
+
+  <!-- Tabela oculta para exportação em Excel -->
+  <table id="exportTable" v-show="showExport" style="position:absolute; left:-9999px;">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Descrição</th>
+        <th>Categoria</th>
+        <th>Status</th>
+        <th>Valor</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(t, i) in filteredTransactions" :key="'export-' + i">
+        <td>{{ new Date(t.date).toLocaleDateString('pt-BR') }}</td>
+        <td>{{ t.description }}</td>
+        <td>{{ t.category }}</td>
+        <td>
+          {{
+            t.category === 'Dívida'
+              ? t.status === 'paid' ? 'Pago' :
+                t.status === 'overdue' ? 'Vencido' : 'Em aberto'
+              : t.status === 'paid' ? 'Pago' :
+                t.status === 'overdue' ? 'Vencido' :
+                t.status === 'open' ? 'Em aberto' :
+                t.status === 'gain' ? 'Ganho' : 'Compra'
+          }}
+        </td>
+        <td :style="{ color: t.amount < 0 ? 'red' : 'green', textAlign: 'right' }">
+          R$ {{ t.amount.toFixed(2) }}
+        </td>
+      </tr>
+
+      <tr>
+        <td colspan="4" style="text-align: right; font-weight: bold;">Total</td>
+        <td :style="{ color: totalAmount < 0 ? 'red' : 'blue' }">
+          R$ {{ totalAmount.toFixed(2) }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </template>
 
 <script>
 import authService from '../services/authService';
 import userService from '../services/userService';
+import { TableToExcel } from '../assets/scripts/helper';
 
 export default {
   name: 'RelatoryPage',
@@ -125,6 +160,7 @@ export default {
         search: '',
         category: 'all',
       },
+      showExport: false,
       hasDebts: false,
       hasRevenues: false,
       categories: [],
@@ -232,8 +268,18 @@ export default {
       }
     },
     download(format) {
-      alert(`Exportação ${format.toUpperCase()} ainda não implementada.`);
-    },
+      if (format === 'excel') {
+        this.showExport = true;
+        this.$nextTick(() => {
+          TableToExcel('exportTable', 'Relatorio');
+          this.showExport = false;
+        });
+      } else if (format === 'csv') {
+        JSONToCSVConvertor(this.filteredTransactions, 'Relatório Financeiro', true);
+      } else {
+        alert(`Formato ${format.toUpperCase()} não suportado.`);
+      }
+    }
   },
 };
 </script>
