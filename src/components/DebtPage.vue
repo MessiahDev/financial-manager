@@ -26,8 +26,7 @@
         />
         <input
             v-model="newDebt.dueDate"
-            type="text"
-            v-mask="'##/##/####'"
+            type="date"
             placeholder="Data de vencimento"
             required
             class="input text-right"
@@ -132,7 +131,7 @@ export default {
             newDebt: {
                 description: '',
                 amount: null,
-                dueDate: '',
+                dueDate: new Date().toISOString().split('T')[0],
                 creditor: '',
                 isPaid: false,
                 userId: null,
@@ -184,9 +183,7 @@ export default {
         async saveDebt() {
             try {
                 if (!this.userId) return;
-                const [day, month, year] = this.newDebt.dueDate.split('/');
-                const isoDate = new Date(year, month - 1, day);
-                const debtData = { ...this.newDebt, userId: this.userId, dueDate: isoDate.toISOString() };
+                const debtData = { ...this.newDebt, userId: this.userId, dueDate: new Date(this.newDebt.dueDate).toISOString()};
                 this.isLoading = true;
                 await debtService.createDebt(debtData);
                 await this.fetchDebts();

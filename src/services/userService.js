@@ -13,6 +13,16 @@ const userService = {
         }
     },
 
+    getUserByIdAllIncludes: async (userId) => {
+        try {
+            const response = await api.get(`/User/allIncludes/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Erro ao buscar o usuário:', error);
+            throw error;
+        }
+    },
+
     updateUserProfile: async (userId, userData) => {
         try {
             const response = await api.put(`/User/${userId}`, userData);

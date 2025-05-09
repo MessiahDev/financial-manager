@@ -97,6 +97,7 @@
           { path: '/receita', label: 'Receita' },
           { path: '/despesa', label: 'Despesa' },
           { path: '/divida', label: 'Dívida' },
+          { path: '/relatorio', label: 'Relatório' },
         ],
       };
     },

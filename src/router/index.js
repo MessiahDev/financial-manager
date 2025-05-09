@@ -66,6 +66,12 @@ const routes = [
         path: '/reenviar-confirmacao-email',
         name: 'ResendConfirmationEmailView',
         component: () => import('../views/ResendConfirmationEmailView.vue')
+    },
+    {
+        path: '/relatorio',
+        name: 'RelatoryView',
+        component: () => import('../views/RelatoryView.vue'),
+        meta: { requiresAuth: true }
     }
 ];
 
