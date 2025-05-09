@@ -105,8 +105,12 @@
           Voltar ao Login
         </button>
 
-        <div class="flex justify-center items-center mt-6 h-10">
-          <Loader v-if="isLoading" />
+        <div
+            v-if="isLoading"
+            class="absolute inset-0 bg-white bg-opacity-60 backdrop-blur-sm flex flex-col items-center justify-center rounded-2xl z-10"
+        >
+            <Loader />
+            <p class="mt-4 font-medium text-gray-800">Aguarde, verificando domínio de e-mail...</p>
         </div>
       </form>
     </div>
@@ -189,9 +193,14 @@ export default {
           };
 
           this.isLoading = true;
-          await authService.register(userData);
+          const response = await authService.register(userData);
           this.isLoading = false;
 
+          if (!response || !response.success) {
+            await showError('Não foi possível completar o cadastro.', response?.message || 'Erro desconhecido.');
+            return;
+          }
+          
           await showSuccess('Cadastro realizado!', `Um email de verificação foi enviado para ${this.email}. Caso não visualize, verifique sua caixa de spam.`);
 
           this.name = '';

@@ -82,8 +82,12 @@
                 </button>
             </div>
 
-            <div v-if="isLoading" class="flex justify-center mt-6">
+            <div
+                v-if="isLoading"
+                class="absolute inset-0 bg-white bg-opacity-60 backdrop-blur-sm flex flex-col items-center justify-center rounded-2xl z-10"
+            >
                 <Loader />
+                <p class="mt-4 font-medium text-gray-800">Aguarde, verificando domínio de e-mail...</p>
             </div>
         </div>
     </div>
@@ -200,48 +204,48 @@ export default {
         async updateProfile() {
             try {
                 if (!this.isPasswordValid) {
-                    await showError('A senha não cumpre os critérios mínimos de segurança.');
-                    return;
+                return await showError('A senha não cumpre os critérios mínimos de segurança.');
                 }
 
                 const userId = await this.fetchUserId();
                 const user = await authService.getProfile(userId);
-
-                const payload = {
-                    name: this.form.name,
-                    email: this.form.email
-                };
-
-                if (this.form.password.trim() !== '') {
-                    if (this.form.password !== this.confirmPassword) {
-                        await showError('Atenção!', 'As senhas não coincidem.');
-                        return;
-                    }
-                    payload.password = this.form.password;
-                }
-
                 const oldEmail = user.email;
 
+                const payload = {
+                name: this.form.name,
+                email: this.form.email,
+                };
+
+                if (this.form.password.trim()) {
+                if (this.form.password !== this.confirmPassword) {
+                    return await showError('Atenção!', 'As senhas não coincidem.');
+                }
+                payload.password = this.form.password;
+                }
+
                 this.isLoading = true;
-
                 const response = await userService.updateUserProfile(user.id, payload);
-                await this.authStore.fetchUserProfile();
-
                 this.isLoading = false;
+
+                if (!response || !response.success) {
+                return await showError('Não foi possível completar a atualização.', response?.message || 'Erro desconhecido.');
+                }
+
+                await this.authStore.fetchUserProfile();
                 this.updateSuccess = true;
                 this.form.password = '';
                 this.confirmPassword = '';
-
                 await showSuccess('Sucesso', 'Perfil atualizado com sucesso.');
 
-                if (this.form.email.trim().toLowerCase() !== oldEmail.trim().toLowerCase()) {
-                    await authService.logout();
-                    router.push('/');
+                const novoEmail = this.form.email.trim().toLowerCase();
+                if (novoEmail !== oldEmail.trim().toLowerCase()) {
+                await authService.logout();
+                router.push('/');
                 }
 
             } catch (error) {
                 this.isLoading = false;
-                await showError('Erro ao atualizar perfil:', error)
+                await showError('Erro ao atualizar perfil:', error);
             }
         }
     }
