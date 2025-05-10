@@ -1,13 +1,13 @@
 <template>
-    <div class="min-h-screen flex flex-col mx-auto pt-24 font-sans">
-        <div class="max-w-5xl mx-auto px-4">
+    <div class="font-sans">
+        <div class="max-w-5xl mx-auto pt-24 pb-10 px-4">
         <h1 class="text-center text-3xl font-bold text-gray-800 mb-12">
         Gerenciador de Dívidas
         </h1>
 
         <form
         @submit.prevent="saveDebt"
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
         >
         <input
             v-model="newDebt.description"

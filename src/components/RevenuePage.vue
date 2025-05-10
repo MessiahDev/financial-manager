@@ -1,13 +1,13 @@
 <template>
   <div class="font-sans">
     <div class="max-w-5xl mx-auto pt-24 pb-10 px-4">
-      <h1 class="text-center text-3xl font-bold text-gray-800">
+      <h1 class="text-center text-3xl font-bold text-gray-800 mb-12">
         Gerenciador de Receitas
       </h1>
 
       <form
         @submit.prevent="saveRevenue"
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-12"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4"
       >
         <input
           v-model="newRevenue.description"
