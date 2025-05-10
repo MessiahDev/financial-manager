@@ -48,10 +48,8 @@
 <script>
 import { GChart } from 'vue-google-charts';
 import authService from '../services/authService';
-import debtService from '../services/debtService';
+import userService from '../services/userService';
 import FinanceCard from '../components/FinanceCard.vue';
-import revenueService from '../services/revenueService';
-import expenseService from '../services/expenseService';
 
 export default {
   name: 'HomePage',
@@ -61,6 +59,7 @@ export default {
   },
   data() {
     return {
+      userId: null,
       totalRevenues: 0,
       totalExpenses: 0,
       totalDebts: 0,
@@ -86,21 +85,23 @@ export default {
     };
   },
 
-  mounted() {
-    this.fetchChartData();
+  async mounted() {
+    try {
+      this.userId = await this.fetchUserId();
+      if (this.userId) {
+        this.fetchChartData();
+      }
+    } catch (error) {
+      console.error("Erro ao montar o componente:", error);
+    }
   },
 
   methods: {
     async fetchChartData() {
       try {
-        const user = await authService.getProfile();
-        const userId = user.id;
+        const user = await userService.getUserByIdAllIncludes(this.userId);
 
-        const [revenues, expenses, debts] = await Promise.all([
-          revenueService.getRevenuesByUserId(userId),
-          expenseService.getExpensesByUserId(userId),
-          debtService.getDebtsByUserId(userId),
-        ]);
+        const { revenues, expenses, debts } = user;
 
         this.calculateTotals(revenues, expenses, debts);
         this.buildRevenuesVsExpensesChart(revenues, expenses);
@@ -178,6 +179,11 @@ export default {
       this.openDebtsCount = openDebts.length;
       this.openDebtsTotal = openDebts.reduce((acc, d) => acc + d.amount, 0);
     },
+
+    async fetchUserId() {
+      const user = await authService.getProfile();
+      return user.id;
+    }
   },
 };
 </script>
