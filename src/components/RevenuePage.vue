@@ -1,87 +1,105 @@
 <template>
-    <div class="max-w-5xl mx-auto py-24 font-sans px-4">
-        <h1 class="text-center text-3xl font-bold text-gray-800 mb-12">
+  <div class="font-sans">
+    <div class="max-w-5xl mx-auto pt-24 pb-10 px-4">
+      <h1 class="text-center text-3xl font-bold text-gray-800">
         Gerenciador de Receitas
-        </h1>
-        
-        <form
+      </h1>
+
+      <form
         @submit.prevent="saveRevenue"
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 mb-12"
-        >
+      >
         <input
-            v-model="newRevenue.description"
-            type="text"
-            placeholder="Descrição da receita"
-            required
-            class="input"
-            aria-label="Descrição da receita"
+          v-model="newRevenue.description"
+          type="text"
+          placeholder="Descrição da receita"
+          required
+          class="input"
+          aria-label="Descrição da receita"
         />
         <input
-            v-model="formattedAmount"
-            type="text"
-            placeholder="Valor"
-            required
-            class="input text-right"
-            aria-label="Valor"
+          v-model="formattedAmount"
+          type="text"
+          placeholder="Valor"
+          required
+          class="input text-right"
+          aria-label="Valor"
         />
         <div class="col-span-full flex justify-end">
-            <button
+          <button
             type="submit"
             :disabled="isLoading"
             class="btn-primary"
-            >
+          >
             <i class="fa-regular fa-floppy-disk mr-1"></i>
             Salvar
-            </button>
+          </button>
         </div>
-        </form>
+      </form>
+    </div>
 
+    <div class="w-full bg-gray-200 flex-grow border border-t-gray-300 py-10 px-4">
+      <div class="max-w-5xl mx-auto">
         <ul class="space-y-2">
-        <li
+          <li
             v-for="(revenue, index) in revenues"
             :key="revenue.id"
             class="flex justify-between items-center p-3 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-zinc-100"
-        >
+          >
             <span class="text-sm text-gray-700">
-            <strong>{{ revenue.description }}</strong> - 
-            {{ Number(revenue.amount).toMoeda(true) }}
+              <strong>{{ revenue.description }}</strong> -
+              {{ Number(revenue.amount).toMoeda(true) }}
             </span>
             <div class="flex gap-2">
-            <button @click="startEdit(index)" class="btn-green">
+              <button @click="startEdit(index)" class="btn-green">
                 <i class="fa-regular fa-pen-to-square mr-1"></i>
                 Editar
-            </button>
-            <button @click="deleteRevenue(index)" class="btn-red">
+              </button>
+              <button @click="deleteRevenue(index)" class="btn-red">
                 <i class="fa-regular fa-trash-can mr-1"></i>
                 Deletar
-            </button>
+              </button>
             </div>
-        </li>
+          </li>
         </ul>
 
         <div class="flex justify-center items-center mt-10 h-10">
-            <Loader v-if="isLoading" />
+          <Loader v-if="isLoading" />
         </div>
-
-        <div
-        v-if="showEditModal"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-        >
-        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
-            <h2 class="text-center text-xl font-semibold text-gray-800 mb-4">
-            Editar Receita
-            </h2>
-            <form @submit.prevent="submitEdit">
-            <input v-model="editingRevenue.description" placeholder="Título" required class="input mb-4" />
-            <input v-model="formattedEditAmount" type="text" placeholder="Valor" class="input text-right mb-4" />
-            <div class="flex flex-col sm:flex-row justify-end gap-2">
-                <button type="submit" class="btn-primary">Salvar</button>
-                <button @click.prevent="closeModal" class="btn-secondary">Cancelar</button>
-            </div>
-            </form>
-        </div>
-        </div>
+      </div>
     </div>
+
+    <div
+      v-if="showEditModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
+        <h2 class="text-center text-xl font-semibold text-gray-800 mb-4">
+          Editar Receita
+        </h2>
+        <form @submit.prevent="submitEdit">
+          <input
+            v-model="editingRevenue.description"
+            placeholder="Título"
+            required
+            class="input mb-4"
+          />
+          <input
+            v-model="formattedEditAmount"
+            type="text"
+            placeholder="Valor"
+            class="input text-right mb-4"
+          />
+          <div class="flex flex-col sm:flex-row justify-end gap-2">
+            <button type="submit" class="btn-primary">Salvar</button>
+            <button @click.prevent="closeModal" class="btn-secondary">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>

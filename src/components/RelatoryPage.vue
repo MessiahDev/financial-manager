@@ -1,8 +1,8 @@
 <template>
-  <div class="max-w-7xl mx-auto mt-12 py-16 px-4 sm:px-6 lg:px-8 font-sans">
-    <h1 class="text-center text-3xl sm:text-4xl font-bold text-gray-800 mb-10">Relatório Financeiro</h1>
+  <div class="max-w-7xl mx-auto mt-12 pt-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <h1 class="text-center text-3xl font-bold text-gray-800 mb-2">Relatório Financeiro</h1>
 
-    <div class="bg-white p-4 sm:p-6 rounded-xl shadow mb-8">
+    <div class="p-4 sm:p-6 rounded-xl">
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         <div>
           <label class="block text-sm text-gray-600 mb-1">De:</label>
@@ -38,41 +38,47 @@
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="bg-white rounded-xl shadow p-4 sm:p-6 overflow-auto">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-        <h2 class="text-lg font-semibold text-gray-700">Lançamentos</h2>
-        <div class="flex flex-wrap gap-2 text-gray-700" title="Planilha">
-          <span class="flex items-center font-semibold">Baixar</span>
-          <button @click="download('excel')" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"><i class="fa-solid fa-download"></i></button>
+  <div class="bg-gray-200 w-full min-h-screen border border-t-gray-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-white rounded-xl shadow p-4 mt-10 sm:p-6 overflow-auto">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+          <h2 class="text-lg font-semibold text-gray-700">Lançamentos</h2>
+          <div class="flex flex-wrap gap-2 text-gray-700" title="Planilha">
+            <span class="flex items-center font-semibold">Baixar</span>
+            <button @click="download('excel')" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"><i class="fa-solid fa-download"></i></button>
+          </div>
         </div>
-      </div>
 
-      <div class="w-full overflow-x-auto">
-        <table class="min-w-full text-sm text-left text-gray-700">
-          <thead>
-            <tr class="border-b border-gray-200 bg-gray-50">
-              <th class="px-4 py-2 whitespace-nowrap">Data</th>
-              <th class="px-4 py-2 whitespace-nowrap">Descrição</th>
-              <th class="px-4 py-2 whitespace-nowrap">Categoria</th>
-              <th class="px-4 py-2 whitespace-nowrap">Status</th>
-              <th class="px-4 py-2 whitespace-nowrap">Valor</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(item, index) in filteredTransactions" :key="index" class="border-b border-gray-100 hover:bg-gray-50">
-              <td class="px-4 py-2">{{ new Date(item.date).toLocaleDateString('pt-BR') }}</td>
-              <td class="px-4 py-2">{{ item.description }}</td>
-              <td class="px-4 py-2">{{ item.category }}</td>
-              <td class="px-4 py-2">
-                <span :class="{
-                  'text-green-600': item.status === 'paid',
-                  'text-red-500': item.status === 'overdue',
-                  'text-yellow-500': item.status === 'open',
-                  'text-blue-600': item.status === 'gain',
-                  'text-orange-500': item.status === 'buy'
-                }">
-                  {{ 
+        <div class="w-full overflow-x-auto">
+          <table class="min-w-full text-sm text-left text-gray-700">
+            <thead>
+              <tr class="border-b border-gray-200 bg-gray-50">
+                <th class="px-4 py-2 whitespace-nowrap">Data</th>
+                <th class="px-4 py-2 whitespace-nowrap">Descrição</th>
+                <th class="px-4 py-2 whitespace-nowrap">Categoria</th>
+                <th class="px-4 py-2 whitespace-nowrap">Status</th>
+                <th class="px-4 py-2 whitespace-nowrap">Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(item, index) in filteredTransactions" :key="index" class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="px-4 py-2">{{ new Date(item.date).toLocaleDateString('pt-BR') }}</td>
+                <td class="px-4 py-2">{{ item.description }}</td>
+                <td class="px-4 py-2">{{ item.category }}</td>
+                <td class="px-4 py-2">
+                  <span
+                  class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                  :class="{
+                    'bg-green-200 text-green-700': item.status === 'paid',
+                    'bg-red-200 text-red-700': item.status === 'overdue',
+                    'bg-yellow-200 text-yellow-700': item.status === 'open',
+                    'bg-blue-200 text-blue-700': item.status === 'gain',
+                    'bg-orange-200 text-orange-700': item.status === 'buy'
+                  }"
+                >
+                  {{
                     item.category === 'Dívida' ? (
                       item.status === 'paid' ? 'Pago' : 
                       item.status === 'overdue' ? 'Vencido' : 
@@ -84,19 +90,20 @@
                     'Compra' 
                   }}
                 </span>
-              </td>
-              <td class="px-4 py-2 font-medium" :class="item.amount > 0 ? 'text-green-600' : 'text-red-500'">
-                {{ item.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }}
-              </td>
-            </tr>
-            <tr class="font-bold bg-gray-50">
-              <td colspan="4" class="px-4 py-2 text-right">Total</td>
-              <td class="px-4 py-2 text-blue-700">
-                {{ totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </td>
+                <td class="px-4 py-2 font-medium" :class="item.amount > 0 ? 'text-green-600' : 'text-red-500'">
+                  {{ item.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }}
+                </td>
+              </tr>
+              <tr class="font-bold bg-gray-50">
+                <td colspan="4" class="px-4 py-2 text-right">Total</td>
+                <td class="px-4 py-2 text-blue-700">
+                  {{ totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

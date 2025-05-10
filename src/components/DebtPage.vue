@@ -1,12 +1,13 @@
 <template>
-    <div class="max-w-5xl mx-auto py-24 font-sans px-4">
+    <div class="min-h-screen flex flex-col mx-auto pt-24 font-sans">
+        <div class="max-w-5xl mx-auto px-4">
         <h1 class="text-center text-3xl font-bold text-gray-800 mb-12">
         Gerenciador de Dívidas
         </h1>
 
         <form
         @submit.prevent="saveDebt"
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5"
         >
         <input
             v-model="newDebt.description"
@@ -55,7 +56,10 @@
             </button>
         </div>
         </form>
-
+        </div>
+        
+        <div class="w-full bg-gray-200 pt-6 flex-grow border border-t-gray-300">
+        <div class="max-w-5xl mx-auto px-4 py-4">
         <ul class="space-y-2">
         <li
             v-for="(debt, index) in debts"
@@ -83,6 +87,7 @@
             </div>
         </li>
         </ul>
+        </div>
 
         <div class="flex justify-center items-center mt-10 h-10">
         <Loader v-if="isLoading" />
@@ -110,6 +115,7 @@
                 <button @click.prevent="closeModal" class="btn-secondary">Cancelar</button>
             </div>
             </form>
+        </div>
         </div>
         </div>
     </div>

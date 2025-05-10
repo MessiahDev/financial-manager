@@ -1,109 +1,130 @@
 <template>
-    <div class="max-w-5xl mx-auto py-24 font-sans px-4">
-        <h1 class="text-center text-3xl font-bold text-gray-800 mb-12">
+  <div class="font-sans">
+    <div class="max-w-5xl mx-auto pt-24 pb-10 px-4">
+      <h1 class="text-center text-3xl font-bold text-gray-800 mb-12">
         Gerenciador de Despesas
-        </h1>
+      </h1>
 
-        <form
+      <form
         @submit.prevent="saveExpense"
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+      >
+        <input
+          v-model="form.description"
+          type="text"
+          placeholder="Descrição da despesa"
+          required
+          class="input"
+          aria-label="Descrição da despesa"
+        />
+        <input
+          v-model="formattedAmount"
+          type="text"
+          placeholder="Valor"
+          required
+          class="input text-right"
+          aria-label="Valor"
+        />
+        <select
+          v-model="form.categoryId"
+          required
+          class="input text-gray-400"
         >
-        <input
-            v-model="form.description"
-            type="text"
-            placeholder="Descrição da despesa"
-            required
-            class="input"
-            aria-label="Descrição da despesa"
-        />
-        <input
-            v-model="formattedAmount"
-            type="text text-right"
-            placeholder="Valor"
-            required
-            class="input text-right"
-            aria-label="Valor"
-        />
-        <select v-model="form.categoryId" 
-            required
-            class="input text-gray-400">
-            <option value="" disabled>
-            Selecione uma categoria
-            </option>
-            <option v-for="category in categories"
+          <option value="" disabled>Selecione uma categoria</option>
+          <option
+            v-for="category in categories"
             :key="category.id"
-            :value="category.id">
+            :value="category.id"
+          >
             {{ category.name }}
-            </option>
+          </option>
         </select>
         <div class="col-span-full flex justify-end">
-            <button
-            type="submit"
-            :disabled="isLoading"
-            class="btn-primary"
-            >
+          <button type="submit" :disabled="isLoading" class="btn-primary">
             <i class="fa-regular fa-floppy-disk mr-1"></i>
             Salvar
-            </button>
+          </button>
         </div>
-        </form>
+      </form>
+    </div>
 
+    <div class="w-full bg-gray-200 flex-grow border border-t-gray-300 py-10 px-4">
+      <div class="max-w-5xl mx-auto">
         <ul class="space-y-2">
-        <li
+          <li
             v-for="(expense, index) in expenses"
             :key="expense.id"
             class="flex justify-between items-center p-3 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-zinc-100"
-        >
+          >
             <span class="text-sm text-gray-700">
-            <strong>{{ expense.description }}</strong> - 
-            {{ Number(expense.amount).toMoeda(true) }} 
-            ({{ expense.categoryName }})
+              <strong>{{ expense.description }}</strong> -
+              {{ Number(expense.amount).toMoeda(true) }}
+              ({{ expense.categoryName }})
             </span>
             <div class="flex gap-2">
-            <button @click="startEdit(index)" class="btn-green">
+              <button @click="startEdit(index)" class="btn-green">
                 <i class="fa-regular fa-pen-to-square mr-1"></i>
                 Editar
-            </button>
-            <button @click="deleteExpense(index)" class="btn-red">
+              </button>
+              <button @click="deleteExpense(index)" class="btn-red">
                 <i class="fa-regular fa-trash-can mr-1"></i>
                 Deletar
-            </button>
+              </button>
             </div>
-        </li>
+          </li>
         </ul>
 
         <div class="flex justify-center items-center mt-10 h-10">
-            <Loader v-if="isLoading" />
+          <Loader v-if="isLoading" />
         </div>
-
-        <div
-        v-if="showEditModal"
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-        >
-        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
-            <h2 class="text-center text-xl font-semibold text-gray-800 mb-4">
-            Editar Despesa
-            </h2>
-            <form @submit.prevent="submitEdit">
-            <input v-model="form.description" placeholder="Título" required class="input mb-4" />
-            <input v-model="formattedEditAmount" type="text" placeholder="Valor" class="input text-right mb-4" />
-            <select v-model="form.categoryId" required
-                class="w-full p-2 mb-4 border border-gray-300 rounded-md text-gray-600 focus:outline-none focus:border-blue-500">
-                <option value="" disabled>Selecione uma categoria</option>
-                    <option v-for="category in categories"
-                    :key="category.id"
-                    :value="category.id">
-                    {{ category.name }}
-                </option>
-            </select>
-            <div class="flex flex-col sm:flex-row justify-end gap-2">
-                <button type="submit" class="btn-primary">Salvar</button>
-                <button @click.prevent="closeModal" class="btn-secondary">Cancelar</button>
-            </div>
-            </form>
-        </div>
-        </div>
+      </div>
     </div>
+
+    <div
+      v-if="showEditModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
+        <h2 class="text-center text-xl font-semibold text-gray-800 mb-4">
+          Editar Despesa
+        </h2>
+        <form @submit.prevent="submitEdit">
+          <input
+            v-model="form.description"
+            placeholder="Título"
+            required
+            class="input mb-4"
+          />
+          <input
+            v-model="formattedEditAmount"
+            type="text"
+            placeholder="Valor"
+            class="input text-right mb-4"
+          />
+          <select
+            v-model="form.categoryId"
+            required
+            class="w-full p-2 mb-4 border border-gray-300 rounded-md text-gray-600 focus:outline-none focus:border-blue-500"
+          >
+            <option value="" disabled>Selecione uma categoria</option>
+            <option
+              v-for="category in categories"
+              :key="category.id"
+              :value="category.id"
+            >
+              {{ category.name }}
+            </option>
+          </select>
+          <div class="flex flex-col sm:flex-row justify-end gap-2">
+            <button type="submit" class="btn-primary">Salvar</button>
+            <button @click.prevent="closeModal" class="btn-secondary">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
