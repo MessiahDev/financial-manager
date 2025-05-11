@@ -1,57 +1,61 @@
 <template>
-  <div class="font-sans">
-    <div class="max-w-5xl mx-auto pt-24 pb-10 px-4">
-      <h1 class="text-center text-3xl font-bold text-gray-800 mb-12">
-        Gerenciador de Categorias
-      </h1>
+  <div class="font-sans bg-stone-250 min-h-screen mb-12 flex flex-col">
+    <div class="w-full mx-auto pt-24 pb-8 px-4">
+      <div class="max-w-5xl mx-auto px-4">
+        <h1 class="text-center text-3xl font-bold text-gray-800 mb-12">
+          Gerenciador de Categorias
+        </h1>
 
-      <form
-        @submit.prevent="saveCategory"
-        class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-1 gap-4"
-      >
-        <input
-          v-model="newCategory.name"
-          type="text"
-          placeholder="Descrição da categoria"
-          required
-          class="input"
-          aria-label="Descrição da categoria"
-        />
-        <div class="col-span-full flex justify-end">
-          <button type="submit" :disabled="isLoading" class="btn-primary">
-            <i class="fa-regular fa-floppy-disk mr-1"></i>
-            Salvar
-          </button>
-        </div>
-      </form>
+        <form
+          @submit.prevent="saveCategory"
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-4"
+        >
+          <input
+            v-model="newCategory.name"
+            type="text"
+            placeholder="Descrição da categoria"
+            required
+            class="input"
+            aria-label="Descrição da categoria"
+          />
+          <div class="col-span-full flex justify-end">
+            <button type="submit" :disabled="isLoading" class="btn-primary">
+              <i class="fa-regular fa-floppy-disk mr-1"></i>
+              Salvar
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-    
-    <div class="w-full bg-gray-200 flex-grow border border-t-gray-300 py-10 px-4">
-      <div class="max-w-5xl mx-auto">
-        <ul class="space-y-2">
+
+    <div class="w-full border-t border-gray-300"></div>
+
+    <div class="w-full bg-gray-200">
+      <div class="max-w-5xl mx-auto px-4 py-8">
+        <ul class="space-y-4">
           <li
             v-for="(category, index) in categories"
             :key="category.id"
-            class="flex justify-between items-center p-3 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-zinc-100"
+            class="p-4 bg-white border border-gray-300 rounded-xl shadow transition hover:shadow-md"
           >
-            <span class="text-sm text-gray-700">
-              <strong>{{ category.name }}</strong>
-            </span>
-            <div class="flex gap-2">
-              <button @click="startEdit(index)" class="btn-green">
-                <i class="fa-regular fa-pen-to-square mr-1"></i>
-                Editar
-              </button>
-              <button @click="deleteCategory(index)" class="btn-red">
-                <i class="fa-regular fa-trash-can mr-1"></i>
-                Deletar
-              </button>
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+              <p class="text-lg font-semibold text-gray-800">{{ category.name }}</p>
+              <div class="flex gap-2">
+                <button @click="startEdit(index)" class="btn-green">
+                  <i class="fa-regular fa-pen-to-square mr-1"></i>
+                  Editar
+                </button>
+                <button @click="deleteCategory(index)" class="btn-red">
+                  <i class="fa-regular fa-trash-can mr-1"></i>
+                  Deletar
+                </button>
+              </div>
             </div>
           </li>
         </ul>
 
-        <div class="flex justify-center items-center mt-10 h-10">
-          <Loader v-if="isLoading" />
+        <div v-if="isLoading" class="flex justify-center items-center mt-8 h-10">
+          <Loader />
         </div>
       </div>
     </div>
@@ -80,6 +84,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 import Loader from "../components/Loader.vue";

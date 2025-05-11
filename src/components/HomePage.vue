@@ -1,13 +1,30 @@
 <template>
-  <section class="container mx-auto pt-12 px-4 font-sans min-h-screen">
-    <div class="text-center my-12">
+  <section class="container mx-auto py-12 px-4 mb-12 font-sans min-h-screen">
+    <div class="text-center mt-12 mb-8">
       <h1 class="text-3xl font-bold text-gray-800">Resumo Financeiro</h1>
       <p class="text-gray-600 mt-2">
         Acompanhe seus dados financeiros de forma visual e intuitiva.
       </p>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
+    <div class="flex flex-col sm:flex-row items-center justify-start gap-4 my-8">
+      <label class="flex items-center gap-2 text-gray-700">
+        Início:
+        <input type="date" v-model="startDate" class="input" />
+      </label>
+      <label class="flex items-center gap-2 text-gray-700">
+        Fim:
+        <input type="date" v-model="endDate" class="input" />
+      </label>
+      <button
+        @click="applyDateFilter"
+        class="bg-none text-gray-600 font-semibold px-4 py-2 border border-solid border-gray-600/50 rounded hover:bg-gray-300"
+      >
+        Filtrar
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 my-8">
       <FinanceCard title="Receitas Totais" :value="totalRevenues.toMoeda(true)" />
       <FinanceCard title="Despesas Totais" :value="totalExpenses.toMoeda(true)" />
       <FinanceCard title="Economias" :value="Number(totalSavings).toMoeda(true)" />
@@ -60,6 +77,8 @@ export default {
   data() {
     return {
       userId: null,
+      startDate: '',
+      endDate: '',
       totalRevenues: 0,
       totalExpenses: 0,
       totalDebts: 0,
@@ -97,20 +116,46 @@ export default {
   },
 
   methods: {
-    async fetchChartData() {
+    async fetchChartData(startDate = null, endDate = null) {
       try {
         const user = await userService.getUserByIdAllIncludes(this.userId);
+        let { revenues, expenses, debts } = user;
 
-        const { revenues, expenses, debts } = user;
+        if (startDate && endDate) {
+          let start = new Date(startDate);
+          let end = new Date(endDate);
+
+          if (start > end) [start, end] = [end, start];
+
+          const formatDate = (date) => new Date(date).toISOString().slice(0, 10);
+
+          const inRange = date => {
+            if (!date) return false;
+            const d = formatDate(date);
+            const startStr = formatDate(start);
+            const endStr = formatDate(end);
+            const result = d >= startStr && d <= endStr;
+            return result;
+          };
+
+          revenues = revenues.filter(r => inRange(r.date));
+          expenses = expenses.filter(e => inRange(e.date));
+          debts = debts.filter(d => inRange(d.dueDate));
+        }
 
         this.calculateTotals(revenues, expenses, debts);
         this.buildRevenuesVsExpensesChart(revenues, expenses);
         this.buildExpensesDistributionChart(expenses, debts);
         this.calculateDebtsSummary(debts);
-
       } catch (error) {
         console.error('Erro ao buscar dados para gráficos:', error);
       }
+    },
+
+    applyDateFilter() {
+      if (!this.startDate || !this.endDate) return;
+
+      this.fetchChartData(this.startDate, this.endDate);
     },
 
     calculateTotals(revenues, expenses, debts) {
@@ -183,7 +228,7 @@ export default {
     async fetchUserId() {
       const user = await authService.getProfile();
       return user.id;
-    }
+    },
   },
 };
 </script>

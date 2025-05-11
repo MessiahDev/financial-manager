@@ -1,69 +1,74 @@
 <template>
-  <div class="font-sans">
-    <div class="max-w-5xl mx-auto pt-24 pb-10 px-4">
-      <h1 class="text-center text-3xl font-bold text-gray-800 mb-12">
-        Gerenciador de Receitas
-      </h1>
+  <div class="font-sans bg-stone-250 min-h-screen mb-12 flex flex-col">
+    <div class="w-full mx-auto pt-24 pb-8 px-4">
+      <div class="max-w-5xl mx-auto px-4">
+        <h1 class="text-center text-3xl font-bold text-gray-800 mb-12">
+          Gerenciador de Receitas
+        </h1>
 
-      <form
-        @submit.prevent="saveRevenue"
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4"
-      >
-        <input
-          v-model="newRevenue.description"
-          type="text"
-          placeholder="Descrição da receita"
-          required
-          class="input"
-          aria-label="Descrição da receita"
-        />
-        <input
-          v-model="formattedAmount"
-          type="text"
-          placeholder="Valor"
-          required
-          class="input text-right"
-          aria-label="Valor"
-        />
-        <div class="col-span-full flex justify-end">
-          <button
-            type="submit"
-            :disabled="isLoading"
-            class="btn-primary"
-          >
-            <i class="fa-regular fa-floppy-disk mr-1"></i>
-            Salvar
-          </button>
-        </div>
-      </form>
+        <form @submit.prevent="saveRevenue" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+          <input
+            v-model="newRevenue.description"
+            type="text"
+            placeholder="Descrição da receita"
+            required
+            class="input"
+            aria-label="Descrição da receita"
+          />
+          <input
+            v-model="formattedAmount"
+            type="text"
+            placeholder="Valor"
+            required
+            class="input text-right"
+            aria-label="Valor"
+          />
+          <div class="col-span-full flex justify-end">
+            <button
+              type="submit"
+              :disabled="isLoading"
+              class="btn-primary"
+            >
+              <i class="fa-regular fa-floppy-disk mr-1"></i>
+              Salvar
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
-    <div class="w-full bg-gray-200 flex-grow border border-t-gray-300 py-10 px-4">
-      <div class="max-w-5xl mx-auto">
-        <ul class="space-y-2">
+    <div class="w-full border-t border-gray-300"></div>
+
+    <div class="w-full bg-gray-200">
+      <div class="max-w-5xl mx-auto px-4 py-8">
+        <ul class="space-y-4">
           <li
             v-for="(revenue, index) in revenues"
             :key="revenue.id"
-            class="flex justify-between items-center p-3 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-zinc-100"
+            class="p-4 bg-white border border-gray-300 rounded-xl shadow transition hover:shadow-md"
           >
-            <span class="text-sm text-gray-700">
-              <strong>{{ revenue.description }}</strong> -
-              {{ Number(revenue.amount).toMoeda(true) }}
-            </span>
-            <div class="flex gap-2">
-              <button @click="startEdit(index)" class="btn-green">
-                <i class="fa-regular fa-pen-to-square mr-1"></i>
-                Editar
-              </button>
-              <button @click="deleteRevenue(index)" class="btn-red">
-                <i class="fa-regular fa-trash-can mr-1"></i>
-                Deletar
-              </button>
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+              <div>
+                <p class="text-lg font-semibold text-gray-800 mb-1">{{ revenue.description }}</p>
+                <p class="text-sm text-gray-600">
+                  Valor: {{ Number(revenue.amount).toMoeda(true) }}
+                </p>
+              </div>
+              <div class="flex gap-2 mt-1 sm:mt-0">
+                <button @click="startEdit(index)" class="btn-green">
+                  <i class="fa-regular fa-pen-to-square mr-1"></i>
+                  Editar
+                </button>
+                <button @click="deleteRevenue(index)" class="btn-red">
+                  <i class="fa-regular fa-trash-can mr-1"></i>
+                  Deletar
+                </button>
+              </div>
             </div>
           </li>
         </ul>
 
-        <div class="flex justify-center items-center mt-10 h-10">
+        <div class="flex justify-center items-center mt-8 h-10">
           <Loader v-if="isLoading" />
         </div>
       </div>

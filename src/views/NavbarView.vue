@@ -1,5 +1,5 @@
 <template>
-    <nav class="bg-[#2c3e50] text-white font-sans fixed top-0 left-0 w-full z-10 shadow-md">
+    <nav class="bg-gray-800 text-white font-sans fixed top-0 left-0 w-full z-10 shadow-md">
       <div class="flex justify-between items-center px-6 py-4 max-w-7xl mx-auto">
         <router-link to="/home" class="text-xl font-bold text-white">Financial Manager</router-link>
   

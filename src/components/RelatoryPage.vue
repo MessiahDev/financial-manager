@@ -2,7 +2,7 @@
   <div class="max-w-7xl mx-auto mt-12 pt-12 px-4 sm:px-6 lg:px-8 font-sans">
     <h1 class="text-center text-3xl font-bold text-gray-800 mb-2">Relatório Financeiro</h1>
 
-    <div class="p-4 sm:p-6 rounded-xl">
+    <div class="p-4 mb-3 sm:p-6 rounded-xl">
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         <div>
           <label class="block text-sm text-gray-600 mb-1">De:</label>
@@ -40,11 +40,13 @@
     </div>
   </div>
 
-  <div class="bg-gray-200 w-full min-h-screen border border-t-gray-300">
+  <div class="bg-gray-200 w-full py-10 mb-12 border border-t-gray-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="bg-white rounded-xl shadow p-4 mt-10 sm:p-6 overflow-auto">
+      <div class="bg-white rounded-xl shadow p-4 sm:p-6 overflow-auto">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-          <h2 class="text-lg font-semibold text-gray-700">Lançamentos</h2>
+          <h2 class="text-lg font-semibold text-gray-700">
+            Lançamentos
+          </h2>
           <div class="flex flex-wrap gap-2 text-gray-700" title="Planilha">
             <span class="flex items-center font-semibold">Baixar</span>
             <button @click="download('excel')" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"><i class="fa-solid fa-download"></i></button>
