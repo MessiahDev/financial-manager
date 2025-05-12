@@ -2,7 +2,8 @@
   <div class="font-sans bg-stone-250 min-h-screen mb-12 flex flex-col">
     <div class="w-full mx-auto pt-24 pb-8 px-4">
       <div class="max-w-5xl mx-auto px-4">
-        <h1 class="text-center text-3xl font-bold text-gray-800 mb-12">
+        <h1 class="text-center text-3xl font-bold mb-12"
+            :class="isDark ? 'text-gray-100' : 'text-gray-800'">
           Gerenciador de Receitas
         </h1>
 
@@ -37,20 +38,21 @@
       </div>
     </div>
 
-    <div class="w-full border-t border-gray-300"></div>
+    <div class="w-full border-t " :class="isDark ? 'border-gray-700' : 'border-gray-300'"></div>
 
-    <div class="w-full bg-gray-200">
+    <div class="w-full" :class="isDark ? 'bg-gray-900' : 'bg-gray-200'">
       <div class="max-w-5xl mx-auto px-4 py-8">
         <ul class="space-y-4">
           <li
             v-for="(revenue, index) in revenues"
             :key="revenue.id"
-            class="p-4 bg-white border border-gray-300 rounded-xl shadow transition hover:shadow-md"
+            class="p-4 border border-gray-300 rounded-xl shadow transition hover:shadow-md"
+            :class="isDark ? 'bg-gray-800' : 'bg-white'"
           >
             <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
               <div>
-                <p class="text-lg font-semibold text-gray-800 mb-1">{{ revenue.description }}</p>
-                <p class="text-sm text-gray-600">
+                <p class="text-lg font-semibold mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-800'">{{ revenue.description }}</p>
+                <p class="text-sm" :class="isDark ? 'text-gray-100' : 'text-gray-600'">
                   Valor: {{ Number(revenue.amount).toMoeda(true) }}
                 </p>
               </div>
@@ -78,8 +80,10 @@
       v-if="showEditModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
-        <h2 class="text-center text-xl font-semibold text-gray-800 mb-4">
+      <div class="p-8 rounded-lg shadow-lg w-full max-w-md mx-4"
+            :class="isDark ? 'bg-gray-800' : 'bg-gray-100'">
+        <h2 class="text-center text-xl font-semibold mb-4"
+            :class="isDark ? 'text-gray-100' : 'text-gray-600'">
           Editar Receita
         </h2>
         <form @submit.prevent="submitEdit">
@@ -110,6 +114,7 @@
 <script>
 import Loader from "../components/Loader.vue";
 import authService from "../services/authService";
+import { useThemeStore } from '../stores/themeStore';
 import revenueService from "../services/revenueService";
 import { showConfirm, showError, showSuccess } from "../services/alertService";
 
@@ -121,23 +126,30 @@ export default {
     },
 
     data() {
-        return {
-            newRevenue: {
-                description: "",
-                amount: null,
-                date: new Date(),
-                userId: null,
-            },
+      return {
+        newRevenue: {
+            description: "",
+            amount: null,
+            date: new Date(),
             userId: null,
-            revenues: [],
-            editingRevenue: null,
-            editingIndex: null,
-            isEditing: false,
-            showEditModal: false,
-            isLoading: false,
-            formattedAmount: '',
-            formattedEditAmount: ''
-        };
+        },
+        userId: null,
+        revenues: [],
+        editingRevenue: null,
+        editingIndex: null,
+        isEditing: false,
+        showEditModal: false,
+        isLoading: false,
+        formattedAmount: '',
+        formattedEditAmount: '',
+        themeStore: useThemeStore(),
+      };
+    },
+
+    computed: {
+      isDark() {
+        return this.themeStore.theme === 'dark';
+      },
     },
 
     watch: {

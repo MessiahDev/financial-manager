@@ -2,7 +2,8 @@
   <div class="font-sans bg-stone-250 min-h-screen mb-12 flex flex-col">
     <div class="w-full mx-auto pt-24 pb-8 px-4">
       <div class="max-w-5xl mx-auto px-4">
-        <h1 class="text-center text-3xl font-bold text-gray-800 mb-12">
+        <h1 class="text-center text-3xl font-bold mb-12"
+            :class="isDark ? 'text-gray-100' : 'text-gray-800'">
           Gerenciador de Categorias
         </h1>
 
@@ -28,18 +29,19 @@
       </div>
     </div>
 
-    <div class="w-full border-t border-gray-300"></div>
+    <div class="w-full border-t" :class="isDark ? 'border-gray-700' : 'border-gray-300'"></div>
 
-    <div class="w-full bg-gray-200">
+    <div class="w-full" :class="isDark ? 'bg-gray-900' : 'bg-gray-200'">
       <div class="max-w-5xl mx-auto px-4 py-8">
         <ul class="space-y-4">
           <li
             v-for="(category, index) in categories"
             :key="category.id"
-            class="p-4 bg-white border border-gray-300 rounded-xl shadow transition hover:shadow-md"
+            class="p-4 border border-gray-300 rounded-xl shadow transition hover:shadow-md"
+            :class="isDark ? 'bg-gray-800' : 'bg-white'"
           >
             <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
-              <p class="text-lg font-semibold text-gray-800">{{ category.name }}</p>
+              <p class="text-lg font-semibold mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-800'">{{ category.name }}</p>
               <div class="flex gap-2">
                 <button @click="startEdit(index)" class="btn-green">
                   <i class="fa-regular fa-pen-to-square mr-1"></i>
@@ -64,8 +66,10 @@
       v-if="showEditModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
     >
-      <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
-        <h2 class="text-center text-xl font-semibold text-gray-800 mb-4">
+      <div class="p-8 rounded-lg shadow-lg w-full max-w-md mx-4" 
+          :class="isDark ? 'bg-gray-800' : 'bg-gray-100'">
+        <h2 class="text-center text-xl font-semibold mb-4" 
+            :class="isDark ? 'text-gray-100' : 'text-gray-600'">
           Editar Categoria
         </h2>
         <form @submit.prevent="submitEdit">
@@ -89,6 +93,7 @@
 <script>
 import Loader from "../components/Loader.vue";
 import authService from "../services/authService";
+import { useThemeStore } from '../stores/themeStore';
 import categoryService from "../services/categoryService";
 import { showSuccess, showError, showConfirm } from "../services/alertService";
 
@@ -100,18 +105,25 @@ export default {
     },
 
     data() {
-        return {
+      return {
+        userId: null,
+        newCategory: {
+            name: "",
             userId: null,
-            newCategory: {
-                name: "",
-                userId: null,
-            },
-            categories: [],
-            editingCategory: null,
-            isEditing: false,
-            showEditModal: false,
-            isLoading: false,
-        };
+        },
+        categories: [],
+        editingCategory: null,
+        isEditing: false,
+        showEditModal: false,
+        isLoading: false,
+        themeStore: useThemeStore(),
+      };
+    },
+
+    computed: {
+      isDark() {
+        return this.themeStore.theme === 'dark';
+      },
     },
 
     async mounted() {

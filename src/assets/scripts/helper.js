@@ -86,16 +86,21 @@ function AnoMesDia(data) {
 
 function DiaMesAno(data) {
   if (!(data instanceof Date)) return '';
-  const mm = data.getMonth() + 1;
-  const dd = data.getDate();
-  return `${String(dd).padStart(2, '0')}/${String(mm).padStart(2, '0')}/${data.getFullYear()}`;
+  const mm = data.getUTCMonth() + 1;
+  const dd = data.getUTCDate();
+  return `${String(dd).padStart(2, '0')}/${String(mm).padStart(2, '0')}/${data.getUTCFullYear()}`;
 }
 
 function DiaMesAnoHora(data) {
   if (!(data instanceof Date)) return '';
-  const dateStr = DiaMesAno(data);
-  const timeStr = data.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  return `${dateStr} ${timeStr}`;
+
+  const dia = String(data.getUTCDate()).padStart(2, '0');
+  const mes = String(data.getUTCMonth() + 1).padStart(2, '0');
+  const ano = data.getUTCFullYear();
+  const hora = String(data.getUTCHours()).padStart(2, '0');
+  const minuto = String(data.getUTCMinutes()).padStart(2, '0');
+
+  return `${dia}/${mes}/${ano} ${hora}:${minuto}`;
 }
 
 export {

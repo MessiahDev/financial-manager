@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col justify-center items-center text-center font-sans min-h-screen p-4">
+    <div class="flex flex-col justify-center items-center text-center bg-gray-100 font-sans min-h-screen p-4">
         <div v-if="isLoading">
             <h1 class="text-2xl font-semibold text-gray-800 mb-2">Confirmação de E-mail</h1>
             <p class="text-gray-600">Estamos confirmando seu e-mail...</p>

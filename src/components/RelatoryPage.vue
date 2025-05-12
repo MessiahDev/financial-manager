@@ -1,20 +1,24 @@
 <template>
   <div class="max-w-7xl mx-auto mt-12 pt-12 px-4 sm:px-6 lg:px-8 font-sans">
-    <h1 class="text-center text-3xl font-bold text-gray-800 mb-2">Relatório Financeiro</h1>
+    <h1 class="text-center text-3xl font-bold mb-2"
+        :class="isDark ? 'text-gray-100' : 'text-gray-800'"
+      >
+      Relatório Financeiro
+    </h1>
 
     <div class="p-4 mb-3 sm:p-6 rounded-xl">
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         <div>
-          <label class="block text-sm text-gray-600 mb-1">De:</label>
-          <input type="date" v-model="filters.from" class="input w-full" />
+          <label class="block text-sm mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-600'">De:</label>
+          <input type="date" v-model="filters.from" class="input w-full text-gray-600" />
         </div>
         <div>
-          <label class="block text-sm text-gray-600 mb-1">Até:</label>
-          <input type="date" v-model="filters.to" class="input w-full" />
+          <label class="block text-sm mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-600'">Até:</label>
+          <input type="date" v-model="filters.to" class="input w-full text-gray-600" />
         </div>
         <div>
-          <label class="block text-sm text-gray-600 mb-1">Categoria:</label>
-          <select v-model="filters.category" class="input w-full h-11">
+          <label class="block text-sm mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-600'">Categoria:</label>
+          <select v-model="filters.category" class="input w-full h-11 text-gray-600">
             <option value="all">Todas</option>
             <option v-for="cat in categories" :key="cat.name" :value="cat.name">{{ cat.name }}</option>
             <option v-if="hasDebts" value="Dívida">Dívida</option>
@@ -22,8 +26,10 @@
           </select>
         </div>
         <div>
-          <label class="block text-sm text-gray-600 mb-1">Status:</label>
-          <select v-model="filters.status" class="input w-full h-11">
+          <label class="block text-sm mb-1"
+          :class="isDark ? 'text-gray-100' : 'text-gray-600'"
+          >Status:</label>
+          <select v-model="filters.status" class="input w-full h-11 text-gray-600">
             <option value="all">Todos</option>
             <option value="paid">Pagos</option>
             <option value="overdue">Vencidos</option>
@@ -33,30 +39,33 @@
           </select>
         </div>
         <div>
-          <label class="block text-sm text-gray-600 mb-1">Buscar:</label>
+          <label class="block text-sm mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-600'">Buscar:</label>
           <input v-model="filters.search" placeholder="Descrição ou categoria" class="input w-full" />
         </div>
       </div>
     </div>
   </div>
 
-  <div class="bg-gray-200 w-full py-10 mb-12 border border-t-gray-300">
+  <div class="w-full border-t" :class="isDark ? 'border-gray-700' : 'border-gray-300'"></div>
+
+  <div class="w-full py-10 mb-12 border-t-gray-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="bg-white rounded-xl shadow p-4 sm:p-6 overflow-auto">
+      <div class="rounded-xl shadow p-4 sm:p-6 overflow-auto" :class="isDark ? 'bg-gray-800' : 'bg-gray-100'">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-          <h2 class="text-lg font-semibold text-gray-700">
+          <h2 class="text-lg font-semibold"
+              :class="isDark ? 'text-gray-100' : 'text-gray-600'">
             Lançamentos
           </h2>
-          <div class="flex flex-wrap gap-2 text-gray-700" title="Planilha">
+          <div class="flex flex-wrap gap-2" :class="isDark ? 'text-gray-100' : 'text-gray-600'" title="Planilha">
             <span class="flex items-center font-semibold">Baixar</span>
             <button @click="download('excel')" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"><i class="fa-solid fa-download"></i></button>
           </div>
         </div>
 
-        <div class="w-full overflow-x-auto">
-          <table class="min-w-full text-sm text-left text-gray-700">
+        <div class="w-full overflow-x-auto" >
+          <table class="min-w-full text-sm text-left" :class="isDark ? 'text-gray-100' : 'text-gray-600'">
             <thead>
-              <tr class="border-b border-gray-200 bg-gray-50">
+              <tr class="border-b border-gray-200" :class="isDark ? 'bg-gray-900' : 'bg-gray-200'">
                 <th class="px-4 py-2 whitespace-nowrap">Data</th>
                 <th class="px-4 py-2 whitespace-nowrap">Descrição</th>
                 <th class="px-4 py-2 whitespace-nowrap">Categoria</th>
@@ -65,8 +74,9 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, index) in filteredTransactions" :key="index" class="border-b border-gray-100 hover:bg-gray-50">
-                <td class="px-4 py-2">{{ new Date(item.date).toLocaleDateString('pt-BR') }}</td>
+              <tr v-for="(item, index) in filteredTransactions" :key="index" class="border-b border-gray-100" 
+                  :class="isDark ? 'text-gray-100 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50'">
+                <td class="px-4 py-2">{{ item.date.toDateDDMMYYYY() }}</td>
                 <td class="px-4 py-2">{{ item.description }}</td>
                 <td class="px-4 py-2">{{ item.category }}</td>
                 <td class="px-4 py-2">
@@ -93,13 +103,13 @@
                   }}
                 </span>
                 </td>
-                <td class="px-4 py-2 font-medium" :class="item.amount > 0 ? 'text-green-600' : 'text-red-500'">
+                <td class="px-4 py-2 font-medium" :class="(item.amount > 0 ? 'text-green-600' : 'text-red-500')"> 
                   {{ item.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }}
                 </td>
               </tr>
-              <tr class="font-bold bg-gray-50">
-                <td colspan="4" class="px-4 py-2 text-right">Total</td>
-                <td class="px-4 py-2 text-blue-700">
+              <tr class="font-bold" :class="isDark ? 'bg-gray-900' : 'bg-gray-200'">
+                <td colspan="4" class="px-4 py-2 text-right" :class="isDark ? 'text-gray-100 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50'">Total</td>
+                <td class="px-4 py-2" :class="totalAmount > 0 ? 'text-blue-700' : 'text-red-700'">
                   {{ totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }}
                 </td>
               </tr>
@@ -155,6 +165,7 @@
 <script>
 import authService from '../services/authService';
 import userService from '../services/userService';
+import { useThemeStore } from '../stores/themeStore';
 import { TableToExcel } from '../assets/scripts/helper';
 
 export default {
@@ -173,6 +184,7 @@ export default {
       hasDebts: false,
       hasRevenues: false,
       categories: [],
+      themeStore: useThemeStore(),
       user: {
         id: null,
         description: '',
@@ -236,6 +248,9 @@ export default {
     },
     totalAmount() {
       return this.filteredTransactions.reduce((sum, t) => sum + t.amount, 0);
+    },
+    isDark() {
+      return this.themeStore.theme === 'dark';
     },
   },
   async mounted() {

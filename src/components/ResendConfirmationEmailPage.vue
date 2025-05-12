@@ -1,12 +1,12 @@
 <template>
-    <div class="flex justify-center items-start font-sans pt-24 min-h-screen">
+    <div class="flex justify-center items-start font-sans bg-gray-100 pt-24 min-h-screen">
         <form @submit.prevent="resendConfimation" class="w-full max-w-sm text-center space-y-5">
-            <h2 class="text-2xl font-semibold text-gray-800">Cadastro</h2>
+            <h2 class="text-2xl font-semibold text-gray-800">Reenviar Confirmação</h2>
 
             <div class="space-y-2 text-left">
                 <label for="email" class="block text-gray-600 text-sm font-medium">Email</label>
                 <input id="email" type="email" v-model="email" required
-                    class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                    class="w-full px-3 py-2 rounded-md text-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-300 text-gray-600" />
             </div>
 
             <button type="submit" :disabled="isLoading"

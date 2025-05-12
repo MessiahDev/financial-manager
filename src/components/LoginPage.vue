@@ -16,7 +16,7 @@
                 v-model="email"
                 required
                 aria-label="Email"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
             />
             <small v-if="emailNotConfirmed" class="text-red-600 mt-2 block">
                 Email não confirmado!
@@ -35,7 +35,7 @@
                 v-model="password"
                 required
                 aria-label="Senha"
-                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-600"
                 />
                 <span
                 class="absolute right-3 top-2.5 text-gray-500 cursor-pointer text-lg"

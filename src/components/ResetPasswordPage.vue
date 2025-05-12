@@ -14,7 +14,7 @@
             :type="showPassword ? 'text' : 'password'"
             v-model="newPassword"
             required
-            class="w-full pr-10 py-2 px-3 rounded-lg text-sm border focus:outline-none transition"
+            class="w-full pr-10 py-2 px-3 rounded-lg text-sm border focus:outline-none transition text-gray-600"
             :class="[
               passwordsMismatch ? 'border-red-500' : '',
               passwordsMatch ? 'border-green-500' : 'border-gray-300'
@@ -48,7 +48,7 @@
             :type="showConfirmPassword ? 'text' : 'password'"
             v-model="confirmNewPassword"
             required
-            class="w-full pr-10 py-2 px-3 rounded-lg text-sm border focus:outline-none transition"
+            class="w-full pr-10 py-2 px-3 rounded-lg text-sm border focus:outline-none transition text-gray-600"
             :class="[
               passwordsMismatch ? 'border-red-500' : '',
               passwordsMatch ? 'border-green-500' : 'border-gray-300'

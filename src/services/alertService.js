@@ -1,9 +1,17 @@
 import Swal from 'sweetalert2';
+import { useThemeStore } from '../stores/themeStore';
 
 const baseClass = 'text-white font-semibold px-4 py-2 rounded';
 
 const baseConfig = {
   buttonsStyling: false,
+};
+
+const themeStore = useThemeStore();
+
+const getThemeMode = () => {
+  const themeStore = useThemeStore();
+  return themeStore.theme === 'dark' ? 'dark' : 'light';
 };
 
 export const showSuccess = (title = 'Sucesso!', text = 'Operação concluída.') => {
@@ -14,6 +22,7 @@ export const showSuccess = (title = 'Sucesso!', text = 'Operação concluída.')
     ...baseConfig,
     confirmButtonText: 'OK',
     customClass: {
+      popup: getThemeMode() === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 2ext-gray-900',
       confirmButton: `btn-primary ${baseClass}`,
     },
   });
@@ -46,6 +55,7 @@ export const showError = (title = 'Erro!', errorOrMessage = '') => {
     ...baseConfig,
     confirmButtonText: 'OK',
     customClass: {
+      popup: getThemeMode() === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-200 text-gray-900',
       confirmButton: `btn-red ${baseClass}`,
     },
   });
@@ -66,6 +76,7 @@ export const showConfirm = ({
     cancelButtonText,
     ...baseConfig,
     customClass: {
+      popup: getThemeMode() === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-200 text-gray-900',
       confirmButton: `btn-red ${baseClass}`,
       cancelButton: `btn-primary ${baseClass} ml-2`,
     },

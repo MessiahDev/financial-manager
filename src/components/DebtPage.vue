@@ -2,7 +2,8 @@
     <div class="font-sans bg-stone-250 min-h-screen mb-12 flex flex-col">
         <div class="w-full mx-auto pt-24 pb-8 px-4">
             <div class="max-w-5xl mx-auto px-4">
-                <h1 class="text-center text-3xl font-bold text-gray-800 mb-12">
+                <h1 class="text-center text-3xl font-bold mb-12"
+                    :class="isDark ? 'text-gray-100' : 'text-gray-800'">
                     Gerenciador de Dívidas
                 </h1>
 
@@ -42,7 +43,7 @@
                         class="input"
                         aria-label="Credora"
                     />
-                    <label class="flex items-center gap-2 text-gray-700 col-span-full">
+                    <label class="flex items-center gap-2 col-span-full" :class="isDark ? 'text-gray-100' : 'text-gray-800'">
                         <input type="checkbox" v-model="newDebt.isPaid" class="scale-125 accent-blue-600" />
                         Dívida já foi quitada?
                     </label>
@@ -56,22 +57,23 @@
             </div>
         </div>
 
-        <div class="w-full border-t border-gray-300"></div>
+        <div class="w-full border-t" :class="isDark ? 'border-gray-700' : 'border-gray-300'"></div>
 
-        <div class="w-full bg-gray-200">
+        <div class="w-full" :class="isDark ? 'bg-gray-900' : 'bg-gray-200'">
             <div class="max-w-5xl mx-auto px-4 py-10">
                 <ul class="space-y-4">
                 <li
                     v-for="(debt, index) in debts"
                     :key="debt.id"
-                    class="p-4 bg-white border border-gray-300 rounded-xl shadow transition hover:shadow-md"
+                    class="p-4 border border-gray-300 rounded-xl shadow transition hover:shadow-md"
+                    :class="isDark ? 'bg-gray-800' : 'bg-white'"
                 >
                     <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
                     <div>
-                        <p class="text-lg font-semibold text-gray-800 mb-1">{{ debt.description }}</p>
-                        <p class="text-sm text-gray-600">
+                        <p class="text-lg font-semibold mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-800'">{{ debt.description }}</p>
+                        <p class="text-sm" :class="isDark ? 'text-gray-100' : 'text-gray-600'">
                         Valor: {{ Number(debt.amount).toMoeda(true) }} |
-                        Vencimento: {{ new Date(debt.dueDate).toLocaleDateString() }} |
+                        Vencimento: {{ debt.dueDate.toDateDDMMYYYY() }} |
                         Credora: {{ debt.creditor }}
                         </p>
                     </div>
@@ -110,8 +112,10 @@
             v-if="showEditModal"
             class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         >
-            <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-4">
-                <h2 class="text-center text-xl font-semibold text-gray-800 mb-4">
+            <div class="p-8 rounded-lg shadow-lg w-full max-w-md mx-4"
+                :class="isDark ? 'bg-gray-800' : 'bg-gray-100'">
+                <h2 class="text-center text-xl font-semibold mb-4"
+                    :class="isDark ? 'text-gray-100' : 'text-gray-600'">
                     Editar Dívida
                 </h2>
                 <form @submit.prevent="submitEdit">
@@ -119,7 +123,7 @@
                     <input v-model="formattedEditAmount" type="text" placeholder="Valor" class="input text-right mb-4" />
                     <input v-model="editingDebt.dueDate" type="date" placeholder="Data de vencimento" required class="input text-right mb-4" />
                     <input v-model="editingDebt.creditor" placeholder="Credora" required class="input mb-4" />
-                    <label class="flex items-center gap-2 text-gray-600 mb-4">
+                    <label class="flex items-center gap-2 mb-4" :class="isDark ? 'text-gray-100' : 'text-gray-600'">
                         <input type="checkbox" v-model="editingDebt.isPaid" class="scale-125 accent-blue-600" />
                         Dívida já foi quitada?
                     </label>
@@ -137,6 +141,7 @@
 import Loader from "../components/Loader.vue";
 import authService from "../services/authService";
 import debtService from "../services/debtService";
+import { useThemeStore } from '../stores/themeStore';
 import { showSuccess, showError, showConfirm } from "../services/alertService";
 
 export default {
@@ -162,8 +167,14 @@ export default {
             showEditModal: false,
             isLoading: false,
             formattedAmount: '',
-            formattedEditAmount: ''
+            formattedEditAmount: '',
+            themeStore: useThemeStore(),
         };
+    },
+    computed: {
+      isDark() {
+        return this.themeStore.theme === 'dark';
+      },
     },
     watch: {
         formattedAmount(newVal) {

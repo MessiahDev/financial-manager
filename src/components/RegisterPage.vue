@@ -14,7 +14,7 @@
             type="text"
             v-model="name"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            class="input"
           />
         </div>
 
@@ -25,7 +25,7 @@
             type="email"
             v-model="email"
             required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            class="input"
           />
         </div>
 
@@ -39,7 +39,7 @@
               v-model="password"
               required
               :class="[
-                'w-full px-4 py-2 pr-10 rounded-lg focus:outline-none border transition',
+                'w-full px-4 py-2 pr-10 rounded-lg focus:outline-none border transition text-gray-600',
                 passwordsMismatch ? 'border-red-500' : passwordsMatch ? 'border-green-500' : 'border-gray-300'
               ]"
             />
@@ -73,7 +73,7 @@
               v-model="confirmPassword"
               required
               :class="[
-                'w-full px-4 py-2 pr-10 rounded-lg focus:outline-none border transition',
+                'w-full px-4 py-2 pr-10 rounded-lg focus:outline-none border transition text-gray-600',
                 passwordsMismatch ? 'border-red-500' : passwordsMatch ? 'border-green-500' : 'border-gray-300'
               ]"
             />

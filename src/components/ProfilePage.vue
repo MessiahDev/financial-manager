@@ -4,19 +4,19 @@
 
         <div class="rounded-2xl p-6 space-y-6">
             <div>
-                <label class="block text-gray-700 mb-1">Nome</label>
+                <label class="block mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-600'">Nome</label>
                 <input v-model="form.name" type="text"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300" />
+                    class="input text-gray-600" />
             </div>
 
             <div>
-                <label class="block text-gray-700 mb-1">E-mail</label>
+                <label class="block mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-600'">E-mail</label>
                 <input v-model="form.email" type="email"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300" />
+                    class="input text-gray-600" />
             </div>
 
             <div class="space-y-1">
-                <label for="password" class="block text-sm font-medium text-gray-700">Senha</label>
+                <label for="password" class="block text-sm font-medium" :class="isDark ? 'text-gray-100' : 'text-gray-600'">Senha</label>
                 
                 <div class="relative">
                     <input
@@ -25,7 +25,7 @@
                     v-model="password"
                     required
                     :class="[
-                        'w-full px-4 py-2 pr-10 rounded-lg focus:outline-none border transition',
+                        'input text-gray-600',
                         passwordsMismatch ? 'border-red-500' : passwordsMatch ? 'border-green-500' : 'border-gray-300'
                     ]"
                     />
@@ -42,7 +42,8 @@
                 <div
                     v-for="(label, key) in passwordLabels"
                     :key="key"
-                    :class="passwordChecks[key] ? 'text-green-600' : 'text-gray-500'"
+                    :class="isDark ? (passwordChecks[key] ? 'text-green-600' : 'text-gray-500') 
+                                    : (passwordChecks[key] ? 'text-green-600' : 'text-gray-600')"
                 >
                     <i :class="passwordChecks[key] ? 'fa-solid fa-check' : 'fa-regular fa-circle'" class="mr-2"></i>
                     {{ label }}
@@ -50,7 +51,7 @@
             </div>
 
             <div class="space-y-1">
-                <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmar Senha</label>
+                <label for="confirmPassword" class="block text-sm font-medium" :class="isDark ? 'text-gray-100' : 'text-gray-600'">Confirmar Senha</label>
                 
                 <div class="relative">
                     <input
@@ -59,7 +60,7 @@
                     v-model="confirmPassword"
                     required
                     :class="[
-                        'w-full px-4 py-2 pr-10 rounded-lg focus:outline-none border transition',
+                        'input text-gray-600',
                         passwordsMismatch ? 'border-red-500' : passwordsMatch ? 'border-green-500' : 'border-gray-300'
                     ]"
                     />
@@ -100,6 +101,7 @@ import Loader from './Loader.vue';
 import authService from '../services/authService';
 import userService from '../services/userService';
 import { useAuthStore } from '../stores/authStore';
+import { useThemeStore } from '../stores/themeStore';
 import { showSuccess, showError } from "../services/alertService";
 
 export default {
@@ -122,10 +124,14 @@ export default {
             showConfirmPassword: false,
             updateSuccess: false,
             isLoading: false,
+            themeStore: useThemeStore(),
         }
     },
 
     computed: {
+        isDark() {
+            return this.themeStore.theme === 'dark';
+        },
         authStore() {
             return useAuthStore();
         },

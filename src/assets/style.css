@@ -13,6 +13,19 @@ body {
   font-family: Arial, sans-serif;
   line-height: 1.6;
   background: rgb(231 229 228);
+  transition: transform 300ms ease;
+}
+
+.light body {
+  background: rgb(231 229 228);
+  color: #1f2937;
+  transition: transform 300ms ease;
+}
+
+.dark body {
+  background: rgb(17 24 39);
+  color: #f9fafb;
+  transition: transform 300ms ease;
 }
 
 ul, ol {

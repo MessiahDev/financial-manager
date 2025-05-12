@@ -42,9 +42,21 @@ const routes = [
         meta: { requiresAuth: true }
     },
     {
+        path: '/relatorio',
+        name: 'RelatoryView',
+        component: () => import('../views/RelatoryView.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
         path: '/perfil',
         name: 'ProfileView',
         component: () => import('../views/ProfileView.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/configuracoes',
+        name: 'SettingsView',
+        component: () => import('../views/SettingsView.vue'),
         meta: { requiresAuth: true }
     },
     {
@@ -66,12 +78,6 @@ const routes = [
         path: '/reenviar-confirmacao-email',
         name: 'ResendConfirmationEmailView',
         component: () => import('../views/ResendConfirmationEmailView.vue')
-    },
-    {
-        path: '/relatorio',
-        name: 'RelatoryView',
-        component: () => import('../views/RelatoryView.vue'),
-        meta: { requiresAuth: true }
     }
 ];
 
