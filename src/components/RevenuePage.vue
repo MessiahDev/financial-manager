@@ -131,7 +131,6 @@ export default {
             description: "",
             amount: null,
             date: new Date(),
-            userId: null,
         },
         userId: null,
         revenues: [],
@@ -234,6 +233,7 @@ export default {
                 }
 
                 await revenueService.updateRevenue(id, data);
+                this.resetForm();
                 await this.fetchRevenues();
                 this.closeModal();
                 await showSuccess('Sucesso!', 'A receita foi atualizada.');
@@ -267,7 +267,6 @@ export default {
             this.editingRevenue = {
                 ...this.editingIndex,
                 amount: Number(this.revenues[index].amount).toFixed(2),
-                userId: this.userId, 
             };
             this.formattedEditAmount = Number(this.editingIndex.amount).toMoeda(true);
             this.isEditing = true;
@@ -284,6 +283,8 @@ export default {
                 amount: 0,
                 date: new Date(),
             };
+            this.formattedAmount = '',
+            this.formattedEditAmount = ''
         },
 
         closeModal() {

@@ -157,7 +157,6 @@ export default {
                 dueDate: new Date().toISOString().split('T')[0],
                 creditor: '',
                 isPaid: false,
-                userId: null,
             },
             userId: null,
             debts: [],
@@ -230,7 +229,10 @@ export default {
         async saveDebt() {
             try {
                 if (!this.userId) return;
-                const debtData = { ...this.newDebt, userId: this.userId, dueDate: new Date(this.newDebt.dueDate).toISOString()};
+                const debtData = {
+                    ...this.newDebt,
+                    dueDate: new Date(this.newDebt.dueDate).toISOString(),
+                };
                 this.isLoading = true;
                 await debtService.createDebt(debtData);
                 await this.fetchDebts();
@@ -246,9 +248,10 @@ export default {
             try {
                 const { id, ...data } = updatedDebt;
                 await debtService.updateDebt(id, data);
+                this.resetForm();
                 await this.fetchDebts();
-                this.closeModal();
                 await showSuccess('Sucesso!', 'A dívida foi atualizada.');
+                this.closeModal();
             } catch (error) {
                 console.error('Erro ao atualizar dívida:', error);
                 await showError('Erro ao atualizar!', error);
@@ -290,7 +293,6 @@ export default {
         submitEdit() {
             const updatedDebt = {
                 ...this.editingDebt,
-                userId: this.userId,
                 isPaid: !!this.editingDebt.isPaid,
                 dueDate: new Date(this.editingDebt.dueDate).toISOString(),
             };
@@ -305,7 +307,6 @@ export default {
                 dueDate: '',
                 creditor: '',
                 isPaid: false,
-                userId: null,
             };
         },
 

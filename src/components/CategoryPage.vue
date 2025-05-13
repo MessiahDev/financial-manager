@@ -139,114 +139,114 @@ export default {
     },
 
     methods: {
-        async fetchUserId() {
-            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-            if (!token) {
-                console.warn("Token não encontrado.");
-                return null;
-            }
-            try {
-                const user = await authService.getProfile();
-                return user.id;
-            } catch (error) {
-                console.error("Erro ao obter perfil do usuário:", error);
-                return null;
-            }
-        },
+      async fetchUserId() {
+          const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+          if (!token) {
+              console.warn("Token não encontrado.");
+              return null;
+          }
+          try {
+              const user = await authService.getProfile();
+              return user.id;
+          } catch (error) {
+              console.error("Erro ao obter perfil do usuário:", error);
+              return null;
+          }
+      },
 
-        async fetchCategories() {
-            try {
-                if (!this.userId) return;
-                this.isLoading = true;
-                const response = await categoryService.getCategoryByUserId(this.userId);
-                this.categories = response || [];
-            } catch (error) {
-                console.error("Erro ao buscar categorias:", error);
-            } finally {
-                this.isLoading = false;
-            }
-        },
+      async fetchCategories() {
+          try {
+              if (!this.userId) return;
+              this.isLoading = true;
+              const response = await categoryService.getCategoryByUserId(this.userId);
+              this.categories = response || [];
+          } catch (error) {
+              console.error("Erro ao buscar categorias:", error);
+          } finally {
+              this.isLoading = false;
+          }
+      },
 
-        async saveCategory() {
-            try {
-                this.isLoading = true;
-                await categoryService.createCategory(this.newCategory);
-                await this.fetchCategories();
-                this.resetForm();
-            } catch (error) {
-                await showError('Erro ao salvar categoria:', error);
-            } finally {
-                this.isLoading = false;
-            }
-        },
+      async saveCategory() {
+          try {
+              this.isLoading = true;
+              const categoryData = { name: this.newCategory.name };
+              await categoryService.createCategory(categoryData);
+              await this.fetchCategories();
+              this.resetForm();
+          } catch (error) {
+              await showError('Erro ao salvar categoria:', error);
+          } finally {
+              this.isLoading = false;
+          }
+      },
 
-        async updateCategory() {
-            try {
-                const { id, ...data } = this.editingCategory;
-                if (!id) {
-                    console.warn("ID da categoria não encontrado. Abortando atualização.");
-                    return;
-                }
+      async updateCategory() {
+          try {
+              const { id, ...data } = this.editingCategory;
+              if (!id) {
+                  console.warn("ID da categoria não encontrado. Abortando atualização.");
+                  return;
+              }
 
-                await categoryService.updateCategory(id, data);
-                await this.fetchCategories();
-                this.closeModal();
+              await categoryService.updateCategory(id, data);
+              await this.fetchCategories();
+              this.closeModal();
 
-                await showSuccess('Sucesso!', 'A categoria foi atualizada.');
-            } catch (error) {
-                console.error('Erro ao atualizar categoria:', error);
-                await showError('Erro ao atualizar', error);
-            }
-        },
+              await showSuccess('Sucesso!', 'A categoria foi atualizada.');
+          } catch (error) {
+              console.error('Erro ao atualizar categoria:', error);
+              await showError('Erro ao atualizar', error);
+          }
+      },
 
-        async deleteCategory(index) {
-            const id = this.categories[index]?.id;
-            if (!id) {
-                console.warn("ID da categoria não encontrado. Abortando exclusão.");
-                return;
-            }
+      async deleteCategory(index) {
+          const id = this.categories[index]?.id;
+          if (!id) {
+              console.warn("ID da categoria não encontrado. Abortando exclusão.");
+              return;
+          }
 
-            const result = await showConfirm();
+          const result = await showConfirm();
 
-            if (result.isConfirmed) {
-                try {
-                    await categoryService.deleteCategory(id);
-                    await this.fetchCategories();
-                    await showSuccess('Deletado!', 'A categoria foi removida com sucesso.');
-                } catch (error) {
-                    await showError('Erro ao deletar categoria!', error);
-                }
-            }
-        },
+          if (result.isConfirmed) {
+              try {
+                  await categoryService.deleteCategory(id);
+                  await this.fetchCategories();
+                  await showSuccess('Deletado!', 'A categoria foi removida com sucesso.');
+              } catch (error) {
+                  await showError('Erro ao deletar categoria!', error);
+              }
+          }
+      },
 
-        startEdit(index) {
-            const category = this.categories[index];
-            if (!category) {
-                console.warn("Categoria não encontrada no índice:", index);
-                return;
-            }
-            this.editingCategory = { ...category };
-            this.isEditing = true;
-            this.showEditModal = true;
-        },
+      startEdit(index) {
+          const category = this.categories[index];
+          if (!category) {
+              console.warn("Categoria não encontrada no índice:", index);
+              return;
+          }
+          this.editingCategory = { ...category };
+          this.isEditing = true;
+          this.showEditModal = true;
+      },
 
-        submitEdit() {
-            this.updateCategory();
-        },
+      submitEdit() {
+          this.updateCategory();
+      },
 
-        resetForm() {
-            this.newCategory = {
-                name: "",
-                userId: this.userId,
-            };
-        },
+      resetForm() {
+          this.newCategory = {
+              name: "",
+          };
+      },
 
-        closeModal() {
-            this.showEditModal = false;
-            this.isEditing = false;
-            this.editingCategory = null;
-        },
-    },
+      closeModal() {
+          this.showEditModal = false;
+          this.isEditing = false;
+          this.editingCategory = null;
+      },
+  },
 };
 </script>
 

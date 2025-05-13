@@ -159,10 +159,9 @@ export default {
               id: null,
               description: '',
               amount: null,
-              date: new Date().toISOString(),
+              date: new Date().toISOString().split('T')[0],
               categoryId: '',
               categoryName: '',
-              userId: null,
           },
           userId: null,
           isEditing: false,
@@ -254,7 +253,7 @@ export default {
                 if (!this.userId) return;
 
                 const selectedCategory = this.categories.find(c => c.id === this.form.categoryId);
-                this.form.categoryName = selectedCategory ? selectedCategory.name : "";
+                this.form.categoryName = selectedCategory ? selectedCategory.name : '';
 
                 const newExpense = {
                     description: this.form.description,
@@ -262,7 +261,6 @@ export default {
                     date: new Date().toISOString(),
                     categoryId: this.form.categoryId,
                     categoryName: this.form.categoryName,
-                    userId: this.userId,
                 };
 
                 this.isLoading = true;
@@ -284,9 +282,9 @@ export default {
                 this.isLoading = true;
                 await expenseService.updateExpense(this.form.id, {
                     ...this.form,
-                    userId: this.userId,
                     date: new Date(this.form.date).toISOString(),
                 });
+                this.resetForm();
                 await this.fetchExpenses();
                 this.closeModal();
                 await showSuccess('Sucesso!', 'A despesa foi atualizada.');
@@ -342,13 +340,13 @@ export default {
                 date: new Date(),
                 categoryId: '',
                 categoryName: '',
-                userId: null,
             };
+            this.formattedAmount = '',
+            this.formattedEditAmount = ''
         },
 
         closeModal() {
             this.showEditModal = false;
-            this.resetForm();
             this.isEditing = false;
             this.editingIndex = null;
             this.isLoading = false;
