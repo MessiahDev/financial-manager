@@ -31,7 +31,7 @@
 
     <div class="w-full border-t" :class="isDark ? 'border-gray-700' : 'border-gray-300'"></div>
 
-    <div class="w-full" :class="isDark ? 'bg-gray-900' : 'bg-gray-200'">
+    <div class="w-full flex-1" :class="isDark ? 'bg-gray-900' : 'bg-gray-200'">
       <div class="max-w-5xl mx-auto px-4 py-8">
         <ul class="space-y-4">
           <li

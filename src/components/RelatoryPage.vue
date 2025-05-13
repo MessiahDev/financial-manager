@@ -1,120 +1,122 @@
 <template>
-  <div class="max-w-7xl mx-auto mt-12 pt-12 px-4 sm:px-6 lg:px-8 font-sans">
-    <h1 class="text-center text-3xl font-bold mb-2"
-        :class="isDark ? 'text-gray-100' : 'text-gray-800'"
-      >
-      Relatório Financeiro
-    </h1>
+  <div class="min-h-screen flex flex-col">
+    <div class="max-w-7xl mx-auto mt-12 pt-12 px-4 sm:px-6 lg:px-8 font-sans">
+      <h1 class="text-center text-3xl font-bold mb-2"
+          :class="isDark ? 'text-gray-100' : 'text-gray-800'"
+        >
+        Relatório Financeiro
+      </h1>
 
-    <div class="p-4 mb-3 sm:p-6 rounded-xl">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        <div>
-          <label class="block text-sm mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-600'">De:</label>
-          <input type="date" v-model="filters.from" class="input w-full text-gray-600" />
-        </div>
-        <div>
-          <label class="block text-sm mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-600'">Até:</label>
-          <input type="date" v-model="filters.to" class="input w-full text-gray-600" />
-        </div>
-        <div>
-          <label class="block text-sm mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-600'">Categoria:</label>
-          <select v-model="filters.category" class="input w-full h-11 text-gray-600">
-            <option value="all">Todas</option>
-            <option v-for="cat in categories" :key="cat.name" :value="cat.name">{{ cat.name }}</option>
-            <option v-if="hasDebts" value="Dívida">Dívida</option>
-            <option v-if="hasRevenues" value="Receita">Receita</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm mb-1"
-          :class="isDark ? 'text-gray-100' : 'text-gray-600'"
-          >Status:</label>
-          <select v-model="filters.status" class="input w-full h-11 text-gray-600">
-            <option value="all">Todos</option>
-            <option value="paid">Pagos</option>
-            <option value="overdue">Vencidos</option>
-            <option value="open">Em aberto</option>
-            <option value="gain">Ganho</option>
-            <option value="buy">Compra</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-600'">Buscar:</label>
-          <input v-model="filters.search" placeholder="Descrição ou categoria" class="input w-full" />
+      <div class="p-4 mb-3 sm:p-6 rounded-xl">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <div>
+            <label class="block text-sm mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-600'">De:</label>
+            <input type="date" v-model="filters.from" class="input w-full text-gray-600" />
+          </div>
+          <div>
+            <label class="block text-sm mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-600'">Até:</label>
+            <input type="date" v-model="filters.to" class="input w-full text-gray-600" />
+          </div>
+          <div>
+            <label class="block text-sm mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-600'">Categoria:</label>
+            <select v-model="filters.category" class="input w-full h-11 text-gray-600">
+              <option value="all">Todas</option>
+              <option v-for="cat in categories" :key="cat.name" :value="cat.name">{{ cat.name }}</option>
+              <option v-if="hasDebts" value="Dívida">Dívida</option>
+              <option v-if="hasRevenues" value="Receita">Receita</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm mb-1"
+            :class="isDark ? 'text-gray-100' : 'text-gray-600'"
+            >Status:</label>
+            <select v-model="filters.status" class="input w-full h-11 text-gray-600">
+              <option value="all">Todos</option>
+              <option value="paid">Pagos</option>
+              <option value="overdue">Vencidos</option>
+              <option value="open">Em aberto</option>
+              <option value="gain">Ganho</option>
+              <option value="buy">Compra</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-600'">Buscar:</label>
+            <input v-model="filters.search" placeholder="Descrição ou categoria" class="input w-full" />
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="w-full border-t" :class="isDark ? 'border-gray-700' : 'border-gray-300'"></div>
+    <div class="w-full border-t" :class="isDark ? 'border-gray-700' : 'border-gray-300'"></div>
 
-  <div class="w-full py-10 mb-12 border-t-gray-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="rounded-xl shadow p-4 sm:p-6 overflow-auto" :class="isDark ? 'bg-gray-800' : 'bg-gray-100'">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-          <h2 class="text-lg font-semibold"
-              :class="isDark ? 'text-gray-100' : 'text-gray-600'">
-            Lançamentos
-          </h2>
-          <div class="flex flex-wrap gap-2" :class="isDark ? 'text-gray-100' : 'text-gray-600'" title="Planilha">
-            <span class="flex items-center font-semibold">Baixar</span>
-            <button @click="download('excel')" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"><i class="fa-solid fa-download"></i></button>
+    <div class="w-full flex-1 py-10 mb-12 border-t-gray-300">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="rounded-xl shadow p-4 sm:p-6 overflow-auto" :class="isDark ? 'bg-gray-800' : 'bg-gray-100'">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+            <h2 class="text-lg font-semibold"
+                :class="isDark ? 'text-gray-100' : 'text-gray-600'">
+              Lançamentos
+            </h2>
+            <div class="flex flex-wrap gap-2" :class="isDark ? 'text-gray-100' : 'text-gray-600'" title="Planilha">
+              <span class="flex items-center font-semibold">Baixar</span>
+              <button @click="download('excel')" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"><i class="fa-solid fa-download"></i></button>
+            </div>
           </div>
-        </div>
 
-        <div class="w-full overflow-x-auto" >
-          <table class="min-w-full text-sm text-left" :class="isDark ? 'text-gray-100' : 'text-gray-600'">
-            <thead>
-              <tr class="border-b border-gray-200" :class="isDark ? 'bg-gray-900' : 'bg-gray-200'">
-                <th class="px-4 py-2 whitespace-nowrap">Data</th>
-                <th class="px-4 py-2 whitespace-nowrap">Descrição</th>
-                <th class="px-4 py-2 whitespace-nowrap">Categoria</th>
-                <th class="px-4 py-2 whitespace-nowrap">Status</th>
-                <th class="px-4 py-2 whitespace-nowrap">Valor</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(item, index) in filteredTransactions" :key="index" class="border-b border-gray-100" 
-                  :class="isDark ? 'text-gray-100 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50'">
-                <td class="px-4 py-2">{{ item.date.toDateDDMMYYYY() }}</td>
-                <td class="px-4 py-2">{{ item.description }}</td>
-                <td class="px-4 py-2">{{ item.category }}</td>
-                <td class="px-4 py-2">
-                  <span
-                  class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
-                  :class="{
-                    'bg-green-200 text-green-700': item.status === 'paid',
-                    'bg-red-200 text-red-700': item.status === 'overdue',
-                    'bg-yellow-200 text-yellow-700': item.status === 'open',
-                    'bg-blue-200 text-blue-700': item.status === 'gain',
-                    'bg-orange-200 text-orange-700': item.status === 'buy'
-                  }"
-                >
-                  {{
-                    item.category === 'Dívida' ? (
-                      item.status === 'paid' ? 'Pago' : 
+          <div class="w-full overflow-x-auto" >
+            <table class="min-w-full text-sm text-left" :class="isDark ? 'text-gray-100' : 'text-gray-600'">
+              <thead>
+                <tr class="border-b border-gray-200" :class="isDark ? 'bg-gray-900' : 'bg-gray-200'">
+                  <th class="px-4 py-2 whitespace-nowrap">Data</th>
+                  <th class="px-4 py-2 whitespace-nowrap">Descrição</th>
+                  <th class="px-4 py-2 whitespace-nowrap">Categoria</th>
+                  <th class="px-4 py-2 whitespace-nowrap">Status</th>
+                  <th class="px-4 py-2 whitespace-nowrap">Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(item, index) in filteredTransactions" :key="index" class="border-b border-gray-100" 
+                    :class="isDark ? 'text-gray-100 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50'">
+                  <td class="px-4 py-2">{{ item.date.toDateDDMMYYYY() }}</td>
+                  <td class="px-4 py-2">{{ item.description }}</td>
+                  <td class="px-4 py-2">{{ item.category }}</td>
+                  <td class="px-4 py-2">
+                    <span
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                    :class="{
+                      'bg-green-200 text-green-700': item.status === 'paid',
+                      'bg-red-200 text-red-700': item.status === 'overdue',
+                      'bg-yellow-200 text-yellow-700': item.status === 'open',
+                      'bg-blue-200 text-blue-700': item.status === 'gain',
+                      'bg-orange-200 text-orange-700': item.status === 'buy'
+                    }"
+                  >
+                    {{
+                      item.category === 'Dívida' ? (
+                        item.status === 'paid' ? 'Pago' : 
+                        item.status === 'overdue' ? 'Vencido' : 
+                        'Em aberto'
+                      ) : item.status === 'paid' ? 'Pago' : 
                       item.status === 'overdue' ? 'Vencido' : 
-                      'Em aberto'
-                    ) : item.status === 'paid' ? 'Pago' : 
-                    item.status === 'overdue' ? 'Vencido' : 
-                    item.status === 'open' ? 'Em aberto' : 
-                    item.status === 'gain' ? 'Ganho' : 
-                    'Compra' 
-                  }}
-                </span>
-                </td>
-                <td class="px-4 py-2 font-medium" :class="(item.amount > 0 ? 'text-green-600' : 'text-red-500')"> 
-                  {{ item.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }}
-                </td>
-              </tr>
-              <tr class="font-bold" :class="isDark ? 'bg-gray-900' : 'bg-gray-200'">
-                <td colspan="4" class="px-4 py-2 text-right" :class="isDark ? 'text-gray-100 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50'">Total</td>
-                <td class="px-4 py-2" :class="totalAmount > 0 ? 'text-blue-700' : 'text-red-700'">
-                  {{ totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                      item.status === 'open' ? 'Em aberto' : 
+                      item.status === 'gain' ? 'Ganho' : 
+                      'Compra' 
+                    }}
+                  </span>
+                  </td>
+                  <td class="px-4 py-2 font-medium" :class="(item.amount > 0 ? 'text-green-600' : 'text-red-500')"> 
+                    {{ item.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }}
+                  </td>
+                </tr>
+                <tr class="font-bold" :class="isDark ? 'bg-gray-900' : 'bg-gray-200'">
+                  <td colspan="4" class="px-4 py-2 text-right" :class="isDark ? 'text-gray-100 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50'">Total</td>
+                  <td class="px-4 py-2" :class="totalAmount > 0 ? 'text-blue-700' : 'text-red-700'">
+                    {{ totalAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
