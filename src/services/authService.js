@@ -77,7 +77,18 @@ const authService = {
 
     getProfile: async () => {
         try {
-            const response = await api.get('/Auth/profile');
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+            if (!token) {
+            throw new Error("Token não encontrado");
+            }
+
+            const response = await api.get('/Auth/profile', {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            });
+
             return response.data;
         } catch (error) {
             console.error('Erro ao buscar perfil do usuário:', error);

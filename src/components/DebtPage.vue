@@ -193,7 +193,7 @@ export default {
     },
     async mounted() {
         try {
-            this.userId = await this.fetchUserId();
+            await this.fetchUserProfile();
             if (this.userId) {
                 await this.fetchDebts();
             }
@@ -202,15 +202,18 @@ export default {
         }
     },
     methods: {
-        async fetchUserId() {
-            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-            if (!token) return null;
+        async fetchUserProfile() {
             try {
                 const user = await authService.getProfile();
-                return user.id;
+                if (user && user.id) {
+                    this.userId = user.id;
+                } else {
+                    console.warn("Usuário não autenticado.");
+                    this.userId = null;
+                }
             } catch (error) {
-                console.error("Erro ao obter perfil do usuário:", error);
-                return null;
+                console.error("Erro ao buscar perfil do usuário:", error);
+                this.userId = null;
             }
         },
 
@@ -220,19 +223,22 @@ export default {
                 this.isLoading = true;
                 const response = await debtService.getDebtsByUserId(this.userId);
                 this.debts = response || [];
-                this.isLoading = false;
             } catch (error) {
                 console.error("Erro ao buscar dívidas:", error);
+            } finally {
+                this.isLoading = false;
             }
         },
 
         async saveDebt() {
             try {
                 if (!this.userId) return;
+
                 const debtData = {
                     ...this.newDebt,
                     dueDate: new Date(this.newDebt.dueDate).toISOString(),
                 };
+
                 this.isLoading = true;
                 await debtService.createDebt(debtData);
                 await this.fetchDebts();
@@ -248,7 +254,6 @@ export default {
             try {
                 const { id, ...data } = updatedDebt;
                 await debtService.updateDebt(id, data);
-                this.resetForm();
                 await this.fetchDebts();
                 await showSuccess('Sucesso!', 'A dívida foi atualizada.');
                 this.closeModal();
@@ -308,6 +313,8 @@ export default {
                 creditor: '',
                 isPaid: false,
             };
+            this.formattedAmount = '';
+            this.formattedEditAmount = '';
         },
 
         closeModal() {
@@ -320,3 +327,4 @@ export default {
 </script>
 
 <style scoped></style>
+

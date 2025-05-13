@@ -1,5 +1,5 @@
 <template>
-    <div class="max-w-lg w-full min-h-screen mx-auto p-4 sm:p-6 lg:p-8 font-sans">
+    <div class="max-w-lg w-full min-h-screemn mx-auto p-4 sm:p-6 lg:p-8 font-sans">
         <h1 class="text-2xl font-bold mb-6 text-center">Perfil do Usuário</h1>
 
         <div class="rounded-2xl p-6 space-y-6">
@@ -118,6 +118,7 @@ export default {
                 email: '',
                 password: ''
             },
+            userId: null,
             password: '',
             confirmPassword: '',
             showPassword: false,
@@ -143,11 +144,11 @@ export default {
         },
         passwordChecks() {
             return {
-            minLength: this.password.length >= 8,
-            uppercase: /[A-Z]/.test(this.password),
-            lowercase: /[a-z]/.test(this.password),
-            number: /\d/.test(this.password),
-            specialChar: /[^A-Za-z0-9]/.test(this.password)
+                minLength: this.password.length >= 8,
+                uppercase: /[A-Z]/.test(this.password),
+                lowercase: /[a-z]/.test(this.password),
+                number: /\d/.test(this.password),
+                specialChar: /[^A-Za-z0-9]/.test(this.password)
             };
         },
         isPasswordValid() {
@@ -156,19 +157,24 @@ export default {
         },
         passwordLabels() {
             return {
-            minLength: 'Mínimo de 8 caracteres',
-            uppercase: 'Pelo menos 1 letra maiúscula',
-            lowercase: 'Pelo menos 1 letra minúscula',
-            number: 'Pelo menos 1 número',
-            specialChar: 'Pelo menos 1 caractere especial'
+                minLength: 'Mínimo de 8 caracteres',
+                uppercase: 'Pelo menos 1 letra maiúscula',
+                lowercase: 'Pelo menos 1 letra minúscula',
+                number: 'Pelo menos 1 número',
+                specialChar: 'Pelo menos 1 caractere especial'
             };
         }
     },
 
-    mounted() {
-        this.fetchUserId();
-        this.fetchProfile();
-        this.authStore.fetchUserProfile();
+    async mounted() {
+        try {
+            await this.fetchUserProfile();
+            if (this.userId) {
+                this.fetchProfile();
+            }
+        } catch (error) {
+            console.error("Erro ao montar o componente:", error);
+        }
     },
 
     methods: {
@@ -179,27 +185,24 @@ export default {
             this.showConfirmPassword = !this.showConfirmPassword;
         },
 
-        async fetchUserId() {
-            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-            if (!token) {
-                console.warn("Token não encontrado.");
-                return null;
-            }
+        async fetchUserProfile() {
             try {
                 const user = await authService.getProfile();
-                return user.id;
+                if (user && user.id) {
+                    this.userId = user.id;
+                } else {
+                    console.warn("Usuário não autenticado.");
+                    this.userId = null;
+                }
             } catch (error) {
-                console.error("Erro ao obter perfil do usuário:", error);
-                return null;
+                console.error("Erro ao buscar perfil do usuário:", error);
+                this.userId = null;
             }
         },
 
         async fetchProfile() {
             try {
-                const userId = await this.fetchUserId();
-                if (!userId) return;
-
-                const user = await userService.getUserProfile(userId);
+                const user = await userService.getUserProfile(this.userId);
                 this.form.name = user.name;
                 this.form.email = user.email;
             } catch (err) {
@@ -209,35 +212,30 @@ export default {
 
         async updateProfile() {
             try {
-                if (!this.isPasswordValid) {
-                return await showError('A senha não cumpre os critérios mínimos de segurança.');
-                }
-
-                const userId = await this.fetchUserId();
-                const user = await authService.getProfile(userId);
+                const user = await authService.getProfile(this.userId);
                 const oldEmail = user.email;
 
                 const payload = {
-                name: this.form.name,
-                email: this.form.email,
+                    name: this.form.name,
+                    email: this.form.email,
                 };
 
                 if (this.form.password.trim()) {
-                if (this.form.password !== this.confirmPassword) {
-                    return await showError('Atenção!', 'As senhas não coincidem.');
-                }
-                payload.password = this.form.password;
+                    if (!this.isPasswordValid) {
+                        return await showError('A senha não cumpre os critérios mínimos de segurança.');
+                    }
+
+                    if (this.form.password !== this.confirmPassword) {
+                        return await showError('Atenção!', 'As senhas não coincidem.');
+                    }
+
+                    payload.password = this.form.password;
                 }
 
                 this.isLoading = true;
-                const response = await userService.updateUserProfile(user.id, payload);
+                await userService.updateUserProfile(user.id, payload);
                 this.isLoading = false;
 
-                if (!response || !response.success) {
-                return await showError('Não foi possível completar a atualização.', response?.message || 'Erro desconhecido.');
-                }
-
-                await this.authStore.fetchUserProfile();
                 this.updateSuccess = true;
                 this.form.password = '';
                 this.confirmPassword = '';
@@ -245,8 +243,8 @@ export default {
 
                 const novoEmail = this.form.email.trim().toLowerCase();
                 if (novoEmail !== oldEmail.trim().toLowerCase()) {
-                await authService.logout();
-                router.push('/');
+                    await authService.logout();
+                    router.push('/');
                 }
 
             } catch (error) {

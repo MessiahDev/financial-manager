@@ -12,14 +12,9 @@ import { useAuthStore } from './stores/authStore';
 import { useThemeStore } from './stores/themeStore';
 import FooterView from './views/FooterView.vue';
 import NavbarView from './views/NavbarView.vue';
-import { onMounted, watchEffect } from 'vue';
+import { watchEffect } from 'vue';
 
-const auth = useAuthStore();
 const themeStore = useThemeStore();
-
-onMounted(() => {
-  auth.fetchUserProfile();
-});
 
 watchEffect(() => {
   document.documentElement.className = themeStore.theme;

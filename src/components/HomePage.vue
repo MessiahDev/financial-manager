@@ -153,7 +153,7 @@ export default {
 
   async mounted() {
     try {
-      this.userId = await this.fetchUserId();
+      await this.fetchUserProfile();
       if (this.userId) {
         this.fetchChartData();
       }
@@ -163,6 +163,21 @@ export default {
   },
 
   methods: {
+    async fetchUserProfile() {
+      try {
+        const user = await authService.getProfile();
+        if (user && user.id) {
+          this.userId = user.id;
+        } else {
+          console.warn("Usuário não autenticado.");
+          this.userId = null;
+        }
+      } catch (error) {
+        console.error("Erro ao buscar perfil do usuário:", error);
+        this.userId = null;
+      }
+    },
+
     async fetchChartData(startDate = null, endDate = null) {
       try {
         const user = await userService.getUserByIdAllIncludes(this.userId);
@@ -270,11 +285,6 @@ export default {
       this.paidDebtsTotal = paidDebts.reduce((acc, d) => acc + d.amount, 0);
       this.openDebtsCount = openDebts.length;
       this.openDebtsTotal = openDebts.reduce((acc, d) => acc + d.amount, 0);
-    },
-
-    async fetchUserId() {
-      const user = await authService.getProfile();
-      return user.id;
     },
   },
 };

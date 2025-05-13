@@ -126,29 +126,29 @@ export default {
     },
 
     data() {
-      return {
-        newRevenue: {
-            description: "",
-            amount: null,
-            date: new Date(),
-        },
-        userId: null,
-        revenues: [],
-        editingRevenue: null,
-        editingIndex: null,
-        isEditing: false,
-        showEditModal: false,
-        isLoading: false,
-        formattedAmount: '',
-        formattedEditAmount: '',
-        themeStore: useThemeStore(),
-      };
+        return {
+            newRevenue: {
+                description: "",
+                amount: null,
+                date: new Date(),
+            },
+            userId: null,
+            revenues: [],
+            editingRevenue: null,
+            editingIndex: null,
+            isEditing: false,
+            showEditModal: false,
+            isLoading: false,
+            formattedAmount: '',
+            formattedEditAmount: '',
+            themeStore: useThemeStore(),
+        };
     },
 
     computed: {
-      isDark() {
-        return this.themeStore.theme === 'dark';
-      },
+        isDark() {
+            return this.themeStore.theme === 'dark';
+        },
     },
 
     watch: {
@@ -170,7 +170,7 @@ export default {
 
     async mounted() {
         try {
-            this.userId = await this.fetchUserId();
+            await this.fetchUserProfile();
             if (this.userId) {
                 this.newRevenue.userId = this.userId;
                 await this.fetchRevenues();
@@ -181,18 +181,18 @@ export default {
     },
 
     methods: {
-        async fetchUserId() {
-            const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-            if (!token) {
-                console.warn("Token não encontrado.");
-                return null;
-            }
+        async fetchUserProfile() {
             try {
                 const user = await authService.getProfile();
-                return user.id;
+                if (user && user.id) {
+                    this.userId = user.id;
+                } else {
+                    console.warn("Usuário não autenticado.");
+                    this.userId = null;
+                }
             } catch (error) {
                 console.error("Erro ao buscar perfil do usuário:", error);
-                return null;
+                this.userId = null;
             }
         },
 

@@ -4,35 +4,43 @@ import authService from '../services/authService';
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     isAuthenticated: false,
-    firstName: '',
+    userId: null,
+    name: '',
+    email: '',
+    role: '',
   }),
+
   actions: {
     async fetchUserProfile() {
       try {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-        if (!token) {
-          this.isAuthenticated = false;
-          return;
-        }
-        this.isAuthenticated = true;
+        if (!token) return;
 
-        const user = await authService.getProfile(token);
+        const user = await authService.getProfile();
         if (user && user.name) {
-          this.firstName = user.name.split(' ')[0];
+          this.name = user.name.split(' ')[0];
+          this.userId = user.id;
+          this.email = user.email;
+          this.role = user.role;
+          this.isAuthenticated = true;
         }
       } catch (error) {
         console.error("Erro ao buscar o usuário logado:", error);
-        this.firstName = '';
+        this.name = '';
+        this.email = '';
+        this.role = '';
+        this.userId = null;
         this.isAuthenticated = false;
       }
     },
 
     logout() {
       authService.logout();
-      localStorage.removeItem('token');
-      sessionStorage.removeItem('token');
       this.isAuthenticated = false;
-      this.firstName = '';
+      this.userId = null;
+      this.name = '';
+      this.email = '';
+      this.role = '';
       window.location.href = '/';
     },
   },
