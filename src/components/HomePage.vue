@@ -28,7 +28,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 my-8">
       <FinanceCard title="Receitas Totais" :value="totalRevenues.toMoeda(true)" />
       <FinanceCard title="Despesas Totais" :value="totalExpenses.toMoeda(true)" />
-      <FinanceCard title="Economias" :value="Number(totalSavings).toMoeda(true)" />
+      <FinanceCard title="Economias" :value="totalSavings.toMoeda(true)" />
       <FinanceCard title="Dívidas Totais">
         <div class="flex flex-col items-center text-center px-2 space-y-1">
           <p class="text-sm">

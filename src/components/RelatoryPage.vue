@@ -20,11 +20,9 @@
           <div>
             <label class="block text-sm mb-1" :class="isDark ? 'text-gray-100' : 'text-gray-600'">Categoria:</label>
             <select v-model="filters.category" class="input w-full h-11 text-gray-600">
-              <option value="all">Todas</option>
-              <option v-for="cat in categories" :key="cat.name" :value="cat.name">{{ cat.name }}</option>
-              <option v-if="hasDebts" value="Dívida">Dívida</option>
-              <option v-if="hasRevenues" value="Receita">Receita</option>
-            </select>
+            <option value="all">Todas</option>
+            <option v-for="cat in uniqueCategories" :key="cat" :value="cat">{{ cat }}</option>
+          </select>
           </div>
           <div>
             <label class="block text-sm mb-1"
@@ -247,6 +245,16 @@ export default {
 
         return inDateRange && inStatus && matchesSearch && matchesCategory;
       });
+    },
+    uniqueCategories() {
+      const fixed = [];
+
+      if (this.hasDebts) fixed.push('Dívida');
+      if (this.hasRevenues) fixed.push('Receita');
+
+      const apiCategories = this.categories.map(c => c.name);
+
+      return [...new Set([...apiCategories, ...fixed])];
     },
     totalAmount() {
       return this.filteredTransactions.reduce((sum, t) => sum + t.amount, 0);
