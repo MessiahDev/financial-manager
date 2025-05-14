@@ -25,7 +25,7 @@
 
       <div class="absolute right-0 flex items-center space-x-4">
         <div v-if="authStore.isAuthenticated" class="relative" ref="userDropdown">
-          <button class="flex items-center space-x-2 focus:outline-none" @click="toggleDropdown">
+          <button class="flex items-center space-x-2 focus:outline-none px-3" @click="toggleDropdown">
             <span>Olá, <b>{{ authStore.name }}</b>!</span>
             <i
               class="fa-solid fa-chevron-down transition-transform duration-200"
