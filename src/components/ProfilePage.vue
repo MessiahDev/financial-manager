@@ -1,5 +1,5 @@
 <template>
-    <div class="max-w-lg w-full min-h-screemn mx-auto p-4 sm:p-6 lg:p-8 font-sans">
+    <div class="max-w-lg w-full min-h-screen mx-auto p-4 sm:p-6 lg:p-8 font-sans">
         <h1 class="text-2xl font-bold mb-6 text-center">Perfil do Usuário</h1>
 
         <div class="rounded-2xl p-6 space-y-6">

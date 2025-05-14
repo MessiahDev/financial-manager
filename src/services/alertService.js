@@ -1,5 +1,6 @@
 import Swal from 'sweetalert2';
 import { useThemeStore } from '../stores/themeStore';
+import { useAuthStore } from '../stores/authStore';
 
 const baseClass = 'text-white font-semibold px-4 py-2 rounded';
 
@@ -7,14 +8,19 @@ const baseConfig = {
   buttonsStyling: false,
 };
 
-const themeStore = useThemeStore();
-
 const getThemeMode = () => {
   const themeStore = useThemeStore();
   return themeStore.theme === 'dark' ? 'dark' : 'light';
 };
 
+const isUserAuthenticated = () => {
+  const authStore = useAuthStore();
+  return authStore.isAuthenticated;
+};
+
 export const showSuccess = (title = 'Sucesso!', text = 'Operação concluída.') => {
+  const isAuth = isUserAuthenticated();
+
   return Swal.fire({
     icon: 'success',
     title,
@@ -22,7 +28,7 @@ export const showSuccess = (title = 'Sucesso!', text = 'Operação concluída.')
     ...baseConfig,
     confirmButtonText: 'OK',
     customClass: {
-      popup: getThemeMode() === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 2ext-gray-900',
+      popup: isAuth && getThemeMode() === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900',
       confirmButton: `btn-primary ${baseClass}`,
     },
   });
@@ -48,6 +54,8 @@ export const showError = (title = 'Erro!', errorOrMessage = '') => {
     }
   }
 
+  const isAuth = isUserAuthenticated();
+
   return Swal.fire({
     icon: 'error',
     title,
@@ -55,7 +63,7 @@ export const showError = (title = 'Erro!', errorOrMessage = '') => {
     ...baseConfig,
     confirmButtonText: 'OK',
     customClass: {
-      popup: getThemeMode() === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-200 text-gray-900',
+      popup: isAuth && getThemeMode() === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-200 text-gray-900',
       confirmButton: `btn-red ${baseClass}`,
     },
   });
@@ -67,6 +75,8 @@ export const showConfirm = ({
   confirmButtonText = 'Sim',
   cancelButtonText = 'Cancelar',
 } = {}) => {
+  const isAuth = isUserAuthenticated();
+
   return Swal.fire({
     icon: 'warning',
     title,
@@ -76,7 +86,7 @@ export const showConfirm = ({
     cancelButtonText,
     ...baseConfig,
     customClass: {
-      popup: getThemeMode() === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-200 text-gray-900',
+      popup: isAuth && getThemeMode() === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-200 text-gray-900',
       confirmButton: `btn-red ${baseClass}`,
       cancelButton: `btn-primary ${baseClass} ml-2`,
     },
