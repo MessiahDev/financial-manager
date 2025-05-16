@@ -79,14 +79,16 @@
                     </div>
                     <div class="flex flex-col sm:flex-row sm:items-center gap-2">
                         <span
-                        :class="[
-                            'px-3 py-1 text-sm rounded-full font-medium',
-                            debt.isPaid
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-700'
-                        ]"
-                        >
-                        {{ debt.isPaid ? 'Quitada' : 'Em aberto' }}
+                            :class="[
+                                'px-3 py-1 text-sm rounded-full font-medium',
+                                debt.isPaid
+                                ? 'bg-green-100 text-green-700'
+                                : new Date(debt.dueDate) < new Date()
+                                    ? 'bg-red-100 text-red-700'
+                                    : 'bg-yellow-100 text-yellow-700'
+                            ]"
+                            >
+                            {{ debt.isPaid ? 'Quitada' : (new Date(debt.dueDate) < new Date() ? 'Vencida' : 'Em aberto') }}
                         </span>
                         <div class="flex gap-2 mt-1 sm:mt-0">
                         <button @click="startEdit(index)" class="btn-green">
