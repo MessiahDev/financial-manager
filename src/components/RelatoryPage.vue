@@ -183,7 +183,6 @@ export default {
       showExport: false,
       hasDebts: false,
       hasRevenues: false,
-      categories: [],
       themeStore: useThemeStore(),
       user: {
         id: null,
@@ -197,38 +196,64 @@ export default {
     };
   },
   computed: {
-    filteredTransactions() {
+    isDark() {
+      return this.themeStore.isDark;
+    },
+
+    allTransactions() {
       const today = new Date();
 
-      const allTransactions = [
-        ...this.user.revenues.map(r => ({
-          ...r,
-          category: r.categoryName || 'Receita',
-          status: 'gain',
-        })),
-        ...this.user.expenses.map(e => ({
-          ...e,
-          category: e.categoryName || 'Despesa',
-          status: 'buy',
-          amount: -Math.abs(e.amount),
-        })),
-        ...this.user.debts.map(d => {
-          const dueDate = new Date(d.dueDate);
-          let status = 'paid';
-          if (!d.isPaid) {
-            status = dueDate < today ? 'overdue' : 'open';
-          }
-          return {
-            ...d,
-            date: d.dueDate,
-            category: d.categoryName || 'Dívida',
-            status,
-            amount: -Math.abs(d.amount),
-          };
-        }),
-      ];
+      const revenues = this.user.revenues.map(r => ({
+        ...r,
+        category: r.categoryName || 'Receita',
+        status: 'gain',
+      }));
 
-      return allTransactions.filter((t) => {
+      const expenses = this.user.expenses.map(e => ({
+        ...e,
+        category: e.categoryName || 'Despesa',
+        status: 'buy',
+        amount: -Math.abs(e.amount),
+      }));
+
+      const debts = this.user.debts.map(d => {
+        const dueDate = new Date(d.dueDate);
+        let status = 'paid';
+        if (!d.isPaid) {
+          status = dueDate < today ? 'overdue' : 'open';
+        }
+        return {
+          ...d,
+          date: d.dueDate,
+          category: d.categoryName || 'Dívida',
+          status,
+          amount: -Math.abs(d.amount),
+        };
+      });
+
+      this.hasDebts = debts.length > 0;
+      this.hasRevenues = revenues.length > 0;
+
+      return [...revenues, ...expenses, ...debts];
+    },
+
+    uniqueCategories() {
+      const categories = new Set();
+
+      if (this.hasDebts) categories.add('Dívida');
+      if (this.hasRevenues) categories.add('Receita');
+
+      this.allTransactions.forEach(t => {
+        if (t.category) {
+          categories.add(t.category);
+        }
+      });
+
+      return Array.from(categories);
+    },
+
+    filteredTransactions() {
+      return this.allTransactions.filter((t) => {
         const inDateRange =
           (!this.filters.from || new Date(t.date) >= new Date(this.filters.from)) &&
           (!this.filters.to || new Date(t.date) <= new Date(this.filters.to));
@@ -246,74 +271,44 @@ export default {
         return inDateRange && inStatus && matchesSearch && matchesCategory;
       });
     },
-    uniqueCategories() {
-      const fixed = [];
 
-      if (this.hasDebts) fixed.push('Dívida');
-      if (this.hasRevenues) fixed.push('Receita');
-
-      const apiCategories = this.categories.map(c => c.name);
-
-      return [...new Set([...apiCategories, ...fixed])];
-    },
     totalAmount() {
       return this.filteredTransactions.reduce((sum, t) => sum + t.amount, 0);
     },
-    isDark() {
-      return this.themeStore.theme === 'dark';
-    },
   },
-  async mounted() {
-    try {
-      await this.fetchUserProfile();
-        if (this.userId) {
-          await this.fetchReportData();
-        }
-    } catch (error) {
-      console.error("Erro ao montar o componente:", error);
-    }
-  },
+
   methods: {
-    async fetchUserProfile() {
+    async fetchUserData() {
       try {
         const user = await authService.getProfile();
-        if (user && user.id) {
-          this.userId = user.id;
-        } else {
-          console.warn("Usuário não autenticado.");
-          this.userId = null;
-        }
+        this.userId = user.id;
+
+        const userData = await userService.getUserByIdAllIncludes(user.id)
+
+        this.user.revenues = userData.revenues;
+        this.user.expenses = userData.expenses;
+        this.user.debts = userData.debts;
       } catch (error) {
-        console.error("Erro ao buscar perfil do usuário:", error);
-        this.userId = null;
+        console.error('Erro ao buscar dados do usuário:', error);
       }
     },
-    async fetchReportData() {
-      try {
-        const userWithDetails = await userService.getUserByIdAllIncludes(this.userId);
-        this.user.revenues = userWithDetails.revenues;
-        this.user.expenses = userWithDetails.expenses;
-        this.user.debts = userWithDetails.debts;
-        this.categories = userWithDetails.categories;
-        this.hasDebts = userWithDetails.debts.length > 0;
-        this.hasRevenues = userWithDetails.revenues.length > 0;
-      } catch (error) {
-        console.error('Erro ao buscar dados do relatório:', error);
-      }
-    },
+
     download(format) {
-      if (format === 'excel') {
-        this.showExport = true;
-        this.$nextTick(() => {
-          TableToExcel('exportTable', 'Relatorio');
-          this.showExport = false;
-        });
-      } else if (format === 'csv') {
-        JSONToCSVConvertor(this.filteredTransactions, 'Relatório Financeiro', true);
-      } else {
-        alert(`Formato ${format.toUpperCase()} não suportado.`);
-      }
-    }
+      this.showExport = true;
+      this.$nextTick(() => {
+        if (format === 'excel') {
+          TableToExcel.convert(document.getElementById('exportTable'), {
+            name: 'RelatorioFinanceiro.xlsx',
+            sheet: { name: 'Relatório' },
+          });
+        }
+        this.showExport = false;
+      });
+    },
+  },
+
+  async mounted() {
+    await this.fetchUserData();
   },
 };
 </script>
