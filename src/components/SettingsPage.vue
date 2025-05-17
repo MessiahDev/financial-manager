@@ -44,7 +44,6 @@ export default {
 
   data() {
     return {
-      userId: null,
       themeStore: useThemeStore(),
     };
   },
@@ -55,30 +54,7 @@ export default {
     },
   },
 
-  async mounted() {
-    try {
-      await this.fetchUserProfile();
-    } catch (error) {
-      console.error("Erro ao montar o componente:", error);
-    }
-  },
-
   methods: {
-      async fetchUserProfile() {
-        try {
-          const user = await authService.getProfile();
-          if (user && user.id) {
-            this.userId = user.id;
-          } else {
-            console.warn("Usuário não autenticado.");
-            this.userId = null;
-          }
-        } catch (error) {
-          console.error("Erro ao buscar perfil do usuário:", error);
-          this.userId = null;
-        }
-    },
-    
     toggleTheme() {
       this.themeStore.toggleTheme();
     },
@@ -88,7 +64,8 @@ export default {
 
       if (result.isConfirmed) {
         try {
-          await userService.deleteUser(this.userId);
+          const user = await authService.getUserInfo();
+          await userService.deleteUser(user.id);
           await showSuccess('Deletado!', 'A conta foi excluida com sucesso.');
           authService.logout();
         } catch (error) {

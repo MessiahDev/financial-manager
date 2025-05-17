@@ -75,7 +75,7 @@ const authService = {
         }
     },
 
-    getProfile: async () => {
+    getUserInfo: async () => {
         try {
             const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
@@ -83,7 +83,7 @@ const authService = {
             throw new Error("Token não encontrado");
             }
 
-            const response = await api.get('/Auth/profile', {
+            const response = await api.get('/Auth/user-info', {
             headers: {
                 Authorization: `Bearer ${token}`,
             },

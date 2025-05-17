@@ -1,18 +1,6 @@
 import api from './api';
 
 const userService = {
-    getUserProfile: async (token) => {
-        try {
-            const response = await api.get('/Auth/profile', {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            return response.data;
-        } catch (error) {
-            console.error('Erro ao buscar perfil do usuário:', error);
-            throw error;
-        }
-    },
-
     getUserByIdAllIncludes: async (userId) => {
         try {
             const response = await api.get(`/User/allIncludes/${userId}`);

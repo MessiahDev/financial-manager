@@ -119,181 +119,161 @@ import revenueService from "../services/revenueService";
 import { showConfirm, showError, showSuccess } from "../services/alertService";
 
 export default {
-    name: "RevenuePage",
+  name: "RevenuePage",
 
-    components: {
-        Loader,
+  components: {
+    Loader,
+  },
+
+  data() {
+    return {
+      newRevenue: {
+        description: "",
+        amount: null,
+        date: new Date(),
+      },
+      userId: null,
+      revenues: [],
+      editingRevenue: null,
+      editingIndex: null,
+      isEditing: false,
+      showEditModal: false,
+      isLoading: false,
+      formattedAmount: '',
+      formattedEditAmount: '',
+      themeStore: useThemeStore(),
+    };
+  },
+
+  computed: {
+    isDark() {
+      return this.themeStore.theme === 'dark';
+    },
+  },
+
+  watch: {
+    formattedAmount(newVal) {
+      const cleaned = newVal.replace(/\D/g, '');
+      const number = parseFloat(cleaned) / 100;
+
+      this.newRevenue.amount = isNaN(number) ? 0 : number;
+      this.formattedAmount = this.newRevenue.amount.toMoeda(true);
+    },
+    formattedEditAmount(newVal) {
+      const cleaned = newVal.replace(/\D/g, '');
+      const number = parseFloat(cleaned) / 100;
+
+      this.editingRevenue.amount = isNaN(number) ? 0 : number;
+      this.formattedEditAmount = this.editingRevenue.amount.toMoeda(true);
+    }
+  },
+
+  async mounted() {
+    try {
+      await this.fetchRevenues();
+    } catch (error) {
+      console.error("Erro ao montar o componente:", error);
+    }
+  },
+
+  methods: {
+    async fetchRevenues() {
+      try {
+        this.isLoading = true;
+        const response = await revenueService.getRevenues();
+        this.isLoading = false;
+        this.revenues = response || [];
+      } catch (error) {
+        console.error("Erro ao buscar receitas:", error);
+      }
     },
 
-    data() {
-        return {
-            newRevenue: {
-                description: "",
-                amount: null,
-                date: new Date(),
-            },
-            userId: null,
-            revenues: [],
-            editingRevenue: null,
-            editingIndex: null,
-            isEditing: false,
-            showEditModal: false,
-            isLoading: false,
-            formattedAmount: '',
-            formattedEditAmount: '',
-            themeStore: useThemeStore(),
-        };
+    async saveRevenue() {
+      try {
+        const revenueData = { ...this.newRevenue };
+        this.isLoading = true;
+        await revenueService.createRevenue(revenueData);
+        await this.fetchRevenues();
+        this.resetForm();
+      } catch (error) {
+        this.isLoading = false
+        await showError('Erro ao salvar receita:', error);
+      } finally {
+        this.isLoading = false;
+      }
     },
 
-    computed: {
-        isDark() {
-            return this.themeStore.theme === 'dark';
-        },
-    },
+    async updateRevenue() {
+      try {
+        const { id, ...data } = this.editingRevenue;
 
-    watch: {
-        formattedAmount(newVal) {
-            const cleaned = newVal.replace(/\D/g, '');
-            const number = parseFloat(cleaned) / 100;
-
-            this.newRevenue.amount = isNaN(number) ? 0 : number;
-            this.formattedAmount = this.newRevenue.amount.toMoeda(true);
-        },
-        formattedEditAmount(newVal) {
-            const cleaned = newVal.replace(/\D/g, '');
-            const number = parseFloat(cleaned) / 100;
-
-            this.editingRevenue.amount = isNaN(number) ? 0 : number;
-            this.formattedEditAmount = this.editingRevenue.amount.toMoeda(true);
+        if (!id) {
+          console.warn("ID da receita não encontrado.");
+          return;
         }
+
+        await revenueService.updateRevenue(id, data);
+        this.resetForm();
+        await this.fetchRevenues();
+        this.closeModal();
+        await showSuccess('Sucesso!', 'A receita foi atualizada.');
+      } catch (error) {
+        await showError('Erro ao atualizar receita:', error);
+      }
     },
 
-    async mounted() {
+    async deleteRevenue(index) {
+      const id = this.revenues[index]?.id;
+      if (!id) {
+        console.warn("ID da receita não encontrado. Abortando exclusão.");
+        return;
+      }
+
+      const result = await showConfirm();
+
+      if (result.isConfirmed) {
         try {
-            await this.fetchUserProfile();
-            if (this.userId) {
-                this.newRevenue.userId = this.userId;
-                await this.fetchRevenues();
-            }
+          await revenueService.deleteRevenue(id);
+          await this.fetchRevenues();
+          await showSuccess('Sucesso!', 'A receita foi removida.');
         } catch (error) {
-            console.error("Erro ao montar o componente:", error);
+          await showError('Erro ao deletar receita:', error);
         }
+      }
     },
 
-    methods: {
-        async fetchUserProfile() {
-            try {
-                const user = await authService.getProfile();
-                if (user && user.id) {
-                    this.userId = user.id;
-                } else {
-                    console.warn("Usuário não autenticado.");
-                    this.userId = null;
-                }
-            } catch (error) {
-                console.error("Erro ao buscar perfil do usuário:", error);
-                this.userId = null;
-            }
-        },
-
-        async fetchRevenues() {
-            try {
-                if (!this.userId) return;
-                this.isLoading = true;
-                const response = await revenueService.getRevenuesByUserId(this.userId);
-                this.isLoading = false;
-                this.revenues = response || [];
-            } catch (error) {
-                console.error("Erro ao buscar receitas:", error);
-            }
-        },
-
-        async saveRevenue() {
-            try {
-                const revenueData = { ...this.newRevenue };
-                this.isLoading = true;
-                await revenueService.createRevenue(revenueData);
-                await this.fetchRevenues();
-                this.resetForm();
-            } catch (error) {
-                this.isLoading = false
-                await showError('Erro ao salvar receita:', error);
-            } finally {
-                this.isLoading = false;
-            }
-        },
-
-        async updateRevenue() {
-            try {
-                const { id, ...data } = this.editingRevenue;
-
-                if (!id) {
-                    console.warn("ID da receita não encontrado.");
-                    return;
-                }
-
-                await revenueService.updateRevenue(id, data);
-                this.resetForm();
-                await this.fetchRevenues();
-                this.closeModal();
-                await showSuccess('Sucesso!', 'A receita foi atualizada.');
-            } catch (error) {
-                await showError('Erro ao atualizar receita:', error);
-            }
-        },
-
-        async deleteRevenue(index) {
-            const id = this.revenues[index]?.id;
-            if (!id) {
-                console.warn("ID da receita não encontrado. Abortando exclusão.");
-                return;
-            }
-
-            const result = await showConfirm();
-
-            if (result.isConfirmed) {
-                try {
-                    await revenueService.deleteRevenue(id);
-                    await this.fetchRevenues();
-                    await showSuccess('Sucesso!', 'A receita foi removida.');
-                } catch (error) {
-                    await showError('Erro ao deletar receita:', error);
-                }
-            }
-        },
-
-        startEdit(index) {
-            this.editingIndex = this.revenues[index];
-            this.editingRevenue = {
-                ...this.editingIndex,
-                amount: Number(this.revenues[index].amount).toFixed(2),
-            };
-            this.formattedEditAmount = Number(this.editingIndex.amount).toMoeda(true);
-            this.isEditing = true;
-            this.showEditModal = true;
-        },
-
-        submitEdit() {
-            this.updateRevenue();
-        },
-
-        resetForm() {
-            this.newRevenue = {
-                description: "",
-                amount: 0,
-                date: new Date(),
-            };
-            this.formattedAmount = '',
-            this.formattedEditAmount = ''
-        },
-
-        closeModal() {
-            this.showEditModal = false;
-            this.isEditing = false;
-            this.editingIndex = null;
-            this.editingRevenue = null;
-        },
+    startEdit(index) {
+      this.editingIndex = this.revenues[index];
+      this.editingRevenue = {
+        ...this.editingIndex,
+        amount: Number(this.revenues[index].amount).toFixed(2),
+      };
+      this.formattedEditAmount = Number(this.editingIndex.amount).toMoeda(true);
+      this.isEditing = true;
+      this.showEditModal = true;
     },
+
+    submitEdit() {
+      this.updateRevenue();
+    },
+
+    resetForm() {
+      this.newRevenue = {
+        description: "",
+        amount: 0,
+        date: new Date(),
+      };
+      this.formattedAmount = '',
+        this.formattedEditAmount = ''
+    },
+
+    closeModal() {
+      this.showEditModal = false;
+      this.isEditing = false;
+      this.editingIndex = null;
+      this.editingRevenue = null;
+    },
+  },
 };
 </script>
 

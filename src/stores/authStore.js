@@ -16,7 +16,7 @@ export const useAuthStore = defineStore('auth', {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         if (!token) return;
 
-        const user = await authService.getProfile();
+        const user = await authService.getUserInfo();
         if (user && user.name) {
           this.name = user.name.split(' ')[0];
           this.userId = user.id;

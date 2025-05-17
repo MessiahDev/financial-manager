@@ -116,9 +116,9 @@ export default {
             form: {
                 name: '',
                 email: '',
+                role: null,
                 password: ''
             },
-            userId: null,
             password: '',
             confirmPassword: '',
             showPassword: false,
@@ -168,10 +168,7 @@ export default {
 
     async mounted() {
         try {
-            await this.fetchUserProfile();
-            if (this.userId) {
-                this.fetchProfile();
-            }
+            this.fetchProfile();
         } catch (error) {
             console.error("Erro ao montar o componente:", error);
         }
@@ -185,26 +182,12 @@ export default {
             this.showConfirmPassword = !this.showConfirmPassword;
         },
 
-        async fetchUserProfile() {
-            try {
-                const user = await authService.getProfile();
-                if (user && user.id) {
-                    this.userId = user.id;
-                } else {
-                    console.warn("Usuário não autenticado.");
-                    this.userId = null;
-                }
-            } catch (error) {
-                console.error("Erro ao buscar perfil do usuário:", error);
-                this.userId = null;
-            }
-        },
-
         async fetchProfile() {
             try {
-                const user = await userService.getUserProfile(this.userId);
+                const user = await authService.getUserInfo();
                 this.form.name = user.name;
                 this.form.email = user.email;
+                this.form.role = user.role;
             } catch (err) {
                 console.error('Erro ao buscar perfil do usuário:', err);
             }
@@ -212,7 +195,7 @@ export default {
 
         async updateProfile() {
             try {
-                const user = await authService.getProfile(this.userId);
+                const user = await authService.getUserInfo();
                 const oldEmail = user.email;
 
                 const payload = {

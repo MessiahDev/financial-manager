@@ -69,7 +69,6 @@
 
 <script>
 import Loader from "../components/Loader.vue";
-import authService from "../services/authService";
 import { useThemeStore } from '../stores/themeStore';
 import categoryService from "../services/categoryService";
 import { showSuccess, showError, showConfirm } from "../services/alertService";
@@ -83,7 +82,6 @@ export default {
 
   data() {
     return {
-      userId: null,
       newCategory: {
         name: "",
       },
@@ -104,36 +102,17 @@ export default {
 
   async mounted() {
     try {
-      await this.fetchUserProfile();
-      if (this.userId) {
-        await this.fetchCategories();
-      }
+      await this.fetchCategories();
     } catch (error) {
       console.error("Erro ao montar o componente:", error);
     }
   },
 
   methods: {
-    async fetchUserProfile() {
-      try {
-        const user = await authService.getProfile();
-        if (user && user.id) {
-          this.userId = user.id;
-        } else {
-          console.warn("Usuário não autenticado.");
-          this.userId = null;
-        }
-      } catch (error) {
-        console.error("Erro ao buscar perfil do usuário:", error);
-        this.userId = null;
-      }
-    },
-
     async fetchCategories() {
       try {
-        if (!this.userId) return;
         this.isLoading = true;
-        const response = await categoryService.getCategoryByUserId(this.userId);
+        const response = await categoryService.getCategories();
         this.categories = response || [];
       } catch (error) {
         console.error("Erro ao buscar categorias:", error);

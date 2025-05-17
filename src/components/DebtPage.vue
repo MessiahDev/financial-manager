@@ -160,7 +160,6 @@ export default {
                 creditor: '',
                 isPaid: false,
             },
-            userId: null,
             debts: [],
             editingDebt: null,
             editingIndex: null,
@@ -195,35 +194,16 @@ export default {
     },
     async mounted() {
         try {
-            await this.fetchUserProfile();
-            if (this.userId) {
-                await this.fetchDebts();
-            }
+            await this.fetchDebts();
         } catch (error) {
             console.error("Erro ao montar o componente:", error);
         }
     },
     methods: {
-        async fetchUserProfile() {
-            try {
-                const user = await authService.getProfile();
-                if (user && user.id) {
-                    this.userId = user.id;
-                } else {
-                    console.warn("Usuário não autenticado.");
-                    this.userId = null;
-                }
-            } catch (error) {
-                console.error("Erro ao buscar perfil do usuário:", error);
-                this.userId = null;
-            }
-        },
-
         async fetchDebts() {
             try {
-                if (!this.userId) return;
                 this.isLoading = true;
-                const response = await debtService.getDebtsByUserId(this.userId);
+                const response = await debtService.getDebts();
                 this.debts = response || [];
             } catch (error) {
                 console.error("Erro ao buscar dívidas:", error);
@@ -234,8 +214,6 @@ export default {
 
         async saveDebt() {
             try {
-                if (!this.userId) return;
-
                 const debtData = {
                     ...this.newDebt,
                     dueDate: new Date(this.newDebt.dueDate).toISOString(),

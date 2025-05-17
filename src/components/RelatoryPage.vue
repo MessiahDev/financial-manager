@@ -280,7 +280,7 @@ export default {
   methods: {
     async fetchUserData() {
       try {
-        const user = await authService.getProfile();
+        const user = await authService.getUserInfo();
         this.userId = user.id;
 
         const userData = await userService.getUserByIdAllIncludes(user.id)

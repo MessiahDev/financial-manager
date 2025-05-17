@@ -84,7 +84,6 @@ export default {
   },
   data() {
     return {
-      userId: null,
       startDate: '',
       endDate: '',
       totalRevenues: 0,
@@ -153,34 +152,17 @@ export default {
 
   async mounted() {
     try {
-      await this.fetchUserProfile();
-      if (this.userId) {
-        this.fetchChartData();
-      }
+      this.fetchChartData();
     } catch (error) {
       console.error("Erro ao montar o componente:", error);
     }
   },
 
   methods: {
-    async fetchUserProfile() {
-      try {
-        const user = await authService.getProfile();
-        if (user && user.id) {
-          this.userId = user.id;
-        } else {
-          console.warn("Usuário não autenticado.");
-          this.userId = null;
-        }
-      } catch (error) {
-        console.error("Erro ao buscar perfil do usuário:", error);
-        this.userId = null;
-      }
-    },
-
     async fetchChartData(startDate = null, endDate = null) {
       try {
-        const user = await userService.getUserByIdAllIncludes(this.userId);
+        const userInfo = await authService.getUserInfo()
+        const user = await userService.getUserByIdAllIncludes(userInfo.id);
         let { revenues, expenses, debts } = user;
 
         if (startDate && endDate) {

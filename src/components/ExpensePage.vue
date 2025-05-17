@@ -145,213 +145,191 @@ import categoryService from "../services/categoryService";
 import { showSuccess, showError, showConfirm } from "../services/alertService";
 
 export default {
-    name: "ExpensePage",
+  name: "ExpensePage",
 
-    components: {
-        Loader,
-    },
+  components: {
+    Loader,
+  },
 
-    data() {
-        return {
-          categories: [],
-          expenses: [],
-          form: {
-              id: null,
-              description: '',
-              amount: null,
-              date: new Date().toISOString().split('T')[0],
-              categoryId: '',
-              categoryName: '',
-          },
-          userId: null,
-          isEditing: false,
-          editingIndex: null,
-          showEditModal: false,
-          isLoading: false,
-          formattedAmount: '',
-          formattedEditAmount: '',
-          themeStore: useThemeStore(),
-        };
-    },
-
-    computed: {
-      isDark() {
-        return this.themeStore.theme === 'dark';
+  data() {
+    return {
+      categories: [],
+      expenses: [],
+      form: {
+        id: null,
+        description: '',
+        amount: null,
+        date: new Date().toISOString().split('T')[0],
+        categoryId: '',
+        categoryName: '',
       },
+      userId: null,
+      isEditing: false,
+      editingIndex: null,
+      showEditModal: false,
+      isLoading: false,
+      formattedAmount: '',
+      formattedEditAmount: '',
+      themeStore: useThemeStore(),
+    };
+  },
+
+  computed: {
+    isDark() {
+      return this.themeStore.theme === 'dark';
+    },
+  },
+
+  watch: {
+    formattedAmount(newVal) {
+      const cleaned = newVal.replace(/\D/g, '');
+      const number = parseFloat(cleaned) / 100;
+
+      this.form.amount = isNaN(number) ? 0 : number;
+      this.formattedAmount = this.form.amount.toMoeda(true);
+    },
+    formattedEditAmount(newVal) {
+      const cleaned = newVal.replace(/\D/g, '');
+      const number = parseFloat(cleaned) / 100;
+
+      this.form.amount = isNaN(number) ? 0 : number;
+      this.formattedEditAmount = this.form.amount.toMoeda(true);
+    }
+  },
+
+  async mounted() {
+    try {
+      await this.fetchCategories();
+      await this.fetchExpenses();
+    } catch (error) {
+      console.error("Erro ao montar o componente:", error);
+    }
+  },
+
+  methods: {
+    async fetchCategories() {
+      try {
+        this.isLoading = true;
+        const response = await categoryService.getCategories();
+        this.categories = response || [];
+      } catch (error) {
+        console.error("Erro ao buscar categorias:", error);
+      }
     },
 
-    watch: {
-        formattedAmount(newVal) {
-            const cleaned = newVal.replace(/\D/g, '');
-            const number = parseFloat(cleaned) / 100;
-
-            this.form.amount = isNaN(number) ? 0 : number;
-            this.formattedAmount = this.form.amount.toMoeda(true);
-        },
-        formattedEditAmount(newVal) {
-            const cleaned = newVal.replace(/\D/g, '');
-            const number = parseFloat(cleaned) / 100;
-
-            this.form.amount = isNaN(number) ? 0 : number;
-            this.formattedEditAmount = this.form.amount.toMoeda(true);
-        }
+    async fetchExpenses() {
+      try {
+        this.isLoading = true;
+        const response = await expenseService.getExpenses();
+        this.isLoading = false;
+        this.expenses = response || [];
+      } catch (error) {
+        console.error("Erro ao buscar despesas:", error);
+      }
     },
 
-    async mounted() {
+    async saveExpense() {
+      try {
+        const selectedCategory = this.categories.find(c => c.id === this.form.categoryId);
+        this.form.categoryName = selectedCategory ? selectedCategory.name : '';
+
+        const newExpense = {
+          description: this.form.description,
+          amount: Number(this.form.amount),
+          date: new Date().toISOString(),
+          categoryId: this.form.categoryId,
+          categoryName: this.form.categoryName,
+        };
+
+        this.isLoading = true;
+        await expenseService.createExpense(newExpense);
+
+        this.resetForm();
+        await this.fetchExpenses();
+      } catch (error) {
+        await showError('Erro ao salvar despesa:', error);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async submitEdit() {
+      try {
+        const selectedCategory = this.categories.find(c => c.id === this.form.categoryId);
+        this.form.categoryName = selectedCategory ? selectedCategory.name : "";
+        this.isLoading = true;
+        await expenseService.updateExpense(this.form.id, {
+          ...this.form,
+          date: new Date(this.form.date).toISOString(),
+        });
+        this.resetForm();
+        await this.fetchExpenses();
+        this.closeModal();
+        await showSuccess('Sucesso!', 'A despesa foi atualizada.');
+      } catch (error) {
+        await showError('Erro ao atualizar despesa:', error);
+      }
+    },
+
+    async deleteExpense(index) {
+      const id = this.expenses[index]?.id;
+
+      if (!id) {
+        console.warn("ID da despesa não encontrado. Abortando exclusão.");
+        return;
+      }
+      const result = await showConfirm();
+
+      if (result.isConfirmed) {
         try {
-            await this.fetchUserProfile();
-            if (this.userId) {
-                await this.fetchCategories();
-                await this.fetchExpenses();
-            }
+          await expenseService.deleteExpense(id);
+          await this.fetchExpenses();
+          await showSuccess('Deletado!', 'A despesa foi removida com sucesso.');
         } catch (error) {
-            console.error("Erro ao montar o componente:", error);
+          await showError('Erro ao deletar despesa:', error);
         }
+      }
     },
 
-    methods: {
-        async fetchUserProfile() {
-            try {
-                const user = await authService.getProfile();
-                if (user && user.id) {
-                    this.userId = user.id;
-                } else {
-                    console.warn("Usuário não autenticado.");
-                    this.userId = null;
-                }
-            } catch (error) {
-                console.error("Erro ao buscar perfil do usuário:", error);
-                this.userId = null;
-            }
-        },
+    startEdit(index) {
+      const expense = this.expenses[index];
+      const newDate = new Date(expense.date).toISOString().split('T')[0];
 
-        async fetchCategories() {
-            try {
-                if (!this.userId) return;
-                this.isLoading = true;
-                const response = await categoryService.getCategoryByUserId(this.userId);
-                this.categories = response || [];
-            } catch (error) {
-                console.error("Erro ao buscar categorias:", error);
-            }
-        },
-
-        async fetchExpenses() {
-            try {
-                if (!this.userId) return;
-                this.isLoading = true;
-                const response = await expenseService.getExpensesByUserId(this.userId);
-                this.isLoading = false;
-                this.expenses = response || [];
-            } catch (error) {
-                console.error("Erro ao buscar despesas:", error);
-            }
-        },
-
-        async saveExpense() {
-            try {
-                if (!this.userId) return;
-
-                const selectedCategory = this.categories.find(c => c.id === this.form.categoryId);
-                this.form.categoryName = selectedCategory ? selectedCategory.name : '';
-
-                const newExpense = {
-                    description: this.form.description,
-                    amount: Number(this.form.amount),
-                    date: new Date().toISOString(),
-                    categoryId: this.form.categoryId,
-                    categoryName: this.form.categoryName,
-                };
-
-                this.isLoading = true;
-                await expenseService.createExpense(newExpense);
-
-                this.resetForm();
-                await this.fetchExpenses();
-            } catch (error) {
-                await showError('Erro ao salvar despesa:', error);
-            } finally {
-                this.isLoading = false;
-            }
-        },
-
-        async submitEdit() {
-            try {
-                const selectedCategory = this.categories.find(c => c.id === this.form.categoryId);
-                this.form.categoryName = selectedCategory ? selectedCategory.name : "";
-                this.isLoading = true;
-                await expenseService.updateExpense(this.form.id, {
-                    ...this.form,
-                    date: new Date(this.form.date).toISOString(),
-                });
-                this.resetForm();
-                await this.fetchExpenses();
-                this.closeModal();
-                await showSuccess('Sucesso!', 'A despesa foi atualizada.');
-            } catch (error) {
-                await showError('Erro ao atualizar despesa:', error);
-            }
-        },
-
-        async deleteExpense(index) {
-            const id = this.expenses[index]?.id;
-
-            if (!id) {
-                console.warn("ID da despesa não encontrado. Abortando exclusão.");
-                return;
-            }
-            const result = await showConfirm();
-
-            if (result.isConfirmed) {
-                try {
-                    await expenseService.deleteExpense(id);
-                    await this.fetchExpenses();
-                    await showSuccess('Deletado!', 'A despesa foi removida com sucesso.');
-                } catch (error) {
-                    await showError('Erro ao deletar despesa:', error);
-                }
-            }
-        },
-
-        startEdit(index) {
-            const expense = this.expenses[index];
-            const newDate = new Date(expense.date).toISOString().split('T')[0];
-            
-            if (!expense) {
-                console.warn("Despesa não encontrada no índice:", index);
-                return;
-            }
-            this.form = {
-                ...expense,
-                amount: Number(expense.amount).toFixed(2),
-                date: newDate,
-            };
-            this.formattedEditAmount = Number(expense.amount).toMoeda(true);
-            this.isEditing = true;
-            this.editingIndex = index;
-            this.showEditModal = true;
-        },
-
-        resetForm() {
-            this.form = {
-                id: null,
-                description: '',
-                amount: null,
-                date: new Date(),
-                categoryId: '',
-                categoryName: '',
-            };
-            this.formattedAmount = '',
-            this.formattedEditAmount = ''
-        },
-
-        closeModal() {
-            this.showEditModal = false;
-            this.isEditing = false;
-            this.editingIndex = null;
-            this.isLoading = false;
-        },
+      if (!expense) {
+        console.warn("Despesa não encontrada no índice:", index);
+        return;
+      }
+      this.form = {
+        ...expense,
+        amount: Number(expense.amount).toFixed(2),
+        date: newDate,
+      };
+      this.formattedEditAmount = Number(expense.amount).toMoeda(true);
+      this.isEditing = true;
+      this.editingIndex = index;
+      this.showEditModal = true;
     },
+
+    resetForm() {
+      this.form = {
+        id: null,
+        description: '',
+        amount: null,
+        date: new Date(),
+        categoryId: '',
+        categoryName: '',
+      };
+      this.formattedAmount = '',
+        this.formattedEditAmount = ''
+    },
+
+    closeModal() {
+      this.showEditModal = false;
+      this.isEditing = false;
+      this.editingIndex = null;
+      this.isLoading = false;
+    },
+  },
 };
 </script>
 
